@@ -65,3 +65,4 @@ void Draw()
 	g_pGame->Draw();
 	EndDrawDX();
 }
+//test
