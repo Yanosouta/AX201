@@ -10,7 +10,7 @@ using namespace Primitive;
 
 void AABBCollider::LateUpdate()
 {
-	// ©“®İ’è‚È‚ç
+	// è‡ªå‹•è¨­å®šãªã‚‰
 	if (m_bPointAuto) {
 		m_Primitive.p = ConvertToFloat3(GetOwner()->GetComponent<Transform>()->GetPosition());
 //		m_Primitive.hl.x = GetOwner()->GetComponent<Transform>()->GetScale().x / 2;
@@ -21,19 +21,25 @@ void AABBCollider::LateUpdate()
 	ColliderBase::LateUpdate();
 }
 
-// “KØ‚Èˆ—‚ğŒÄ‚Ño‚·
+// é©åˆ‡ãªå‡¦ç†ã‚’å‘¼ã³å‡ºã™
 void AABBCollider::CallTouchOperation(ColliderBase* collider)
 {
-	TouchingTheAABB(collider);
+	TouchingTheOBB(collider);
 }
 
-//--- AABB‚Æ‚Ì“–‚½‚è”»’è
+//--- AABBã¨ã®å½“ãŸã‚Šåˆ¤å®š
 void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 {
-	//--- OBB‚ÆOBB‚Å‚Ì“–‚½‚è”»’èˆ—
-   // Še•ûŒüƒxƒNƒgƒ‹‚ÌŠm•Û
-   // iN***:•W€‰»•ûŒüƒxƒNƒgƒ‹j
-	// ƒƒ‚
+	
+}
+
+//--- Oã¨ã®å½“ãŸã‚Šåˆ¤å®š
+void AABBCollider::TouchingTheOBB(ColliderBase* _AABB)
+{
+	//--- OBBã¨OBBã§ã®å½“ãŸã‚Šåˆ¤å®šå‡¦ç†
+   // å„æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã®ç¢ºä¿
+   // ï¼ˆN***:æ¨™æº–åŒ–æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ï¼‰
+	// ãƒ¡ãƒ¢
 	// 0-X-Right	-e1
 	// 1-Y-Up		-e2
 	// 2-Z-Forword	-e3
@@ -45,49 +51,49 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	Float3 NBe3 = Primitive::ConvertToFloat3(_AABB->GetOwner()->GetComponent<Transform>()->GetVectorForword()), Be3 = NBe3 * _AABB->GetPrimitive().lenZ()/2;
 	Float3 Interval = this->GetPrimitive().p - _AABB->GetPrimitive().p;
 
-	// •ª—£² : Ae1
+	// åˆ†é›¢è»¸ : Ae1
 	float rA = Ae1.magnitude();
 	float rB = LenSegOnSeparateAxis(&NAe1, &Be1, &Be2, &Be3);
 	float L = fabs(Interval.dot(NAe1));
 	if (L > rA + rB)
-		return; // Õ“Ë‚µ‚Ä‚¢‚È‚¢
+		return; // è¡çªã—ã¦ã„ãªã„
 
-   // •ª—£² : Ae2
+   // åˆ†é›¢è»¸ : Ae2
 	rA = Ae2.magnitude();
 	rB = LenSegOnSeparateAxis(&NAe2, &Be1, &Be2, &Be3);
 	L = fabs(Interval.dot(NAe2));
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : Ae3
+	// åˆ†é›¢è»¸ : Ae3
 	rA = Ae3.magnitude();
 	rB = LenSegOnSeparateAxis(&NAe3, &Be1, &Be2, &Be3);
 	L = fabs(Interval.dot(NAe3));
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : Be1
+	// åˆ†é›¢è»¸ : Be1
 	rA = LenSegOnSeparateAxis(&NBe1, &Ae1, &Ae2, &Ae3);
 	rB = Be1.magnitude();
 	L = fabs(Interval.dot(NBe1));
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : Be2
+	// åˆ†é›¢è»¸ : Be2
 	rA = LenSegOnSeparateAxis(&NBe2, &Ae1, &Ae2, &Ae3);
 	rB = Be2.magnitude();
 	L = fabs(Interval.dot(NBe2));
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : Be3
+	// åˆ†é›¢è»¸ : Be3
 	rA = LenSegOnSeparateAxis(&NBe3, &Ae1, &Ae2, &Ae3);
 	rB = Be3.magnitude();
 	L = fabs(Interval.dot(NBe3));
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C11
+	// åˆ†é›¢è»¸ : C11
 	Float3 Cross;
 	Cross = NAe1.cross(NBe1);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae2, &Ae3);
@@ -96,7 +102,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C12
+	// åˆ†é›¢è»¸ : C12
 	Cross = NAe1.cross(NBe2);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae2, &Ae3);
 	rB = LenSegOnSeparateAxis(&Cross, &Be1, &Be3);
@@ -104,7 +110,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C13
+	// åˆ†é›¢è»¸ : C13
 	Cross = NAe1.cross(NBe3);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae2, &Ae3);
 	rB = LenSegOnSeparateAxis(&Cross, &Be1, &Be2);
@@ -112,7 +118,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C21
+	// åˆ†é›¢è»¸ : C21
 	Cross = NAe2.cross(NBe1);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae1, &Ae3);
 	rB = LenSegOnSeparateAxis(&Cross, &Be2, &Be3);
@@ -120,7 +126,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C22
+	// åˆ†é›¢è»¸ : C22
 	Cross = NAe2.cross(NBe2);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae1, &Ae3);
 	rB = LenSegOnSeparateAxis(&Cross, &Be1, &Be3);
@@ -128,7 +134,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C23
+	// åˆ†é›¢è»¸ : C23
 	Cross = NAe2.cross(NBe3);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae1, &Ae3);
 	rB = LenSegOnSeparateAxis(&Cross, &Be1, &Be2);
@@ -136,7 +142,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C31
+	// åˆ†é›¢è»¸ : C31
 	Cross = NAe3.cross(NBe1);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae1, &Ae2);
 	rB = LenSegOnSeparateAxis(&Cross, &Be2, &Be3);
@@ -144,7 +150,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C32
+	// åˆ†é›¢è»¸ : C32
 	Cross = NAe3.cross(NBe2);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae1, &Ae2);
 	rB = LenSegOnSeparateAxis(&Cross, &Be1, &Be3);
@@ -152,7 +158,7 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£² : C33
+	// åˆ†é›¢è»¸ : C33
 	Cross = NAe3.cross(NBe3);
 	rA = LenSegOnSeparateAxis(&Cross, &Ae1, &Ae2);
 	rB = LenSegOnSeparateAxis(&Cross, &Be1, &Be2);
@@ -160,11 +166,11 @@ void AABBCollider::TouchingTheAABB(ColliderBase* _AABB)
 	if (L > rA + rB)
 		return;
 
-	// •ª—£•½–Ê‚ª‘¶İ‚µ‚È‚¢‚Ì‚ÅuÕ“Ë‚µ‚Ä‚¢‚év
+	// åˆ†é›¢å¹³é¢ãŒå­˜åœ¨ã—ãªã„ã®ã§ã€Œè¡çªã—ã¦ã„ã‚‹ã€
 	CheckTouchCollider(_AABB);
 }
 
-//--- Sphere‚Æ‚Ì“–‚½‚è”»’è
+//--- Sphereã¨ã®å½“ãŸã‚Šåˆ¤å®š
 void AABBCollider::TouchingTheSphere(ColliderBase* _Sphere)
 {
 
