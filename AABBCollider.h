@@ -1,10 +1,10 @@
 /*
-ObjectBaseƒNƒ‰ƒX - Œp³Œ³ê—p
-Œp³æ
-@Object3DƒNƒ‰ƒX - Œp³Œ³ê—p
-@Œp³æ
-   // ‚±‚±‚ÉƒIƒuƒWƒFƒNƒg‚ğ’Ç‰Á‚µ‚Ä‚¢‚­B
-@UI - 
+ObjectBaseã‚¯ãƒ©ã‚¹ - ç¶™æ‰¿å…ƒå°‚ç”¨
+ç¶™æ‰¿å…ˆ
+ã€€Object3Dã‚¯ãƒ©ã‚¹ - ç¶™æ‰¿å…ƒå°‚ç”¨
+ã€€ç¶™æ‰¿å…ˆ
+   // ã“ã“ã«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¿½åŠ ã—ã¦ã„ãã€‚
+ã€€UI - 
 
 
 */
@@ -22,36 +22,37 @@ ObjectBaseƒNƒ‰ƒX - Œp³Œ³ê—p
 class AABBCollider : public ColliderBase
 {
 private:
-	// Œ`ó
+	// å½¢çŠ¶
 	Primitive::AABB m_Primitive;
-	// Point‚ğTransform‚©‚ç©“®İ’è
+	// Pointã‚’Transformã‹ã‚‰è‡ªå‹•è¨­å®š
 	bool m_bPointAuto;
-	// ƒ[ƒh‚Ìî•ñ - ƒ‚ƒfƒ‹‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^“à‚Å‚Ì‚İ•ÏX‚ğ‰Á‚¦‚é
+	// ãƒ­ãƒ¼ãƒ‰æ™‚ã®æƒ…å ± - ãƒ¢ãƒ‡ãƒ«ã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿å†…ã§ã®ã¿å¤‰æ›´ã‚’åŠ ãˆã‚‹
 	Transform m_RoadTransData;
 
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	AABBCollider()
 		: ColliderBase()
 		, m_bPointAuto(true)
 	{}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~AABBCollider(){}
 
 	void LateUpdate();
 
-	// “KØ‚Èˆ—‚ğŒÄ‚Ño‚·
+	// é©åˆ‡ãªå‡¦ç†ã‚’å‘¼ã³å‡ºã™
 	void CallTouchOperation(ColliderBase* collider) override;
 
-	//--- AABB‚Æ‚Ì“–‚½‚è”»’è
+	//--- AABBã¨ã®å½“ãŸã‚Šåˆ¤å®š
 	void TouchingTheAABB(ColliderBase* _AABB) override;
-	//--- Sphere‚Æ‚Ì“–‚½‚è”»’è
+	void TouchingTheOBB(ColliderBase* _AABB) override;
+	//--- Sphereã¨ã®å½“ãŸã‚Šåˆ¤å®š
 	void TouchingTheSphere(ColliderBase* _Sphere) override;
 
-	//--- ƒQƒbƒgŠÖ”
+	//--- ã‚²ãƒƒãƒˆé–¢æ•°
 	Primitive::AABB& GetPrimitive() { return m_Primitive; }
 
-	//--- ƒZƒbƒgŠÖ”
+	//--- ã‚»ãƒƒãƒˆé–¢æ•°
 	void SetLoadPoint(DirectX::XMFLOAT3 point) { m_RoadTransData.SetPosition(point); }
 	void SetLoadLen(DirectX::XMFLOAT3 len) { m_RoadTransData.SetScale(len); }
 	void SetPoint(Primitive::Float3 point) { m_Primitive.p = point; }
