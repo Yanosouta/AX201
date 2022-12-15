@@ -1,3 +1,11 @@
+////////////////////////////
+//編集履歴
+//2022年12月16日　矢野　ノックバック追加
+//
+//
+//
+//
+//
 #include "EnemyController.h"
 #include "Transform.h"
 #include "ObjectBase.h"
@@ -215,6 +223,7 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 	// 矢と当たったときの処理
 	if (object->GetTag() == TagName::Arrow)
 	{
+		//ノックバック　矢野12/16
 		// 自分を削除
 		ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 	}
