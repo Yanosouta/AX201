@@ -11,7 +11,19 @@ std::list<std::pair<std::string, ID3D11ShaderResourceView*>> SpriteRenderer::m_T
 // コンストラクタ
 SpriteRenderer::SpriteRenderer()
 {
-
+	//ブレンドステート作成
+	D3D11_RENDER_TARGET_BLEND_DESC blend = {};
+	blend.BlendEnable = true;	//ブレンドを行う設定
+	blend.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	blend.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blend.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blend.SrcBlendAlpha = D3D11_BLEND_ONE;
+	blend.DestBlendAlpha = D3D11_BLEND_ZERO;
+	blend.BlendOp = D3D11_BLEND_OP_ADD;
+	blend.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	m_pAlphaBlend = new BlendState();
+	m_pAlphaBlend->Create(blend);
+	m_pAlphaBlend->Bind();
 }
 
 // デストラクタ
@@ -140,10 +152,10 @@ void SpriteRenderer::End()
 void SpriteRenderer::SetSize(float width, float height)
 {
 	Vertex vtx[4] = {
-		{{-(width / 2), -(height / 2), 0.0f}, {0.0f, 0.0f}},
-		{{ (width / 2), -(height / 2), 0.0f}, {1.0f, 0.0f}},
-		{{-(width / 2),  (height / 2), 0.0f}, {0.0f, 1.0f}},
-		{{ (width / 2),  (height / 2), 0.0f}, {1.0f, 1.0f}} };
+		{{(width / 2), (height / 2), 0.0f}, {0.0f, 0.0f}},
+		{{-(width / 2), (height / 2), 0.0f}, {1.0f, 0.0f}},
+		{{(width / 2), -(height / 2), 0.0f}, {0.0f, 1.0f}},
+		{{ -(width / 2),  -(height / 2), 0.0f}, {1.0f, 1.0f}} };
 	m_SpriteInfo.pVtxBuf = new VertexBuffer;
 	m_SpriteInfo.pVtxBuf->Create(vtx, 4);
 }

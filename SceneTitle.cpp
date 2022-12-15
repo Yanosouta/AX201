@@ -73,7 +73,7 @@ SceneTitle::SceneTitle()
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.2")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.2")->GetComponent<Transform>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/karizanki.png");	//2022/12/14 小栗大輝　テクスチャを変更
-	pSpriteRenderer->SetSize(300, 50);
+	pSpriteRenderer->SetSize(300, 80);
 	ObjectManager::FindObjectWithName("UI.2")->SetLayerNum(1);
 	pTransform->SetPosition({ 450.0f, 300.0f, 0.0f });
 }

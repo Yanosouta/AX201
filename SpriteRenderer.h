@@ -55,7 +55,7 @@ private:
 	static VertexShader* m_pDefVS;
 	static PixelShader* m_pDefPS;
 	static unsigned int m_shaderRef;
-	//static BlendState* m_pAlphaBlend;
+	BlendState* m_pAlphaBlend;		//static消した　小栗 12/15
 	// テクスチャリスト
 	static std::list<std::pair<std::string, ID3D11ShaderResourceView*>> m_TextureList;
 private:
