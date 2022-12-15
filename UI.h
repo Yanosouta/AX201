@@ -24,5 +24,5 @@ public:
 		this->GetComponent<SpriteRenderer>()->Draw();
 	}
 };
-
+// 12/16 プルリクエストのテスト 竹下
 #endif //!___UI_H___
