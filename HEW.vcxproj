@@ -73,7 +73,7 @@
     <IncludePath>C:\Users\shira\OneDrive\デスクトップ\HEW\HEW\HEW;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\shira\OneDrive\デスクトップ\HEW\HEW\HEW;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Sohta\OneDrive\ドキュメント\AX201;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
