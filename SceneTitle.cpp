@@ -25,6 +25,19 @@ SceneTitle::SceneTitle()
 	std::shared_ptr<AABBCollider> pAABBCollider;	// AABB当たり判定用
 	std::shared_ptr<CameraPlayer> pCameraPlayer;
 
+	//2022/12/16　小栗大輝
+	//UIの描画が最後に来るようにクリエイトの位置を最初に持ってきた
+	//UI部分--------------------------------------------------------------------------------
+	ObjectManager::CreateObject<UI>("UI.2");
+	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.2")->GetComponent<SpriteRenderer>();
+	pTransform = ObjectManager::FindObjectWithName("UI.2")->GetComponent<Transform>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/karizanki.png");	//2022/12/14 小栗大輝　テクスチャを変更
+	pSpriteRenderer->SetSize(300, 80);
+	ObjectManager::FindObjectWithName("UI.2")->SetLayerNum(1);
+	pTransform->SetPosition({ 450.0f, 300.0f, 0.0f });
+
+	//------------------------------------------------------------------------------------
+
 	//--- オブジェクト作成
 	//   型　：CameraPlayer
 	//  名前 ：CameraPlayer
@@ -68,14 +81,7 @@ SceneTitle::SceneTitle()
 	// 座標を設定
 	pTransform->SetPosition({ 0.0f, -5.0f, 0.0f });
 
-	// 仮
-	ObjectManager::CreateObject<UI>("UI.2");
-	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.2")->GetComponent<SpriteRenderer>();
-	pTransform = ObjectManager::FindObjectWithName("UI.2")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/karizanki.png");	//2022/12/14 小栗大輝　テクスチャを変更
-	pSpriteRenderer->SetSize(300, 80);
-	ObjectManager::FindObjectWithName("UI.2")->SetLayerNum(1);
-	pTransform->SetPosition({ 450.0f, 300.0f, 0.0f });
+
 }
 
 SceneTitle::~SceneTitle()
