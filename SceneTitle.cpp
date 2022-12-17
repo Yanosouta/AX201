@@ -7,6 +7,7 @@
 #include "Object3D.h"
 #include "Cube.h"
 #include "AABBCollider.h"
+#include "TestAnimation.h" // (仮)
 
 #include "Transform.h"
 #include "CameraObjPlayer.h"
