@@ -9,18 +9,19 @@ class EnemyController : public ComponentBase
 {
 private:
 
-	//--- ˆÚ“®—p
-	// ˆÚ“®ƒXƒs[ƒhi‚PƒtƒŒ[ƒ€‚Éi‚Ş‹——£j
+	//--- ç§»å‹•ç”¨
+	// ç§»å‹•ã‚¹ãƒ”ãƒ¼ãƒ‰ï¼ˆï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã«é€²ã‚€è·é›¢ï¼‰
 	float m_MoveSpeed;
-	// ƒ^[ƒQƒbƒg‚Ü‚Å‚ÌƒxƒNƒgƒ‹
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«
 	DirectX::XMFLOAT3 m_TargetVector;
-	// ƒ^[ƒQƒbƒg‚ÌêŠ‚ğƒ‰ƒ“ƒ_ƒ€‚Å•Ï‚¦‚éŠÔ(ƒ~ƒŠ•b)
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®å ´æ‰€ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã§å¤‰ãˆã‚‹æ™‚é–“(ãƒŸãƒªç§’)
 	float m_ChangeTargetTime;
-	float m_tic; // ƒtƒŒ[ƒ€ƒJƒEƒ“ƒg
-	float m_TargetRotY;	// ƒ^[ƒQƒbƒg‚Ü‚Å‚ÌƒxƒNƒgƒ‹‚ÌYŠp“x
-	float m_lateRotY;	// ’x‚ê‚Ä‚Â‚¢‚Ä‚­‚éYŠp“x
+	float m_tic; // ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ãƒˆ
+	float m_TargetRotY;	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«ã®Yè§’åº¦
+	float m_lateRotY;	// é…ã‚Œã¦ã¤ã„ã¦ãã‚‹Yè§’åº¦
+	DirectX::XMFLOAT3 m_prevPos;	// ã²ã¨ã¤å‰ã®åº§æ¨™
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	EnemyController()
 		: m_MoveSpeed(0.05f)
 		, m_ChangeTargetTime(50.0f)
@@ -28,18 +29,18 @@ public:
 		, m_TargetRotY(0.0f)
 		, m_lateRotY(0.0f)
 	{}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~EnemyController() {}
 
-	// XV
+	// æ›´æ–°
 	void Update()override;
 
-	// “–‚½‚è”»’è
+	// å½“ãŸã‚Šåˆ¤å®š
 	void OnCollisionEnter(ObjectBase* object);
 	void OnCollisionStay(ObjectBase* object);
 	void OnCollisionExit(ObjectBase* object);
 
-	//--- ƒZƒbƒgŠÖ”
+	//--- ã‚»ãƒƒãƒˆé–¢æ•°
 	void SetMoveSpeed(float speed) { m_MoveSpeed = speed; }
 };
 
