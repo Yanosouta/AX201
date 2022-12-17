@@ -31,7 +31,8 @@ public:
 	{}
 	// デストラクタ
 	~EnemyController() {}
-
+	// 初期化
+	void Start() override;
 	// 更新
 	void Update()override;
 
