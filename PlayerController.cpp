@@ -14,36 +14,42 @@
 #include <math.h>
 #include "CameraPlayer.h"
 
+void PlayerController::Start()
+{
+	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Ground);
+	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Wall);
+}
+
 void PlayerController::Update()
 {
-	// ƒJƒƒ‰‚ªPlayerƒJƒƒ‰‚Å‚Í‚È‚¢‚ÍXV‚µ‚È‚¢
+	// ã‚«ãƒ¡ãƒ©ãŒPlayerã‚«ãƒ¡ãƒ©ã§ã¯ãªã„æ™‚ã¯æ›´æ–°ã—ãªã„
 	if (!ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()) return;
 
-	//--- ˆÚ“®iƒJƒƒ‰‚ÌŒü‚«‚É‰‚¶‚ÄˆÚ“®•ûŒü‚ğŒˆ‚ß‚éj
-	// ƒƒCƒ“ƒJƒƒ‰‚ÌÀ•W‚Æ’‹“_‚ğæ“¾‚·‚é
+	//--- ç§»å‹•ï¼ˆã‚«ãƒ¡ãƒ©ã®å‘ãã«å¿œã˜ã¦ç§»å‹•æ–¹å‘ã‚’æ±ºã‚ã‚‹ï¼‰
+	// ãƒ¡ã‚¤ãƒ³ã‚«ãƒ¡ãƒ©ã®åº§æ¨™ã¨æ³¨è¦–ç‚¹ã‚’å–å¾—ã™ã‚‹
 	DirectX::XMFLOAT3 camPos = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<Transform>()->GetPosition();
 	DirectX::XMFLOAT3 camLook = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->GetLookPoint();
-	// Y²‚Å‚ÌƒvƒŒƒCƒ„[‚ÌˆÚ“®‚Í—v‚ç‚È‚¢‚½‚ßA0.0f‚Éİ’è
+	// Yè»¸ã§ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ç§»å‹•ã¯è¦ã‚‰ãªã„ãŸã‚ã€0.0fã«è¨­å®š
 	camPos.y = 0.0f;
 	camLook.y = 0.0f;
-	// XMVECTOR‚É•ÏŠ·
+	// XMVECTORã«å¤‰æ›
 	DirectX::XMVECTOR vCamPos = DirectX::XMLoadFloat3(&camPos);
 	DirectX::XMVECTOR vCamLook = DirectX::XMLoadFloat3(&camLook);
-	// À•W‚©‚ç’‹“_‚ÖŒü‚­ƒxƒNƒgƒ‹‚ğZo(³–Ê)
+	// åº§æ¨™ã‹ã‚‰æ³¨è¦–ç‚¹ã¸å‘ããƒ™ã‚¯ãƒˆãƒ«ã‚’ç®—å‡º(æ­£é¢)
 	DirectX::XMVECTOR vFront;
 	vFront = DirectX::XMVectorSubtract(vCamLook, vCamPos);
 	vFront = DirectX::XMVector3Normalize(vFront);
-	// ³–Ê•ûŒü‚É‘Î‚µ‚ÄAY²‚ğ90‹‰ñ“]‚³‚¹‚½‰¡Œü‚«‚ÌƒxƒNƒgƒ‹‚ğZo
+	// æ­£é¢æ–¹å‘ã«å¯¾ã—ã¦ã€Yè»¸ã‚’90Â°å›è»¢ã•ã›ãŸæ¨ªå‘ãã®ãƒ™ã‚¯ãƒˆãƒ«ã‚’ç®—å‡º
 	DirectX::XMMATRIX matRotSide = DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(90.0f));
 	DirectX::XMVECTOR vSide = DirectX::XMVector3TransformCoord(vFront, matRotSide);
 
 	DirectX::XMVECTOR vMove = DirectX::XMVectorZero();
-	// Î‚ßˆÚ“®‚à‰Â
+	// æ–œã‚ç§»å‹•ã‚‚å¯
 	if (IsKeyPress('W')) vMove = DirectX::XMVectorAdd(vMove, vFront);
 	if (IsKeyPress('S')) vMove = DirectX::XMVectorAdd(vMove, DirectX::XMVectorScale(vFront, -1.0f));
 	if (IsKeyPress('A')) vMove = DirectX::XMVectorAdd(vMove, DirectX::XMVectorScale(vSide, -1.0f));
 	if (IsKeyPress('D')) vMove = DirectX::XMVectorAdd(vMove, vSide);
-	// Î‚ßˆÚ“®‚Ì‚Æ‚«‚ÉˆÚ“®—Ê‚ª‘½‚­‚È‚Á‚Ä‚µ‚Ü‚¤‚½‚ßA³‹K‰»‚·‚é
+	// æ–œã‚ç§»å‹•ã®ã¨ãã«ç§»å‹•é‡ãŒå¤šããªã£ã¦ã—ã¾ã†ãŸã‚ã€æ­£è¦åŒ–ã™ã‚‹
 	vMove = DirectX::XMVector3Normalize(vMove);
 	vMove = DirectX::XMVectorScale(vMove, 0.1f);
 
@@ -54,44 +60,44 @@ void PlayerController::Update()
 		GetOwner()->GetComponent<Transform>()->GetPosition().y + move.y,
 		GetOwner()->GetComponent<Transform>()->GetPosition().z + move.z
 		});
-	// ˆÚ“®‚µ‚½ê‡AˆÚ“®‚µ‚½•ûŒü‚É‰ñ“]‚·‚é
+	// ç§»å‹•ã—ãŸå ´åˆã€ç§»å‹•ã—ãŸæ–¹å‘ã«å›è»¢ã™ã‚‹
 	if (move.x != 0.0f || move.y != 0.0f || move.z != 0.0f) {
 		float radY = 0.0f;
-		// Z•ûŒü‚Ö‚ÌƒxƒNƒgƒ‹(ƒ‚ƒfƒ‹‚Ì³–Ê•ûŒü‚ÌƒxƒNƒgƒ‹)
+		// Zæ–¹å‘ã¸ã®ãƒ™ã‚¯ãƒˆãƒ«(ãƒ¢ãƒ‡ãƒ«ã®æ­£é¢æ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ«)
 		DirectX::XMFLOAT3 zVector = { 0.0f, 0.0f, 1.0f };
-		// “àÏ‚ÆƒxƒNƒgƒ‹‚Ì’·‚³‚ğg‚Á‚ÄcosƒÆ‚ğ‹‚ß‚é
+		// å†…ç©ã¨ãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã‚’ä½¿ã£ã¦cosÎ¸ã‚’æ±‚ã‚ã‚‹
 		DirectX::XMStoreFloat(&radY, DirectX::XMVector3Dot(DirectX::XMVector3Normalize(vMove), DirectX::XMLoadFloat3(&zVector)));
-		// “àÏ‚©‚çŠp“x‚ğ‹‚ß‚é
+		// å†…ç©ã‹ã‚‰è§’åº¦ã‚’æ±‚ã‚ã‚‹
 		radY = ::acos(radY);
-		// ƒ‰ƒWƒAƒ“Šp‚©‚ç‚¨‚È‚¶‚İ‚ÌŠp“x‚É•ÏX
+		// ãƒ©ã‚¸ã‚¢ãƒ³è§’ã‹ã‚‰ãŠãªã˜ã¿ã®è§’åº¦ã«å¤‰æ›´
 		radY = DirectX::XMConvertToDegrees(radY);
-		// ‰ñ“]‚ª‰E‰ñ“]‚©¶‰ñ“]‚©‚ğ”»•Ê‚·‚é‚½‚ß‚ÉAŠOÏ‚Å‹‚ß‚é
-		// ‹‚ß‚½ŠOÏ‚ÌY¬•ª‚ªƒvƒ‰ƒX‚¾‚Á‚½‚ç¶‰ñ‚èB
-		// ‹‚ß‚½ŠOÏ‚ÌY¬•ª‚ªƒ}ƒCƒiƒX‚¾‚Á‚½‚ç‰E‰ñ‚èB
+		// å›è»¢ãŒå³å›è»¢ã‹å·¦å›è»¢ã‹ã‚’åˆ¤åˆ¥ã™ã‚‹ãŸã‚ã«ã€å¤–ç©ã§æ±‚ã‚ã‚‹
+		// æ±‚ã‚ãŸå¤–ç©ã®Yæˆåˆ†ãŒãƒ—ãƒ©ã‚¹ã ã£ãŸã‚‰å·¦å›ã‚Šã€‚
+		// æ±‚ã‚ãŸå¤–ç©ã®Yæˆåˆ†ãŒãƒã‚¤ãƒŠã‚¹ã ã£ãŸã‚‰å³å›ã‚Šã€‚
 		DirectX::XMFLOAT3 rotateDirection;
 		DirectX::XMStoreFloat3(&rotateDirection, DirectX::XMVector3Cross(DirectX::XMVector3Normalize(vMove), DirectX::XMLoadFloat3(&zVector)));
 		if (rotateDirection.y > 0) radY = 180.0f + (180.0f - radY);
-		// Zo‚µ‚½Šp“x‚ğ“K—p‚·‚é
+		// ç®—å‡ºã—ãŸè§’åº¦ã‚’é©ç”¨ã™ã‚‹
 		GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, radY, 0.0f });
 	}
 
-	//--- ”­Ë
+	//--- ç™ºå°„
 	if (IsKeyTrigger(VK_SPACE)) {
-		m_tic = 0.0f;	// ‰Ÿ‚µn‚ß‚½‚çA0.0f‚É‰Šú‰»
+		m_tic = 0.0f;	// æŠ¼ã—å§‹ã‚ãŸã‚‰ã€0.0fã«åˆæœŸåŒ–
 
-		// •ÏX—pƒ|ƒCƒ“ƒ^
+		// å¤‰æ›´ç”¨ãƒã‚¤ãƒ³ã‚¿
 		std::shared_ptr<Transform> trans;
 		std::shared_ptr<Rigidbody> rb;
 
-		//--- ƒIƒuƒWƒFƒNƒgì¬
-		//   Œ^@FArrow
-		//  –¼‘O FArrow
-		// ƒ^ƒO–¼FArrow
+		//--- ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆ
+		//   å‹ã€€ï¼šArrow
+		//  åå‰ ï¼šArrow
+		// ã‚¿ã‚°åï¼šArrow
 		m_haveArrow = ObjectManager::CreateObject<Arrow>("Arrow", TagName::Arrow);
-		// ¡‚Á‚Ä‚¢‚éArrow‚ÌTransform‚ğæ“¾
+		// ä»ŠæŒã£ã¦ã„ã‚‹Arrowã®Transformã‚’å–å¾—
 		trans = m_haveArrow->GetComponent<Transform>();
-		// À•W‚ğ©•ª‚ÌƒIƒuƒWƒFƒNƒg{©•ªƒIƒuƒWƒFƒNƒg‚Ì–@üi’·‚³‚Pj‰¡‚ÌˆÊ’u‚Éİ’è
-		// —v–ñF‰E‘O
+		// åº§æ¨™ã‚’è‡ªåˆ†ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼‹è‡ªåˆ†ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ³•ç·šï¼ˆé•·ã•ï¼‘ï¼‰æ¨ªã®ä½ç½®ã«è¨­å®š
+		// è¦ç´„ï¼šå³å‰
 		trans->SetPosition({
 			GetOwner()->GetComponent<Transform>()->GetPosition().x + 
 				GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
@@ -103,28 +109,28 @@ void PlayerController::Update()
 				GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().z
 			});
-		// Šp“x‚ğ©•ª‚ÌƒIƒuƒWƒFƒNƒg‚ÌŠp“x‚Éİ’è
+		// è§’åº¦ã‚’è‡ªåˆ†ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è§’åº¦ã«è¨­å®š
 		trans->SetAngle({
 			GetOwner()->GetComponent<Transform>()->GetAngle().x,
-			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// –î‚Ìƒ‚ƒfƒ‹‚Æ–î‚ğËo‚·‚éƒ‚ƒfƒ‹‚Ì³–Ê‚ªˆá‚¤ê‡A‚±‚±‚Å”’l’²®‚·‚éB
+			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// çŸ¢ã®ãƒ¢ãƒ‡ãƒ«ã¨çŸ¢ã‚’å°„å‡ºã™ã‚‹ãƒ¢ãƒ‡ãƒ«ã®æ­£é¢ãŒé•ã†å ´åˆã€ã“ã“ã§æ•°å€¤èª¿æ•´ã™ã‚‹ã€‚
 			GetOwner()->GetComponent<Transform>()->GetAngle().z
 			});
 
 	}
 	if (IsKeyPress(VK_SPACE)) {
-		m_tic++;	// ‰Ÿ‚µ‚Ä‚¢‚éŠÔAƒJƒEƒ“ƒg‚·‚é
-		// •ÏX—pƒ|ƒCƒ“ƒ^
+		m_tic++;	// æŠ¼ã—ã¦ã„ã‚‹é–“ã€ã‚«ã‚¦ãƒ³ãƒˆã™ã‚‹
+		// å¤‰æ›´ç”¨ãƒã‚¤ãƒ³ã‚¿
 		std::shared_ptr<Transform> trans;
 		std::shared_ptr<Rigidbody> rb;
-		// ¡‚Á‚Ä‚¢‚éArrow‚ÌTransform‚ğæ“¾
+		// ä»ŠæŒã£ã¦ã„ã‚‹Arrowã®Transformã‚’å–å¾—
 		trans = m_haveArrow->GetComponent<Transform>();
-		// ¡‚Á‚Ä‚¢‚éArrow‚ÌRigidbody‚ğæ“¾
+		// ä»ŠæŒã£ã¦ã„ã‚‹Arrowã®Rigidbodyã‚’å–å¾—
 		rb = m_haveArrow->GetComponent<Rigidbody>();
-		// ƒ`ƒƒ[ƒWŠÔ‚ÌŠ„‡‚ğ‹‚ß‚é
+		// ãƒãƒ£ãƒ¼ã‚¸æ™‚é–“ã®å‰²åˆã‚’æ±‚ã‚ã‚‹
 		float ChargePer = m_tic > m_ChargeTime ? m_ChargeTime/m_ChargeTime : m_tic/m_ChargeTime;
-		// Š„‡‚ğ‹t‚É‚·‚é
+		// å‰²åˆã‚’é€†ã«ã™ã‚‹
 		ChargePer = 1 - ChargePer;
-		// À•W‚ğ©•ª‚ÌƒIƒuƒWƒFƒNƒg{©•ªƒIƒuƒWƒFƒNƒg‚Ì–@üi’·‚³‚Pj‰¡‚ÌˆÊ’u‚Éİ’è
+		// åº§æ¨™ã‚’è‡ªåˆ†ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼‹è‡ªåˆ†ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ³•ç·šï¼ˆé•·ã•ï¼‘ï¼‰æ¨ªã®ä½ç½®ã«è¨­å®š
 		trans->SetPosition({
 			GetOwner()->GetComponent<Transform>()->GetPosition().x +
 				GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
@@ -136,43 +142,43 @@ void PlayerController::Update()
 				GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * ChargePer
 			});
-		// Šp“x‚ğ©•ª‚ÌƒIƒuƒWƒFƒNƒg‚ÌŠp“x‚Éİ’è
+		// è§’åº¦ã‚’è‡ªåˆ†ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è§’åº¦ã«è¨­å®š
 		trans->SetAngle({
 			GetOwner()->GetComponent<Transform>()->GetAngle().x,
-			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// –î‚Ìƒ‚ƒfƒ‹‚Æ–î‚ğËo‚·‚éƒ‚ƒfƒ‹‚Ì³–Ê‚ªˆá‚¤ê‡A‚±‚±‚Å”’l’²®‚·‚éB
+			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// çŸ¢ã®ãƒ¢ãƒ‡ãƒ«ã¨çŸ¢ã‚’å°„å‡ºã™ã‚‹ãƒ¢ãƒ‡ãƒ«ã®æ­£é¢ãŒé•ã†å ´åˆã€ã“ã“ã§æ•°å€¤èª¿æ•´ã™ã‚‹ã€‚
 			GetOwner()->GetComponent<Transform>()->GetAngle().z
 			});
-		// ƒ`ƒƒ[ƒWƒ^ƒCƒ€ˆÈã‚É’·‰Ÿ‚µ‚µ‚Ä‚¢‚½ê‡
+		// ãƒãƒ£ãƒ¼ã‚¸ã‚¿ã‚¤ãƒ ä»¥ä¸Šã«é•·æŠ¼ã—ã—ã¦ã„ãŸå ´åˆ
 		if (m_tic > m_ChargeTime) {
-			// ƒTƒCƒY‚ğİ’è
+			// ã‚µã‚¤ã‚ºã‚’è¨­å®š
 			trans->SetScale({ 0.6f, 0.6f, 0.6f });
 		}
-		// ’Êí‚Ìê‡
+		// é€šå¸¸ã®å ´åˆ
 		else {
-			// ƒTƒCƒY‚ğİ’è
+			// ã‚µã‚¤ã‚ºã‚’è¨­å®š
 			trans->SetScale({ 0.3f, 0.3f, 0.3f });
 		}
 
-		// —­‚ß’†‚È‚Ì‚Å‰Á‘¬“x‚ğ0.0f‚Éİ’è
+		// æºœã‚ä¸­ãªã®ã§åŠ é€Ÿåº¦ã‚’0.0fã«è¨­å®š
 		rb->SetAccele({ 0.0f, 0.0f, 0.0f});
 	}
 	if (IsKeyRelease(VK_SPACE)) {
-		// •ÏX—pƒ|ƒCƒ“ƒ^
+		// å¤‰æ›´ç”¨ãƒã‚¤ãƒ³ã‚¿
 		std::shared_ptr<Rigidbody> rb;
-		// ¡‚Á‚Ä‚¢‚éArrow‚ÌRigidbody‚ğæ“¾
+		// ä»ŠæŒã£ã¦ã„ã‚‹Arrowã®Rigidbodyã‚’å–å¾—
 		rb = m_haveArrow->GetComponent<Rigidbody>();
-		// ƒ`ƒƒ[ƒWƒ^ƒCƒ€ˆÈã‚É’·‰Ÿ‚µ‚µ‚Ä‚¢‚½ê‡
+		// ãƒãƒ£ãƒ¼ã‚¸ã‚¿ã‚¤ãƒ ä»¥ä¸Šã«é•·æŠ¼ã—ã—ã¦ã„ãŸå ´åˆ
 		if (m_tic > m_ChargeTime) {
-			// ‰Á‘¬“x‚ğƒIƒuƒWƒFƒNƒg‚Ì³–Ê•ûŒü‚Éİ’è
+			// åŠ é€Ÿåº¦ã‚’ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ­£é¢æ–¹å‘ã«è¨­å®š
 			rb->SetAccele({
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.6f,
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.6f,
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.6f
 				});
 		}
-		// ’Êí‚Ìê‡
+		// é€šå¸¸ã®å ´åˆ
 		else {
-			// ‰Á‘¬“x‚ğƒIƒuƒWƒFƒNƒg‚Ì³–Ê•ûŒü‚Éİ’è
+			// åŠ é€Ÿåº¦ã‚’ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ­£é¢æ–¹å‘ã«è¨­å®š
 			rb->SetAccele({
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.3f,
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.3f,
@@ -181,18 +187,18 @@ void PlayerController::Update()
 		}
 	}
 
-	//--- À•W•â³
-	// —‰º”»’è
+	//--- åº§æ¨™è£œæ­£
+	// è½ä¸‹åˆ¤å®š
 	if (GetOwner()->GetComponent<Rigidbody>()) {
-		// yÀ•W‚ª-9ˆÈ‰º
+		// yåº§æ¨™ãŒ-9ä»¥ä¸‹
 		if (GetOwner()->GetComponent<Transform>()->GetPosition().y < -9.0f) {
-			// À•W‚ğ•â³
+			// åº§æ¨™ã‚’è£œæ­£
 			GetOwner()->GetComponent<Transform>()->SetPosition({
 				GetOwner()->GetComponent<Transform>()->GetPosition().x,
 				0.0f,
 				GetOwner()->GetComponent<Transform>()->GetPosition().z
 				});
-			// ‰Á‘¬“x‚ğ•â³
+			// åŠ é€Ÿåº¦ã‚’è£œæ­£
 			GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 		}
 	}
@@ -201,39 +207,39 @@ void PlayerController::Update()
 void PlayerController::OnCollisionEnter(ObjectBase* object)
 {
 	if (object->GetTag() == TagName::Field) {
-		//--- •Ç(Plane)‚É‚ß‚è‚ñ‚¾OBB‚ğ–ß‚·ˆ—
-		// “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚Ì‚Ç‚Ì–Ê‚Æ“–‚½‚Á‚½‚Æ‚«‚ÉƒAƒNƒVƒ‡ƒ“‚ğ‹N‚±‚·‚©B
-		// --- –Ê‚Ì–@ü‚ğ‹‚ß‚é
-		Float3 Normal = Primitive::Vector3_up; // ã‚Ì–Ê‚Éİ’è
+		//--- å£(Plane)ã«ã‚ã‚Šè¾¼ã‚“ã OBBã‚’æˆ»ã™å‡¦ç†
+		// å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã©ã®é¢ã¨å½“ãŸã£ãŸã¨ãã«ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’èµ·ã“ã™ã‹ã€‚
+		// --- é¢ã®æ³•ç·šã‚’æ±‚ã‚ã‚‹
+		Float3 Normal = Primitive::Vector3_up; // ä¸Šã®é¢ã«è¨­å®š
 		DirectX::XMVECTOR planeN = DirectX::XMLoadFloat3(&ConvertToDirectXFloat3(Normal));
 		DirectX::XMVector3Normalize(planeN);
-		// ƒuƒƒbƒN‚ÌŠp“x‚©‚ç‰ñ“]s—ñ‚ğŒvZ
+		// ãƒ–ãƒ­ãƒƒã‚¯ã®è§’åº¦ã‹ã‚‰å›è»¢è¡Œåˆ—ã‚’è¨ˆç®—
 		DirectX::XMMATRIX rotation;
 		rotation =
 			DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().y)) *
 			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().x)) *
 			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().z));
-		// –@ü‚ÌŒü‚«‚ğƒuƒƒbƒN‚Ì‰ñ“]s—ñ‚Å•Ï‚¦‚é
+		// æ³•ç·šã®å‘ãã‚’ãƒ–ãƒ­ãƒƒã‚¯ã®å›è»¢è¡Œåˆ—ã§å¤‰ãˆã‚‹
 		DirectX::XMVector3TransformCoord(planeN, rotation);
-		// --- –Êã‚ÌÀ•W‚ğ‹‚ß‚é
+		// --- é¢ä¸Šã®åº§æ¨™ã‚’æ±‚ã‚ã‚‹
 		DirectX::XMVECTOR Pos;
 		if (Normal == Primitive::Vector3_up || Normal == Primitive::Vector3_down) {
-			// ‚‚³‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
+			// é«˜ã•ã‚’æ³•ç·šã«ã‹ã‘ãŸã‚‚ã®ãŒé¢ä¸Šã®åº§æ¨™ã¨ãªã‚‹
 			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
 				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2));
 		}
 		else if (Normal == Primitive::Vector3_forward || Normal == Primitive::Vector3_back) {
-			// ‰œs‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
+			// å¥¥è¡Œã‚’æ³•ç·šã«ã‹ã‘ãŸã‚‚ã®ãŒé¢ä¸Šã®åº§æ¨™ã¨ãªã‚‹
 			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
 				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2));
 		}
 		else if (Normal == Primitive::Vector3_right || Normal == Primitive::Vector3_left) {
-			// •‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
+			// å¹…ã‚’æ³•ç·šã«ã‹ã‘ãŸã‚‚ã®ãŒé¢ä¸Šã®åº§æ¨™ã¨ãªã‚‹
 			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
 				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2));
 		}
-		// --- •½–Ê‚Ì–@ü‚É‘Î‚·‚éOBB‚ÌË‰eü‚Ì’·‚³‚ğZo
-		float r = 0.0f;		// ‹ßÚ‹——£
+		// --- å¹³é¢ã®æ³•ç·šã«å¯¾ã™ã‚‹OBBã®å°„å½±ç·šã®é•·ã•ã‚’ç®—å‡º
+		float r = 0.0f;		// è¿‘æ¥è·é›¢
 		float Addr;
 		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
 			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorForword()),
@@ -251,14 +257,14 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 			, planeN));
 		r += fabs(Addr);
 
-		// --- –ß‚µ‹——£‚ğZo
+		// --- æˆ»ã—è·é›¢ã‚’ç®—å‡º
 		float s;
 		DirectX::XMStoreFloat(&s, DirectX::XMVector3Dot(
 			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetPosition()), Pos), planeN));
 		if (s > 0)	s = r - fabs(s);
 		else		s = r + fabs(s);
 
-		// --- ‚ß‚è‚ñ‚¾ˆÊ’u‚©‚ç•½–Ê‚Ì–@ü•ûŒü‚É–ß‚µ‹——£‚¾‚¯ƒIƒtƒZƒbƒg‚·‚é
+		// --- ã‚ã‚Šè¾¼ã‚“ã ä½ç½®ã‹ã‚‰å¹³é¢ã®æ³•ç·šæ–¹å‘ã«æˆ»ã—è·é›¢ã ã‘ã‚ªãƒ•ã‚»ãƒƒãƒˆã™ã‚‹
 		DirectX::XMFLOAT3 offsetPos;
 		DirectX::XMStoreFloat3(&offsetPos, DirectX::XMVectorScale(planeN, s));
 		this->GetOwner()->GetComponent<Transform>()->SetPosition({
@@ -272,39 +278,39 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 void PlayerController::OnCollisionStay(ObjectBase* object)
 {
 	if (object->GetTag() == TagName::Field) {
-		//--- •Ç(Plane)‚É‚ß‚è‚ñ‚¾OBB‚ğ–ß‚·ˆ—
-		// “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚Ì‚Ç‚Ì–Ê‚Æ“–‚½‚Á‚½‚Æ‚«‚ÉƒAƒNƒVƒ‡ƒ“‚ğ‹N‚±‚·‚©B
-		// --- –Ê‚Ì–@ü‚ğ‹‚ß‚é
-		Float3 Normal = Primitive::Vector3_up; // ã‚Ì–Ê‚Éİ’è
+		//--- å£(Plane)ã«ã‚ã‚Šè¾¼ã‚“ã OBBã‚’æˆ»ã™å‡¦ç†
+		// å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã©ã®é¢ã¨å½“ãŸã£ãŸã¨ãã«ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã‚’èµ·ã“ã™ã‹ã€‚
+		// --- é¢ã®æ³•ç·šã‚’æ±‚ã‚ã‚‹
+		Float3 Normal = Primitive::Vector3_up; // ä¸Šã®é¢ã«è¨­å®š
 		DirectX::XMVECTOR planeN = DirectX::XMLoadFloat3(&ConvertToDirectXFloat3(Normal));
 		DirectX::XMVector3Normalize(planeN);
-		// ƒuƒƒbƒN‚ÌŠp“x‚©‚ç‰ñ“]s—ñ‚ğŒvZ
+		// ãƒ–ãƒ­ãƒƒã‚¯ã®è§’åº¦ã‹ã‚‰å›è»¢è¡Œåˆ—ã‚’è¨ˆç®—
 		DirectX::XMMATRIX rotation;
 		rotation =
 			DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().y)) *
 			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().x)) *
 			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().z));
-		// –@ü‚ÌŒü‚«‚ğƒuƒƒbƒN‚Ì‰ñ“]s—ñ‚Å•Ï‚¦‚é
+		// æ³•ç·šã®å‘ãã‚’ãƒ–ãƒ­ãƒƒã‚¯ã®å›è»¢è¡Œåˆ—ã§å¤‰ãˆã‚‹
 		DirectX::XMVector3TransformCoord(planeN, rotation);
-		// --- –Êã‚ÌÀ•W‚ğ‹‚ß‚é
+		// --- é¢ä¸Šã®åº§æ¨™ã‚’æ±‚ã‚ã‚‹
 		DirectX::XMVECTOR Pos;
 		if (Normal == Primitive::Vector3_up || Normal == Primitive::Vector3_down) {
-			// ‚‚³‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
+			// é«˜ã•ã‚’æ³•ç·šã«ã‹ã‘ãŸã‚‚ã®ãŒé¢ä¸Šã®åº§æ¨™ã¨ãªã‚‹
 			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
 				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2));
 		}
 		else if (Normal == Primitive::Vector3_forward || Normal == Primitive::Vector3_back) {
-			// ‰œs‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
+			// å¥¥è¡Œã‚’æ³•ç·šã«ã‹ã‘ãŸã‚‚ã®ãŒé¢ä¸Šã®åº§æ¨™ã¨ãªã‚‹
 			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
 				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2));
 		}
 		else if (Normal == Primitive::Vector3_right || Normal == Primitive::Vector3_left) {
-			// •‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
+			// å¹…ã‚’æ³•ç·šã«ã‹ã‘ãŸã‚‚ã®ãŒé¢ä¸Šã®åº§æ¨™ã¨ãªã‚‹
 			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
 				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2));
 		}
-		// --- •½–Ê‚Ì–@ü‚É‘Î‚·‚éOBB‚ÌË‰eü‚Ì’·‚³‚ğZo
-		float r = 0.0f;		// ‹ßÚ‹——£
+		// --- å¹³é¢ã®æ³•ç·šã«å¯¾ã™ã‚‹OBBã®å°„å½±ç·šã®é•·ã•ã‚’ç®—å‡º
+		float r = 0.0f;		// è¿‘æ¥è·é›¢
 		float Addr;
 		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
 			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorForword()),
@@ -322,14 +328,14 @@ void PlayerController::OnCollisionStay(ObjectBase* object)
 			, planeN));
 		r += fabs(Addr);
 
-		// --- –ß‚µ‹——£‚ğZo
+		// --- æˆ»ã—è·é›¢ã‚’ç®—å‡º
 		float s;
 		DirectX::XMStoreFloat(&s, DirectX::XMVector3Dot(
 			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetPosition()), Pos), planeN));
 		if (s > 0)	s = r - fabs(s);
 		else		s = r + fabs(s);
 
-		// --- ‚ß‚è‚ñ‚¾ˆÊ’u‚©‚ç•½–Ê‚Ì–@ü•ûŒü‚É–ß‚µ‹——£‚¾‚¯ƒIƒtƒZƒbƒg‚·‚é
+		// --- ã‚ã‚Šè¾¼ã‚“ã ä½ç½®ã‹ã‚‰å¹³é¢ã®æ³•ç·šæ–¹å‘ã«æˆ»ã—è·é›¢ã ã‘ã‚ªãƒ•ã‚»ãƒƒãƒˆã™ã‚‹
 		DirectX::XMFLOAT3 offsetPos;
 		DirectX::XMStoreFloat3(&offsetPos, DirectX::XMVectorScale(planeN, s));
 		this->GetOwner()->GetComponent<Transform>()->SetPosition({
