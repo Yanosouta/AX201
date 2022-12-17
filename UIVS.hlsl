@@ -1,57 +1,51 @@
-// CPU‚©‚çó‚¯æ‚Á‚½’¸“_ƒf[ƒ^
+// CPUã‹ã‚‰å—ã‘å–ã£ãŸé ‚ç‚¹ãƒ‡ãƒ¼ã‚¿
 struct VS_IN
 {
 	float3 pos : POSITION0;
 	float2 uv : TEXCOORD0;
 };
 
-// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[‚É“n‚·ƒf[ƒ^
-// ¦SV_POSITION‚Íƒ‰ƒXƒ^ƒ‰ƒCƒY‚É“n‚³‚ê‚é
+// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«æ¸¡ã™ãƒ‡ãƒ¼ã‚¿
+// â€»SV_POSITIONã¯ãƒ©ã‚¹ã‚¿ãƒ©ã‚¤ã‚ºã«æ¸¡ã•ã‚Œã‚‹
 struct VS_OUT
 {
 	float4 pos : SV_POSITION;
 	float2 uv : TEXCOORD0;
+	float4 wPos : TEXCOORD1;
 };
 
-cbuffer Transform : register(b0)
+// å®šæ•°ãƒãƒƒãƒ•ã‚¡å®šç¾©
+cbuffer AnimeUV : register(b0)
 {
-	float posX, posY;
-	float scaleX, scaleY;
-	float angle;
-	float dummy[3];
-}
+	float uvWidth;
+	float uvHeight;
+	float uvTopLeftU;
+	float uvTopLeftV;
+};
+
+cbuffer WVP : register(b1) {
+	float4x4 world;
+	float4x4 view;
+	float4x4 proj;
+};
 
 VS_OUT main(VS_IN vin)
 {
 	VS_OUT vout;
-	vout.uv = vin.uv;	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_‚Öó‚¯“n‚µ
+	vout.uv = vin.uv;	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ã¸å—ã‘æ¸¡ã—
+
+	// åˆ†å‰²ã—ãŸã‚µã‚¤ã‚ºã«ã‚¹ã‚±ãƒ¼ãƒ«ãƒ€ã‚¦ãƒ³
+	vout.uv.x *= uvWidth;
+	vout.uv.y *= uvHeight;
+	// å·¦ä¸Šã¾ã§ç§»å‹•
+	vout.uv.x += uvTopLeftU;
+	vout.uv.y += uvTopLeftV;
 
 	vout.pos = float4(vin.pos, 1.0f);
 
-	//--- ƒ|ƒŠƒSƒ“‚Ì•ÏŒ`
-	// Šgk
-	vout.pos.x *= scaleX;
-	vout.pos.y *= scaleY;
-	// ‰ñ“]
-	float4 work = vout.pos;
-	vout.pos.x = work.x * cos(angle) - work.y * sin(angle);
-	vout.pos.y = work.x * sin(angle) + work.y * cos(angle);
-	// ˆÚ“®
-	vout.pos.x += posX;
-	vout.pos.y += posY;
-
-
-	// ‡@‰æ–Ê‚Ìã‰º‚ğ‚Ğ‚Á‚­‚è•Ô‚·
-	// @-1‚ğ‚©‚¯‚Äã‰º‚Ì+-‚ğ”½“]
-	vout.pos.y *= -1.0f;
-	// ‡A‰æ–Ê‚ÌƒXƒP[ƒ‹‚ğ¬‚³‚­‚·‚é
-	// —áF-1`1‚ÌŠÔ‚Í"2"—£‚ê‚Ä‚¢‚éB
-	// @@‚±‚ÌŠÔ"2"‚É‚»‚ë‚¦‚é‚½‚ß‚ÉA‰æ–Ê•(960, 540)‚ğA”¼•ª‚Ì‘å‚«‚³(480, 270)‚ÅŠ„‚é
-	vout.pos.x /= 480.0f;
-	vout.pos.y /= 270.0f;
-	// ‡B(0, 0)‚ÌÀ•W‚ğ¶ã(-1, 1)‚ÉˆÚ“®
-	vout.pos.x -= 1.0f;
-	vout.pos.y += 1.0f;
-
+	vout.pos = mul(vout.pos, world);
+	vout.wPos = vout.pos;
+	vout.pos = mul(vout.pos, view);
+	vout.pos = mul(vout.pos, proj);
 	return vout;
 }
