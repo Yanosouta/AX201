@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "ConstantBuffer.h"
 #include "BlendState.h"
+#include "SamplerState.h"
 #include <memory>
 #include <list>
 #include <DirectXMath.h>
@@ -15,53 +16,55 @@ class SpriteRenderer : public ComponentBase
 {
 public:
 
+	struct AnimeUV {
+		float uvWidth;		// æ¨ªå¹…
+		float uvHeight;		// ç¸¦å¹…
+		float uvTopLeftU;	// å·¦ä¸ŠUåº§æ¨™
+		float uvTopLeftV;	// å·¦ä¸ŠVåº§æ¨™
+	};
 	struct Info {
-		// ’¸“_î•ñ
+		// é ‚ç‚¹æƒ…å ±
 		VertexBuffer* pVtxBuf;
-		// UVî•ñ
-		float uvWidth;		// ‰¡•
-		float uvHeight;		// c•
-		float uvTopLeftU;	// ¶ãUÀ•W
-		float uvTopLeftV;	// ¶ãVÀ•W
-		// ƒeƒNƒXƒ`ƒƒ
+		// UVæƒ…å ±
+		AnimeUV animeUV;
+		// ãƒ†ã‚¯ã‚¹ãƒãƒ£
 		ID3D11ShaderResourceView* pTexture;
-		// s—ñ
+		// è¡Œåˆ—
 		DirectX::XMFLOAT4X4 m_Mat[3];
 	};
 
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	SpriteRenderer();
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~SpriteRenderer();
 
 	void Start();
 	void LateUpdate();
-	// •`‰æ
+	// æç”»
 	void Draw();
 	void End();
 
-	// ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 	ID3D11ShaderResourceView* LoadTexture(std::string);
 
-	//--- ƒZƒbƒgŠÖ”
+	//--- ã‚»ãƒƒãƒˆé–¢æ•°
 	void SetInfo(Info info) { m_SpriteInfo = info; }
 	void SetSize(float width, float height);
 
-	//--- ƒQƒbƒgŠÖ”
+	//--- ã‚²ãƒƒãƒˆé–¢æ•°
 	Info* GetInfo() { return &m_SpriteInfo; }
 
 private:
 	static VertexShader* m_pDefVS;
 	static PixelShader* m_pDefPS;
 	static unsigned int m_shaderRef;
-	BlendState* m_pAlphaBlend;		//staticÁ‚µ‚½@¬ŒI 12/15
-	// ƒeƒNƒXƒ`ƒƒƒŠƒXƒg
+	static SamplerState* m_pSamplerState;
+	static BlendState* m_pAlphaBlend;
+	static ConstantBuffer* m_pConst[2];
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒªã‚¹ãƒˆ
 	static std::list<std::pair<std::string, ID3D11ShaderResourceView*>> m_TextureList;
 private:
-	VertexShader* m_pVS;
-	PixelShader* m_pPS;
-	ConstantBuffer* m_pConst;
 	Info m_SpriteInfo;
 };
 
