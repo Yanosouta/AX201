@@ -13,38 +13,41 @@ class ColliderBase : public ComponentBase
 {
 	using ColliderPool = std::list<ColliderBase*>;
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	ColliderBase(){}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~ColliderBase(){}
 
-	// ŒãXV
+	// å¾Œæ›´æ–°
 	void LateUpdate() override;
 
-	// “KØ‚Èˆ—‚ğŒÄ‚Ño‚·
+	// é©åˆ‡ãªå‡¦ç†ã‚’å‘¼ã³å‡ºã™
 	virtual void CallTouchOperation(ColliderBase* collider) = 0;
 
-	//--- “–‚½‚è”»’èˆ—
-	// AABB‚Æ‚Ì“–‚½‚è”»’è
+	//--- å½“ãŸã‚Šåˆ¤å®šå‡¦ç†
+	// AABBã¨ã®å½“ãŸã‚Šåˆ¤å®š
 	virtual void TouchingTheAABB(ColliderBase* _AABB) = 0;
 	virtual void TouchingTheOBB(ColliderBase* _AABB) = 0;
-	// Sphere‚Æ‚Ì“–‚½‚è”»’è
+	// Sphereã¨ã®å½“ãŸã‚Šåˆ¤å®š
 	virtual void TouchingTheSphere(ColliderBase* _Sphere) = 0;
 
 	virtual void CheckTouchCollider(ColliderBase* collider);
 	virtual void CheckExitCollider();
 
-	// •ª—£²‚É“Š‰e‚³‚ê‚½²¬•ª‚©‚ç“Š‰eü•ª’·‚ğZo
+	// åˆ†é›¢è»¸ã«æŠ•å½±ã•ã‚ŒãŸè»¸æˆåˆ†ã‹ã‚‰æŠ•å½±ç·šåˆ†é•·ã‚’ç®—å‡º
 	float LenSegOnSeparateAxis(Float3 *Sep, Float3 *e1, Float3 *e2, Float3 *e3 = 0);
 
-	//--- ƒQƒbƒgŠÖ”
+	//--- ã‚²ãƒƒãƒˆé–¢æ•°
 	virtual Primitive::AABB& GetPrimitive() = 0;
 
 protected:
-	// Œ³‚©‚çG‚ê‚Ä‚¢‚éƒRƒ‰ƒCƒ_[‚ÌƒŠƒXƒg
+	// å…ƒã‹ã‚‰è§¦ã‚Œã¦ã„ã‚‹ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã®ãƒªã‚¹ãƒˆ
 	ColliderPool m_TouchingPool;
-	// ¡G‚ê‚½ƒRƒ‰ƒCƒ_[‚ÌƒŠƒXƒg
+	// ä»Šè§¦ã‚ŒãŸã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã®ãƒªã‚¹ãƒˆ
 	ColliderPool m_justTouchedPool;
+	
+	// å½“ãŸã‚Šåˆ¤å®šã‚’ã¨ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‹åãƒªã‚¹ãƒˆ
+	std::list<std::string> m_TouchOBBList;
 };
 
 #endif //!___COLLIDER_H___
