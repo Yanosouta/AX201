@@ -4,6 +4,16 @@
 SamplerState::SamplerState()
 	: m_pState(nullptr)
 {
+	D3D11_SAMPLER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+
+	desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	desc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+
+	desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+
+	GetDevice()->CreateSamplerState(&desc, &m_pState);
 }
 SamplerState::~SamplerState()
 {
@@ -14,15 +24,6 @@ SamplerState::~SamplerState()
 	}
 }
 
-HRESULT SamplerState::Create(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE address)
-{
-	D3D11_SAMPLER_DESC desc = {};
-	desc.Filter = filter;
-	desc.AddressU = address;
-	desc.AddressV = address;
-	desc.AddressW = address;
-	return GetDevice()->CreateSamplerState(&desc, &m_pState);
-}
 void SamplerState::Bind()
 {
 	GetContext()->PSSetSamplers(0, 1, &m_pState);
