@@ -19,6 +19,7 @@
 SceneTitle::SceneTitle()
 {
 	//--- 変更用ポインタ
+	std::shared_ptr<ObjectBase> pObj;
 	std::shared_ptr<MeshRenderer> pMeshRenderer;	// 3Dオブジェクト用レンダラー
 	std::shared_ptr<SpriteRenderer> pSpriteRenderer;// 2Dオブジェクト用レンダラー
 	std::shared_ptr<Transform> pTransform;			// 位置情報
@@ -85,13 +86,27 @@ SceneTitle::SceneTitle()
 	//--- オブジェクト作成
 	//   型　：Field
 	//  名前 ：Field
-	// タグ名：Field
-	ObjectManager::CreateObject<Field>("Field", TagName::Field);
+	// タグ名：Ground
+	ObjectManager::CreateObject<Field>("Field", TagName::Ground);
 	// Transformのポインタを取得する
 	pTransform = ObjectManager::FindObjectWithName("Field")->GetComponent<Transform>();
 	// 座標を設定
 	pTransform->SetPosition({ 0.0f, -5.0f, 0.0f });
 
+	//--- オブジェクト作成
+	//   型　：Field
+	//  名前 ：Field
+	// タグ名：Wall
+	pObj = ObjectManager::CreateObject<Field>("Field", TagName::Wall);
+	// Transformのポインタを取得する
+	pTransform = pObj->GetComponent<Transform>();
+	// 座標を設定
+	pTransform->SetPosition({ 0.0f, -4.0f, 4.0f });
+	// オブジェクトの辺の長さをセット
+	pTransform->SetScale({ 2.0f, 5.0f, 5.0f });
+	pTransform->SetAngle({ 0.0f, 70.0f, 0.0f });
+	// 当たり判定の辺の長さをセット
+	pObj->GetComponent<AABBCollider>()->SetLen({ 2.0f, 5.0f, 5.0f });
 
 }
 
