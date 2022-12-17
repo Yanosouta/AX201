@@ -13,6 +13,7 @@ private:
 	float m_ChargeTime;
 	float m_tic; // フレームカウント
 	std::shared_ptr<ObjectBase> m_haveArrow; // 現在プレイヤーが持っている矢のポインタ
+	DirectX::XMFLOAT3 m_prevPos;	// ひとつ前の座標
 public:
 	// コンストラクタ
 	PlayerController()
