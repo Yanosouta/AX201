@@ -9,7 +9,6 @@ public:
 	BlendState();
 	~BlendState();
 
-	HRESULT Create(D3D11_RENDER_TARGET_BLEND_DESC desc);
 	void Bind();
 
 private:
