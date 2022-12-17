@@ -6,46 +6,62 @@
 VertexShader* SpriteRenderer::m_pDefVS = nullptr;
 PixelShader* SpriteRenderer::m_pDefPS = nullptr;
 unsigned int SpriteRenderer::m_shaderRef = 0;
+SamplerState* SpriteRenderer::m_pSamplerState;
+BlendState* SpriteRenderer::m_pAlphaBlend;
+ConstantBuffer* SpriteRenderer::m_pConst[2];
 std::list<std::pair<std::string, ID3D11ShaderResourceView*>> SpriteRenderer::m_TextureList;
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 SpriteRenderer::SpriteRenderer()
 {
-	//ƒuƒŒƒ“ƒhƒXƒe[ƒgì¬
-	D3D11_RENDER_TARGET_BLEND_DESC blend = {};
-	blend.BlendEnable = true;	//ƒuƒŒƒ“ƒh‚ğs‚¤İ’è
-	blend.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	blend.SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	blend.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	blend.SrcBlendAlpha = D3D11_BLEND_ONE;
-	blend.DestBlendAlpha = D3D11_BLEND_ZERO;
-	blend.BlendOp = D3D11_BLEND_OP_ADD;
-	blend.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	m_pAlphaBlend = new BlendState();
-	m_pAlphaBlend->Create(blend);
-	m_pAlphaBlend->Bind();
+	if (m_shaderRef == 0)
+	{
+		//ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆä½œæˆ
+		m_pAlphaBlend = new BlendState();
+		// ã‚µãƒ³ãƒ—ãƒ©ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆä½œæˆ
+		m_pSamplerState = new SamplerState();
+		// VertexShaderã‚’ä½œæˆ
+		m_pDefVS = new VertexShader();
+		if (FAILED(m_pDefVS->Load("Assets/Shader/UIVS.cso"))) {
+			MessageBox(nullptr, "UIVS.cso", "Error", MB_OK);
+		}
+		// PixelShaderã‚’ä½œæˆ
+		m_pDefPS = new PixelShader();
+		if (FAILED(m_pDefPS->Load("Assets/Shader/ModelPS.cso"))) {
+			MessageBox(nullptr, "ModelPS.cso", "Error", MB_OK);
+		}
+
+		// Animeç”¨ConstantBufferã‚’ä½œæˆ
+		m_pConst[0] = new ConstantBuffer;
+		m_pConst[0]->Create(sizeof(AnimeUV));
+		// Transformç”¨ConstantBufferã‚’ä½œæˆ
+		m_pConst[1] = new ConstantBuffer;
+		m_pConst[1]->Create(sizeof(DirectX::XMFLOAT4X4) * 3);
+	}
+	++m_shaderRef;
+
 }
 
-// ƒfƒXƒgƒ‰ƒNƒ^
+// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 SpriteRenderer::~SpriteRenderer()
 {
 	if(m_SpriteInfo.pVtxBuf)
 		delete m_SpriteInfo.pVtxBuf;
 }
 
-// ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 ID3D11ShaderResourceView* SpriteRenderer::LoadTexture(std::string file)
 {
-	// “o˜^Ï‚İ‚ÌƒeƒNƒXƒ`ƒƒ‚ªŒ©‚Â‚©‚Á‚½‚ç
-	// ƒ[ƒh‚¹‚¸‚É“o˜^Ï‚İ‚ÌƒeƒNƒXƒ`ƒƒƒf[ƒ^‚ğ•Ô‚·B
+	// ç™»éŒ²æ¸ˆã¿ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒè¦‹ã¤ã‹ã£ãŸã‚‰
+	// ãƒ­ãƒ¼ãƒ‰ã›ãšã«ç™»éŒ²æ¸ˆã¿ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ‡ãƒ¼ã‚¿ã‚’è¿”ã™ã€‚
 	for (auto it = m_TextureList.begin(); it != m_TextureList.end(); it++)
 		if (it->first == file) {
 			m_SpriteInfo.pTexture = it->second;
 			return it->second;
 		}
 
-	// Œ©‚Â‚©‚ç‚È‚©‚Á‚½‚çƒeƒNƒXƒ`ƒƒ‚ğV‚µ‚­ƒ[ƒh‚µA
-	// ƒtƒ@ƒCƒ‹ƒl[ƒ€‚Æ‹¤‚ÉƒeƒNƒXƒ`ƒƒî•ñ‚ğ•Û‘¶‚µ‚Ä‚¨‚­B
+	// è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’æ–°ã—ããƒ­ãƒ¼ãƒ‰ã—ã€
+	// ãƒ•ã‚¡ã‚¤ãƒ«ãƒãƒ¼ãƒ ã¨å…±ã«ãƒ†ã‚¯ã‚¹ãƒãƒ£æƒ…å ±ã‚’ä¿å­˜ã—ã¦ãŠãã€‚
 	ID3D11ShaderResourceView* texture;
 	LoadTextureFromFile(file.c_str(), &texture);
 	m_TextureList.push_back(std::pair<std::string, ID3D11ShaderResourceView*>(file, texture));
@@ -55,25 +71,12 @@ ID3D11ShaderResourceView* SpriteRenderer::LoadTexture(std::string file)
 
 void SpriteRenderer::Start()
 {
-	if (m_shaderRef == 0)
-	{
-		m_pDefVS = new VertexShader();
-		if (FAILED(m_pDefVS->Load("Assets/Shader/ModelVS.cso"))) {
-			MessageBox(nullptr, "ModelVS.cso", "Error", MB_OK);
-		}
-		m_pDefPS = new PixelShader();
-		if (FAILED(m_pDefPS->Load("Assets/Shader/ModelPS.cso"))) {
-			MessageBox(nullptr, "ModelPS.cso", "Error", MB_OK);
-		}
-	}
-	++m_shaderRef;
-	m_pVS = m_pDefVS;
-	m_pPS = m_pDefPS;
-
-	m_pConst = new ConstantBuffer;
-	m_pConst->Create(sizeof(m_SpriteInfo.m_Mat));
-
-	// s—ñ‚ğ’PˆÊs—ñ‚É‚·‚é‚½‚ß‚Ìİ’è
+	// AnimeUVã®åˆæœŸåŒ–
+	m_SpriteInfo.animeUV.uvHeight = 1.0f;
+	m_SpriteInfo.animeUV.uvWidth = 1.0f;
+	m_SpriteInfo.animeUV.uvTopLeftU = 0.0f;
+	m_SpriteInfo.animeUV.uvTopLeftV = 0.0f;
+	// è¡Œåˆ—ã‚’å˜ä½è¡Œåˆ—ã«ã™ã‚‹ãŸã‚ã®è¨­å®š
 	m_SpriteInfo.m_Mat[0]._11 = 1.0f;
 	m_SpriteInfo.m_Mat[0]._22 = 1.0f;
 	m_SpriteInfo.m_Mat[0]._33 = 1.0f;
@@ -82,32 +85,32 @@ void SpriteRenderer::Start()
 
 void SpriteRenderer::LateUpdate()
 {
-	//--- UI‚ÍƒIƒuƒWƒFƒNƒg‚Ìè‘O‚É•`‰æ‚·‚é
-	// 0.25 ã‰º0.5/ã3 [720]
-	// ˆÚ“®s—ñ
+	//--- UIã¯ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ‰‹å‰ã«æç”»ã™ã‚‹
+	// 0.25 ä¸Šä¸‹0.5/âˆš3 [720]
+	// ç§»å‹•è¡Œåˆ—
 	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(
 		-GetOwner()->GetComponent<Transform>()->GetPosition().x / 720 * (0.5f / std::sqrtf(3.0f)),
 		GetOwner()->GetComponent<Transform>()->GetPosition().y / 720 * (0.5f / std::sqrtf(3.0f)),
 		GetOwner()->GetLayerNum() * 1e-8f);
-	// X‰ñ“]s—ñ
+	// Xå›è»¢è¡Œåˆ—
 	DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(
 		0.0f/*GetOwner()->GetComponent<Transform>()->GetAngle().x*/);
-	// Y‰ñ“]s—ñ
+	// Yå›è»¢è¡Œåˆ—
 	DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(
 		0.0f/*GetOwner()->GetComponent<Transform>()->GetAngle().y*/);
-	// Z‰ñ“]s—ñ
+	// Zå›è»¢è¡Œåˆ—
 	DirectX::XMMATRIX Rz = DirectX::XMMatrixRotationZ(
 		GetOwner()->GetComponent<Transform>()->GetAngle().z);
-	// Šg‘åk¬s—ñ
+	// æ‹¡å¤§ç¸®å°è¡Œåˆ—
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(
 		GetOwner()->GetComponent<Transform>()->GetScale().x / 720 * (0.5f / std::sqrtf(3.0f)),
 		GetOwner()->GetComponent<Transform>()->GetScale().y / 720 * (0.5f / std::sqrtf(3.0f)),
 		1.0f/*GetOwner()->GetComponent<Transform>()->GetScale().z*/);
 
-	// ‘S‚Ä‚Ìs—ñ‚ğˆê‚Â‚É‚Ü‚Æ‚ß‚é
+	// å…¨ã¦ã®è¡Œåˆ—ã‚’ä¸€ã¤ã«ã¾ã¨ã‚ã‚‹
 	DirectX::XMMATRIX mat = S * Rz * Ry * Rx * T;
 
-	// ƒVƒF[ƒ_‚É“n‚·‘O‚ÉÀs‚·‚éˆ—
+	// ã‚·ã‚§ãƒ¼ãƒ€ã«æ¸¡ã™å‰ã«å®Ÿè¡Œã™ã‚‹å‡¦ç†
 	mat = DirectX::XMMatrixTranspose(mat);
 
 	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[0], mat);
@@ -120,33 +123,45 @@ void SpriteRenderer::LateUpdate()
 	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[2], 
 		DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(
 			DirectX::XMConvertToRadians(60.0f), 16.0f / 9.0f, 0.2f, 0.3f)));
-
-	m_pConst->Write(m_SpriteInfo.m_Mat);
 }
 
-// •`‰æ
+// æç”»
 void SpriteRenderer::Draw()
 {
-	m_pVS->Bind();
-	m_pPS->Bind();
-	m_pConst->BindVS(0);
+	// ConstantBufferã‚’è¨­å®š
+	m_pConst[0]->Write(&m_SpriteInfo.animeUV);
+	m_pConst[1]->Write(&m_SpriteInfo.m_Mat);
+	m_pAlphaBlend->Bind();		// Î±ãƒ–ãƒ¬ãƒ³ãƒ‰ç”¨BlendStateã‚’è¨­å®š
+	m_pSamplerState->Bind();	// SamplerStateè¨­å®š
+	m_pDefVS->Bind();		// VertexShaderè¨­å®š
+	m_pDefPS->Bind();		// PixelShaderè¨­å®š
 
-	// ƒeƒNƒXƒ`ƒƒİ’è
+	for (int i = 0; i < 2; i++)
+	{
+		if (m_pConst[i])
+		{
+			m_pConst[i]->BindVS(i);
+		}
+	}
+
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£è¨­å®š
 	SetTexturePS(m_SpriteInfo.pTexture, 0);
 
-	// •`‰æ
+	// æç”»
 	m_SpriteInfo.pVtxBuf->Draw();
 }
 
 void SpriteRenderer::End()
 {
-	// ƒeƒNƒXƒ`ƒƒ‚ğ‰ğ•ú
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’è§£æ”¾
 	for (auto it = m_TextureList.begin(); it != m_TextureList.end(); it++)
 		it->second->Release();
 	m_TextureList.clear();
 	delete m_pDefPS;
 	delete m_pDefVS;
-	delete m_pConst;
+	delete m_pConst[0];
+	delete m_pConst[1];
+	delete m_pSamplerState;
 }
 
 void SpriteRenderer::SetSize(float width, float height)
