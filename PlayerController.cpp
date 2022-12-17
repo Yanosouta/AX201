@@ -24,6 +24,9 @@ void PlayerController::Update()
 {
 	// カメラがPlayerカメラではない時は更新しない
 	if (!ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()) return;
+	
+	// 座標を保存する
+	m_prevPos = GetOwner()->GetComponent<Transform>()->GetPosition();
 
 	//--- 移動（カメラの向きに応じて移動方向を決める）
 	// メインカメラの座標と注視点を取得する
@@ -206,143 +209,63 @@ void PlayerController::Update()
 
 void PlayerController::OnCollisionEnter(ObjectBase* object)
 {
-	if (object->GetTag() == TagName::Field) {
-		//--- 壁(Plane)にめり込んだOBBを戻す処理
-		// 当たったオブジェクトのどの面と当たったときにアクションを起こすか。
-		// --- 面の法線を求める
-		Float3 Normal = Primitive::Vector3_up; // 上の面に設定
-		DirectX::XMVECTOR planeN = DirectX::XMLoadFloat3(&ConvertToDirectXFloat3(Normal));
-		DirectX::XMVector3Normalize(planeN);
-		// ブロックの角度から回転行列を計算
-		DirectX::XMMATRIX rotation;
-		rotation =
-			DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().y)) *
-			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().x)) *
-			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().z));
-		// 法線の向きをブロックの回転行列で変える
-		DirectX::XMVector3TransformCoord(planeN, rotation);
-		// --- 面上の座標を求める
-		DirectX::XMVECTOR Pos;
-		if (Normal == Primitive::Vector3_up || Normal == Primitive::Vector3_down) {
-			// 高さを法線にかけたものが面上の座標となる
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2));
-		}
-		else if (Normal == Primitive::Vector3_forward || Normal == Primitive::Vector3_back) {
-			// 奥行を法線にかけたものが面上の座標となる
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2));
-		}
-		else if (Normal == Primitive::Vector3_right || Normal == Primitive::Vector3_left) {
-			// 幅を法線にかけたものが面上の座標となる
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2));
-		}
-		// --- 平面の法線に対するOBBの射影線の長さを算出
-		float r = 0.0f;		// 近接距離
-		float Addr;
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorForword()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorUp()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorRight()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2)
-			, planeN));
-		r += fabs(Addr);
-
-		// --- 戻し距離を算出
-		float s;
-		DirectX::XMStoreFloat(&s, DirectX::XMVector3Dot(
-			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetPosition()), Pos), planeN));
-		if (s > 0)	s = r - fabs(s);
-		else		s = r + fabs(s);
-
-		// --- めり込んだ位置から平面の法線方向に戻し距離だけオフセットする
-		DirectX::XMFLOAT3 offsetPos;
-		DirectX::XMStoreFloat3(&offsetPos, DirectX::XMVectorScale(planeN, s));
-		this->GetOwner()->GetComponent<Transform>()->SetPosition({
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().x + offsetPos.x,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().y + offsetPos.y,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().z + offsetPos.z
+	// フィールドと当たったときの処理
+	if (object->GetTag() == TagName::Ground) {
+		// Y軸の加速度をゼロに
+		this->GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().x,
+			0.0f,
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().z
 			});
+
+		// --- めり込んだ位置からY方向に戻し距離だけオフセットする
+		float offsetPosY =
+			object->GetComponent<AABBCollider>()->GetPrimitive().p.y +
+			object->GetComponent<AABBCollider>()->GetPrimitive().hl.y +
+			this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().hl.y;
+		this->GetOwner()->GetComponent<Transform>()->SetPosition({
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().x,
+			offsetPosY,
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().z
+			});
+	}
+
+	// 壁と当たったときの処理
+	if (object->GetTag() == TagName::Wall) {
+		GetOwner()->GetComponent<Transform>()->SetPosition(m_prevPos);
+
+		// 加速度を補正
+		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
 }
 
 void PlayerController::OnCollisionStay(ObjectBase* object)
 {
-	if (object->GetTag() == TagName::Field) {
-		//--- 壁(Plane)にめり込んだOBBを戻す処理
-		// 当たったオブジェクトのどの面と当たったときにアクションを起こすか。
-		// --- 面の法線を求める
-		Float3 Normal = Primitive::Vector3_up; // 上の面に設定
-		DirectX::XMVECTOR planeN = DirectX::XMLoadFloat3(&ConvertToDirectXFloat3(Normal));
-		DirectX::XMVector3Normalize(planeN);
-		// ブロックの角度から回転行列を計算
-		DirectX::XMMATRIX rotation;
-		rotation =
-			DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().y)) *
-			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().x)) *
-			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().z));
-		// 法線の向きをブロックの回転行列で変える
-		DirectX::XMVector3TransformCoord(planeN, rotation);
-		// --- 面上の座標を求める
-		DirectX::XMVECTOR Pos;
-		if (Normal == Primitive::Vector3_up || Normal == Primitive::Vector3_down) {
-			// 高さを法線にかけたものが面上の座標となる
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2));
-		}
-		else if (Normal == Primitive::Vector3_forward || Normal == Primitive::Vector3_back) {
-			// 奥行を法線にかけたものが面上の座標となる
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2));
-		}
-		else if (Normal == Primitive::Vector3_right || Normal == Primitive::Vector3_left) {
-			// 幅を法線にかけたものが面上の座標となる
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2));
-		}
-		// --- 平面の法線に対するOBBの射影線の長さを算出
-		float r = 0.0f;		// 近接距離
-		float Addr;
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorForword()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorUp()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorRight()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2)
-			, planeN));
-		r += fabs(Addr);
-
-		// --- 戻し距離を算出
-		float s;
-		DirectX::XMStoreFloat(&s, DirectX::XMVector3Dot(
-			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetPosition()), Pos), planeN));
-		if (s > 0)	s = r - fabs(s);
-		else		s = r + fabs(s);
-
-		// --- めり込んだ位置から平面の法線方向に戻し距離だけオフセットする
-		DirectX::XMFLOAT3 offsetPos;
-		DirectX::XMStoreFloat3(&offsetPos, DirectX::XMVectorScale(planeN, s));
-		this->GetOwner()->GetComponent<Transform>()->SetPosition({
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().x + offsetPos.x,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().y + offsetPos.y,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().z + offsetPos.z
+	// フィールドと当たったときの処理
+	if (object->GetTag() == TagName::Ground) {
+		// Y軸の加速度をゼロに
+		this->GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().x,
+			0.0f,
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().z
 			});
+
+		// --- めり込んだ位置からY方向に戻し距離だけオフセットする
+		float offsetPosY =
+			object->GetComponent<AABBCollider>()->GetPrimitive().p.y +
+			object->GetComponent<AABBCollider>()->GetPrimitive().hl.y +
+			this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().hl.y;
+		this->GetOwner()->GetComponent<Transform>()->SetPosition({
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().x,
+			offsetPosY,
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().z
+			});
+	}
+
+	// 壁と当たったときの処理
+	if (object->GetTag() == TagName::Wall) {
+		GetOwner()->GetComponent<Transform>()->SetPosition(m_prevPos);
+		// 加速度を補正
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
 }
