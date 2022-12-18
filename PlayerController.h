@@ -4,6 +4,7 @@
 #include "ComponentBase.h"
 #include "ObjectBase.h"
 #include <memory>
+#include <DirectXMath.h>
 
 class PlayerController : public ComponentBase
 {
