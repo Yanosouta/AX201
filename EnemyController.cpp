@@ -150,9 +150,15 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 	// 矢と当たったときの処理
 	if (object->GetTag() == TagName::Arrow)
 	{
+		DirectX::XMFLOAT3 a = { 0.01f ,0.01f ,0.01f };
 		//ノックバック　矢野12/16
+		GetOwner()->GetComponent<Rigidbody>()->SetAccele(
+			object->GetComponent<Rigidbody>()->GetAccele()
+		);
+		//プレイヤーの動きを止める
+		m_MoveSpeed = 0.0f;
 		// 自分を削除
-		ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 	}
 }
 

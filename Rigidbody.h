@@ -13,6 +13,7 @@ public:
 	Rigidbody()
 		: m_Mass(0.03f)
 		, m_Accele({0.0f, 0.0f, 0.0f})
+		, m_Drag(0.95f)
 	{}
 	// デストラクタ
 	virtual ~Rigidbody(){}
@@ -46,6 +47,8 @@ private:
 	float m_Mass;
 	// 加速度
 	DirectX::XMFLOAT3 m_Accele;
+	//抵抗(減速率)
+	float m_Drag;
 };
 
 #endif //!___RIGIDBODY_H___
