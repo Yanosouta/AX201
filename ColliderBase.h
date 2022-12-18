@@ -39,6 +39,9 @@ public:
 
 	//--- ゲット関数
 	virtual Primitive::AABB& GetPrimitive() = 0;
+	
+	//--- セット関数
+	virtual void SetTouchOBB(std::string typeName) { m_TouchOBBList.push_back(typeName); }
 
 protected:
 	// 元から触れているコライダーのリスト
