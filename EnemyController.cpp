@@ -47,7 +47,18 @@ void EnemyController::Update()
 		vTargetVector = DirectX::XMVectorScale(vTargetVector, m_MoveSpeed);
 		// Float3に変換する
 		DirectX::XMStoreFloat3(&m_TargetVector, vTargetVector);
-
+		//ノックバック後のスタン
+		if (m_bKnockBackFlg)
+		{
+			m_FlgCount--;
+			if (m_FlgCount <= 0)
+			{
+				//初期化処理
+				m_MoveSpeed = 0.05f;	//速度を元に戻す
+				m_bKnockBackFlg = false;
+				m_FlgCount = 5.0f;		
+			}
+		}
 		// 移動した場合、移動した方向に回転する
 		if (m_TargetVector.x != 0.0f || m_TargetVector.y != 0.0f || m_TargetVector.z != 0.0f) {
 			m_TargetRotY = 0.0f;
@@ -150,7 +161,9 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 	// 矢と当たったときの処理
 	if (object->GetTag() == TagName::Arrow)
 	{
-		DirectX::XMFLOAT3 a = { 0.01f ,0.01f ,0.01f };
+		m_bKnockBackFlg = true;
+		m_MoveSpeed = 0.0f;
+
 		//ノックバック　矢野12/16
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele(
 			object->GetComponent<Rigidbody>()->GetAccele()
