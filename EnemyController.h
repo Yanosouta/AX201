@@ -28,6 +28,8 @@ private:
 	float m_lateRotY;	// 遅れてついてくるY角度
 	DirectX::XMFLOAT3 m_prevPos;	// ひとつ前の座標
 	int m_Hp;	//Enemyの体力
+	bool m_bKnockBackFlg; //ノックバック中にフラグを立てる
+	float m_FlgCount;	//フラグを立てている時にカウント
 public:
 	// コンストラクタ
 	EnemyController()
@@ -37,6 +39,8 @@ public:
 		, m_TargetRotY(0.0f)
 		, m_lateRotY(0.0f)
 		, m_Hp(2)
+		, m_bKnockBackFlg(false)
+		, m_FlgCount(5.0f)
 	{}
 	// デストラクタ
 	~EnemyController() {}
