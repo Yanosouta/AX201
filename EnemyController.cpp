@@ -1,7 +1,7 @@
 ////////////////////////////
 //編集履歴
 //2022年12月16日　矢野　ノックバック追加
-//
+//2022年12月19日　矢野　EnemyのHPを追加
 //
 //
 //
@@ -155,10 +155,13 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele(
 			object->GetComponent<Rigidbody>()->GetAccele()
 		);
-		//プレイヤーの動きを止める
-		m_MoveSpeed = 0.0f;
+		//EnemyのHPを減らす
+		m_Hp--;
 		// 自分を削除
-		//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		if (m_Hp == 0)
+		{
+			ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		}
 	}
 }
 

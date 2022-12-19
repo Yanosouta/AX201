@@ -1,3 +1,10 @@
+///////////////////////
+//編集履歴
+//2022年12月19日 矢野　Hpの変数を追加
+//
+//
+//
+//
 #ifndef ___ENEMY_CONTROLLER_H___
 #define ___ENEMY_CONTROLLER_H__
 
@@ -20,6 +27,7 @@ private:
 	float m_TargetRotY;	// ターゲットまでのベクトルのY角度
 	float m_lateRotY;	// 遅れてついてくるY角度
 	DirectX::XMFLOAT3 m_prevPos;	// ひとつ前の座標
+	int m_Hp;	//Enemyの体力
 public:
 	// コンストラクタ
 	EnemyController()
@@ -28,6 +36,7 @@ public:
 		, m_tic(m_ChangeTargetTime)
 		, m_TargetRotY(0.0f)
 		, m_lateRotY(0.0f)
+		, m_Hp(2)
 	{}
 	// デストラクタ
 	~EnemyController() {}
