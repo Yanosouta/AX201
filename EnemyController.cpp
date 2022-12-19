@@ -1,7 +1,7 @@
 ////////////////////////////
 //編集履歴
 //2022年12月16日　矢野　ノックバック追加
-//
+//2022年12月19日　矢野　EnemyのHPを追加
 //
 //
 //
@@ -47,7 +47,18 @@ void EnemyController::Update()
 		vTargetVector = DirectX::XMVectorScale(vTargetVector, m_MoveSpeed);
 		// Float3に変換する
 		DirectX::XMStoreFloat3(&m_TargetVector, vTargetVector);
-
+		//ノックバック後のスタン
+		if (m_bKnockBackFlg)
+		{
+			m_FlgCount--;
+			if (m_FlgCount <= 0)
+			{
+				//初期化処理
+				m_MoveSpeed = 0.05f;	//速度を元に戻す
+				m_bKnockBackFlg = false;
+				m_FlgCount = 5.0f;		
+			}
+		}
 		// 移動した場合、移動した方向に回転する
 		if (m_TargetVector.x != 0.0f || m_TargetVector.y != 0.0f || m_TargetVector.z != 0.0f) {
 			m_TargetRotY = 0.0f;
@@ -150,15 +161,20 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 	// 矢と当たったときの処理
 	if (object->GetTag() == TagName::Arrow)
 	{
-		DirectX::XMFLOAT3 a = { 0.01f ,0.01f ,0.01f };
+		m_bKnockBackFlg = true;
+		m_MoveSpeed = 0.0f;
+
 		//ノックバック　矢野12/16
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele(
 			object->GetComponent<Rigidbody>()->GetAccele()
 		);
-		//プレイヤーの動きを止める
-		m_MoveSpeed = 0.0f;
+		//EnemyのHPを減らす
+		m_Hp--;
 		// 自分を削除
-		//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		if (m_Hp == 0)
+		{
+			ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		}
 	}
 }
 
