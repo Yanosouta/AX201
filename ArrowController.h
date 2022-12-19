@@ -8,16 +8,17 @@ class ArrowController : public ComponentBase
 {
 private:
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	ArrowController() {}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~ArrowController() {}
-
-	// XV
+	// åˆæœŸåŒ–
+	void Start()override;
+	// æ›´æ–°
 	void Update()override;
 
 
-	// “–‚½‚è”»’è
+	// å½“ãŸã‚Šåˆ¤å®š
 	void OnCollisionEnter(ObjectBase* object);
 	void OnCollisionStay(ObjectBase* object);
 	void OnCollisionExit(ObjectBase* object);

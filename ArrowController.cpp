@@ -4,13 +4,19 @@
 #include <DirectXMath.h>
 #include "Transform.h"
 #include "Rigidbody.h"
+#include "AABBCollider.h"
+
+void ArrowController::Start()
+{
+	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Enemy);
+}
 
 void ArrowController::Update()
 {
-	//--- ��̐i�s�����Ɍ��������킹��v���O����
-	// ���݂̐��ʂ̃x�N�g��
+	//--- 矢の進行方向に向きを合わせるプログラム
+	// 現在の正面のベクトル
 	GetOwner()->GetComponent<Transform>()->GetVectorForword();
-	// ���f���̐��ʕ����̃x�N�g��
+	// モデルの正面方向のベクトル
 	DirectX::XMFLOAT3 zVector = { 0.0f, 0.0f, -1.0f };
 }
 

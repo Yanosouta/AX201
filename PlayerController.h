@@ -4,28 +4,31 @@
 #include "ComponentBase.h"
 #include "ObjectBase.h"
 #include <memory>
+#include <DirectXMath.h>
 
 class PlayerController : public ComponentBase
 {
 private:
-	//--- ËŒ‚—p
-	// ’·‰Ÿ‚µ‚É‚æ‚é—­‚ßUŒ‚‚ğg—p‰Â”\‚É‚È‚éŠÔ
+	//--- å°„æ’ƒç”¨
+	// é•·æŠ¼ã—ã«ã‚ˆã‚‹æºœã‚æ”»æ’ƒã‚’ä½¿ç”¨å¯èƒ½ã«ãªã‚‹æ™‚é–“
 	float m_ChargeTime;
-	float m_tic; // ƒtƒŒ[ƒ€ƒJƒEƒ“ƒg
-	std::shared_ptr<ObjectBase> m_haveArrow; // Œ»İƒvƒŒƒCƒ„[‚ª‚Á‚Ä‚¢‚é–î‚Ìƒ|ƒCƒ“ƒ^
+	float m_tic; // ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ãƒˆ
+	std::shared_ptr<ObjectBase> m_haveArrow; // ç¾åœ¨ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒæŒã£ã¦ã„ã‚‹çŸ¢ã®ãƒã‚¤ãƒ³ã‚¿
+	DirectX::XMFLOAT3 m_prevPos;	// ã²ã¨ã¤å‰ã®åº§æ¨™
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	PlayerController()
-		: m_ChargeTime(30.0f) // 60 fps ‚Ìê‡ 0.5 •b
+		: m_ChargeTime(30.0f) // 60 fps ã®å ´åˆ 0.5 ç§’
 	{}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~PlayerController() {}
-
-	// XV
+	// åˆæœŸåŒ–
+	void Start() override;
+	// æ›´æ–°
 	void Update()override;
 
 
-	// “–‚½‚è”»’è
+	// å½“ãŸã‚Šåˆ¤å®š
 	void OnCollisionEnter(ObjectBase* object);
 	void OnCollisionStay(ObjectBase* object);
 	void OnCollisionExit(ObjectBase* object);

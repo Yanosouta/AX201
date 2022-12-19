@@ -1,6 +1,6 @@
 ////////////////////////////
-//•ÒW—š—ğ
-//2022”N12Œ16“ú@–î–ì@ƒmƒbƒNƒoƒbƒN’Ç‰Á
+//ç·¨é›†å±¥æ­´
+//2022å¹´12æœˆ16æ—¥ã€€çŸ¢é‡ã€€ãƒãƒƒã‚¯ãƒãƒƒã‚¯è¿½åŠ 
 //
 //
 //
@@ -15,217 +15,150 @@
 #include "ObjectManager.h"
 #include "Arrow.h"
 
+void EnemyController::Start()
+{
+	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Ground);
+	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Wall);
+	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Arrow);
+}
+
 void EnemyController::Update()
 {
-	//--- Player‚ğ’Ç‚¢‚©‚¯‚éˆ—
+	// åº§æ¨™ã‚’ä¿å­˜ã™ã‚‹
+	m_prevPos = GetOwner()->GetComponent<Transform>()->GetPosition();
+	
+	//--- Playerã‚’è¿½ã„ã‹ã‘ã‚‹å‡¦ç†
 	DirectX::XMFLOAT3 rotateDirection;
 	m_tic++;
 	if (m_tic >= m_ChangeTargetTime) {
 		m_tic = rand() % (int)m_ChangeTargetTime;
-		// Playerƒ^ƒO‚ÌƒIƒuƒWƒFƒNƒg‚ÌÀ•W‚ğæ“¾
+		// Playerã‚¿ã‚°ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®åº§æ¨™ã‚’å–å¾—
 		DirectX::XMFLOAT3 PlayerPos = ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<Transform>()->GetPosition();
-		// ƒ^[ƒQƒbƒg‚Æ‚È‚éƒvƒŒƒCƒ„[‚ÌÀ•W‚ğƒ‰ƒ“ƒ_ƒ€‚Å‚¸‚ç‚·
+		// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ãªã‚‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®åº§æ¨™ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã§ãšã‚‰ã™
 		PlayerPos.x += rand() % 8 - 4;
 		PlayerPos.z += rand() % 8 - 4;
 
-		// ƒ^[ƒQƒbƒg‚Ü‚Å‚ÌƒxƒNƒgƒ‹‚ğZo
+		// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«ã‚’ç®—å‡º
 		DirectX::XMVECTOR vTargetVector =
 			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&PlayerPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
-		// ƒxƒNƒgƒ‹‚ğ³‹K‰»
+		// ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ­£è¦åŒ–
 		vTargetVector = DirectX::XMVector3Normalize(vTargetVector);
-		// ˆÚ“®ƒXƒs[ƒh‚ğŠ|‚¯‚é
+		// ç§»å‹•ã‚¹ãƒ”ãƒ¼ãƒ‰ã‚’æ›ã‘ã‚‹
 		vTargetVector = DirectX::XMVectorScale(vTargetVector, m_MoveSpeed);
-		// Float3‚É•ÏŠ·‚·‚é
+		// Float3ã«å¤‰æ›ã™ã‚‹
 		DirectX::XMStoreFloat3(&m_TargetVector, vTargetVector);
 
-		// ˆÚ“®‚µ‚½ê‡AˆÚ“®‚µ‚½•ûŒü‚É‰ñ“]‚·‚é
+		// ç§»å‹•ã—ãŸå ´åˆã€ç§»å‹•ã—ãŸæ–¹å‘ã«å›è»¢ã™ã‚‹
 		if (m_TargetVector.x != 0.0f || m_TargetVector.y != 0.0f || m_TargetVector.z != 0.0f) {
 			m_TargetRotY = 0.0f;
-			// Z•ûŒü‚Ö‚ÌƒxƒNƒgƒ‹(ƒ‚ƒfƒ‹‚Ì³–Ê•ûŒü‚ÌƒxƒNƒgƒ‹)
+			// Zæ–¹å‘ã¸ã®ãƒ™ã‚¯ãƒˆãƒ«(ãƒ¢ãƒ‡ãƒ«ã®æ­£é¢æ–¹å‘ã®ãƒ™ã‚¯ãƒˆãƒ«)
 			DirectX::XMFLOAT3 zVector = { 0.0f, 0.0f, 1.0f };
-			// “àÏ‚ÆƒxƒNƒgƒ‹‚Ì’·‚³‚ğg‚Á‚ÄcosƒÆ‚ğ‹‚ß‚é
+			// å†…ç©ã¨ãƒ™ã‚¯ãƒˆãƒ«ã®é•·ã•ã‚’ä½¿ã£ã¦cosÎ¸ã‚’æ±‚ã‚ã‚‹
 			DirectX::XMStoreFloat(&m_TargetRotY, DirectX::XMVector3Dot(DirectX::XMVector3Normalize(vTargetVector), DirectX::XMLoadFloat3(&zVector)));
-			// “àÏ‚©‚çŠp“x‚ğ‹‚ß‚é
+			// å†…ç©ã‹ã‚‰è§’åº¦ã‚’æ±‚ã‚ã‚‹
 			m_TargetRotY = ::acos(m_TargetRotY);
-			// ƒ‰ƒWƒAƒ“Šp‚©‚ç‚¨‚È‚¶‚İ‚ÌŠp“x‚É•ÏX
+			// ãƒ©ã‚¸ã‚¢ãƒ³è§’ã‹ã‚‰ãŠãªã˜ã¿ã®è§’åº¦ã«å¤‰æ›´
 			m_TargetRotY = DirectX::XMConvertToDegrees(m_TargetRotY);
-			// ‰ñ“]‚ª‰E‰ñ“]‚©¶‰ñ“]‚©‚ğ”»•Ê‚·‚é‚½‚ß‚ÉAŠOÏ‚Å‹‚ß‚é
-			// ‹‚ß‚½ŠOÏ‚ÌY¬•ª‚ªƒvƒ‰ƒX‚¾‚Á‚½‚ç¶‰ñ‚èB
-			// ‹‚ß‚½ŠOÏ‚ÌY¬•ª‚ªƒ}ƒCƒiƒX‚¾‚Á‚½‚ç‰E‰ñ‚èB
+			// å›è»¢ãŒå³å›è»¢ã‹å·¦å›è»¢ã‹ã‚’åˆ¤åˆ¥ã™ã‚‹ãŸã‚ã«ã€å¤–ç©ã§æ±‚ã‚ã‚‹
+			// æ±‚ã‚ãŸå¤–ç©ã®Yæˆåˆ†ãŒãƒ—ãƒ©ã‚¹ã ã£ãŸã‚‰å·¦å›ã‚Šã€‚
+			// æ±‚ã‚ãŸå¤–ç©ã®Yæˆåˆ†ãŒãƒã‚¤ãƒŠã‚¹ã ã£ãŸã‚‰å³å›ã‚Šã€‚
 			DirectX::XMStoreFloat3(&rotateDirection, DirectX::XMVector3Cross(DirectX::XMVector3Normalize(vTargetVector), DirectX::XMLoadFloat3(&zVector)));
 			if (rotateDirection.y > 0) m_TargetRotY = 180.0f + (180.0f - m_TargetRotY);
 		}
 	}
 
-	// À•W‚É“K—p‚·‚é
+	// åº§æ¨™ã«é©ç”¨ã™ã‚‹
 	GetOwner()->GetComponent<Transform>()->SetPosition({
 		GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
 		GetOwner()->GetComponent<Transform>()->GetPosition().y,
 		GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
 		});
 
-	// “ñ‚Â‚ÌŠÔ‚ÌŠp“x‚ª180‹’´‚¦‚Ä‚¢‚½ê‡A‹t‰ñ“]‚Ì•û‚ª‘¬‚¢‚½‚ßA•â³
+	// äºŒã¤ã®é–“ã®è§’åº¦ãŒ180Â°è¶…ãˆã¦ã„ãŸå ´åˆã€é€†å›è»¢ã®æ–¹ãŒé€Ÿã„ãŸã‚ã€è£œæ­£
 	if (abs(m_lateRotY - m_TargetRotY) >= 180.0f) 
 		if (m_TargetRotY < 0.0f) m_TargetRotY = (int)m_TargetRotY + 360;
 		else if (m_TargetRotY >= 0.0f) m_TargetRotY = (int)m_TargetRotY - 360;
-	// 180‹‚ğ’´‚¦‚½‚à‚µ‚­‚ÍA-180‹ˆÈ‰º‚É‚È‚Á‚½‚Æ‚«‚É”ÍˆÍ“à‚É•â³‚·‚é
+	// 180Â°ã‚’è¶…ãˆãŸã‚‚ã—ãã¯ã€-180Â°ä»¥ä¸‹ã«ãªã£ãŸã¨ãã«ç¯„å›²å†…ã«è£œæ­£ã™ã‚‹
 	if (m_lateRotY < -180)  m_lateRotY = ((int)(fabs(m_lateRotY) + 180) % 360 - 180) * -1.0f;
 	if ( 180 <= m_lateRotY) m_lateRotY = (int)(m_lateRotY + 180) % 360 - 180;
-	// ’x‚ê‚Ä‚Â‚¢‚Ä‚¢‚­ê‡‚ÌŠp“x‚ğŒvZ‚µ“K‰‚·‚é
+	// é…ã‚Œã¦ã¤ã„ã¦ã„ãå ´åˆã®è§’åº¦ã‚’è¨ˆç®—ã—é©å¿œã™ã‚‹
 	m_lateRotY = (m_TargetRotY - m_lateRotY) * 0.05f + m_lateRotY;
 	GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, m_lateRotY,0.0f });
 }
 
 void EnemyController::OnCollisionEnter(ObjectBase* object)
 {
-	// ƒtƒB[ƒ‹ƒh‚Æ“–‚½‚Á‚½‚Æ‚«‚Ìˆ—
-	if (object->GetTag() == TagName::Field) {
-		//--- •Ç(Plane)‚É‚ß‚è‚ñ‚¾OBB‚ğ–ß‚·ˆ—
-		// “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚Ì‚Ç‚Ì–Ê‚Æ“–‚½‚Á‚½‚Æ‚«‚ÉƒAƒNƒVƒ‡ƒ“‚ğ‹N‚±‚·‚©B
-		// --- –Ê‚Ì–@ü‚ğ‹‚ß‚é
-		Float3 Normal = Primitive::Vector3_up; // ã‚Ì–Ê‚Éİ’è
-		DirectX::XMVECTOR planeN = DirectX::XMLoadFloat3(&ConvertToDirectXFloat3(Normal));
-		DirectX::XMVector3Normalize(planeN);
-		// ƒuƒƒbƒN‚ÌŠp“x‚©‚ç‰ñ“]s—ñ‚ğŒvZ
-		DirectX::XMMATRIX rotation;
-		rotation =
-			DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().y)) *
-			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().x)) *
-			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().z));
-		// –@ü‚ÌŒü‚«‚ğƒuƒƒbƒN‚Ì‰ñ“]s—ñ‚Å•Ï‚¦‚é
-		DirectX::XMVector3TransformCoord(planeN, rotation);
-		// --- –Êã‚ÌÀ•W‚ğ‹‚ß‚é
-		DirectX::XMVECTOR Pos;
-		if (Normal == Primitive::Vector3_up || Normal == Primitive::Vector3_down) {
-			// ‚‚³‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2));
-		}
-		else if (Normal == Primitive::Vector3_forward || Normal == Primitive::Vector3_back) {
-			// ‰œs‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2));
-		}
-		else if (Normal == Primitive::Vector3_right || Normal == Primitive::Vector3_left) {
-			// •‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2));
-		}
-		// --- •½–Ê‚Ì–@ü‚É‘Î‚·‚éOBB‚ÌË‰eü‚Ì’·‚³‚ğZo
-		float r = 0.0f;		// ‹ßÚ‹——£
-		float Addr;
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorForword()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorUp()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorRight()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2)
-			, planeN));
-		r += fabs(Addr);
-
-		// --- –ß‚µ‹——£‚ğZo
-		float s;
-		DirectX::XMStoreFloat(&s, DirectX::XMVector3Dot(
-			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetPosition()), Pos), planeN));
-		if (s > 0)	s = r - fabs(s);
-		else		s = r + fabs(s);
-
-		// --- ‚ß‚è‚ñ‚¾ˆÊ’u‚©‚ç•½–Ê‚Ì–@ü•ûŒü‚É–ß‚µ‹——£‚¾‚¯ƒIƒtƒZƒbƒg‚·‚é
-		DirectX::XMFLOAT3 offsetPos;
-		DirectX::XMStoreFloat3(&offsetPos, DirectX::XMVectorScale(planeN, s));
-		this->GetOwner()->GetComponent<Transform>()->SetPosition({
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().x + offsetPos.x,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().y + offsetPos.y,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().z + offsetPos.z
+	// ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¨å½“ãŸã£ãŸã¨ãã®å‡¦ç†
+	if (object->GetTag() == TagName::Ground) {
+		// Yè»¸ã®åŠ é€Ÿåº¦ã‚’ã‚¼ãƒ­ã«
+		this->GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().x,
+			0.0f,
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().z
 			});
+
+		// --- ã‚ã‚Šè¾¼ã‚“ã ä½ç½®ã‹ã‚‰Yæ–¹å‘ã«æˆ»ã—è·é›¢ã ã‘ã‚ªãƒ•ã‚»ãƒƒãƒˆã™ã‚‹
+		float offsetPosY =
+			object->GetComponent<AABBCollider>()->GetPrimitive().p.y +
+			object->GetComponent<AABBCollider>()->GetPrimitive().hl.y +
+			this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().hl.y;
+		this->GetOwner()->GetComponent<Transform>()->SetPosition({
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().x,
+			offsetPosY,
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().z
+			});
+	}
+
+	// å£ã¨å½“ãŸã£ãŸã¨ãã®å‡¦ç†
+	if (object->GetTag() == TagName::Wall) {
+		GetOwner()->GetComponent<Transform>()->SetPosition(m_prevPos);
+		// åŠ é€Ÿåº¦ã‚’è£œæ­£
+		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
 }
 
 void EnemyController::OnCollisionStay(ObjectBase* object)
 {
-	// ƒtƒB[ƒ‹ƒh‚Æ“–‚½‚Á‚½‚Æ‚«‚Ìˆ—
-	if (object->GetTag() == TagName::Field) {
-		//--- •Ç(Plane)‚É‚ß‚è‚ñ‚¾OBB‚ğ–ß‚·ˆ—
-		// “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚Ì‚Ç‚Ì–Ê‚Æ“–‚½‚Á‚½‚Æ‚«‚ÉƒAƒNƒVƒ‡ƒ“‚ğ‹N‚±‚·‚©B
-		// --- –Ê‚Ì–@ü‚ğ‹‚ß‚é
-		Float3 Normal = Primitive::Vector3_up; // ã‚Ì–Ê‚Éİ’è
-		DirectX::XMVECTOR planeN = DirectX::XMLoadFloat3(&ConvertToDirectXFloat3(Normal));
-		DirectX::XMVector3Normalize(planeN);
-		// ƒuƒƒbƒN‚ÌŠp“x‚©‚ç‰ñ“]s—ñ‚ğŒvZ
-		DirectX::XMMATRIX rotation;
-		rotation =
-			DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().y)) *
-			DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().x)) *
-			DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(object->GetComponent<Transform>()->GetAngle().z));
-		// –@ü‚ÌŒü‚«‚ğƒuƒƒbƒN‚Ì‰ñ“]s—ñ‚Å•Ï‚¦‚é
-		DirectX::XMVector3TransformCoord(planeN, rotation);
-		// --- –Êã‚ÌÀ•W‚ğ‹‚ß‚é
-		DirectX::XMVECTOR Pos;
-		if (Normal == Primitive::Vector3_up || Normal == Primitive::Vector3_down) {
-			// ‚‚³‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2));
-		}
-		else if (Normal == Primitive::Vector3_forward || Normal == Primitive::Vector3_back) {
-			// ‰œs‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2));
-		}
-		else if (Normal == Primitive::Vector3_right || Normal == Primitive::Vector3_left) {
-			// •‚ğ–@ü‚É‚©‚¯‚½‚à‚Ì‚ª–Êã‚ÌÀ•W‚Æ‚È‚é
-			Pos = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&object->GetComponent<Transform>()->GetPosition()),
-				DirectX::XMVectorScale(planeN, object->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2));
-		}
-		// --- •½–Ê‚Ì–@ü‚É‘Î‚·‚éOBB‚ÌË‰eü‚Ì’·‚³‚ğZo
-		float r = 0.0f;		// ‹ßÚ‹——£
-		float Addr;
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorForword()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenZ() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorUp()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenY() / 2)
-			, planeN));
-		r += fabs(Addr);
-		DirectX::XMStoreFloat(&Addr, DirectX::XMVector3Dot(
-			DirectX::XMVectorScale(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetVectorRight()),
-				this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().lenX() / 2)
-			, planeN));
-		r += fabs(Addr);
-
-		// --- –ß‚µ‹——£‚ğZo
-		float s;
-		DirectX::XMStoreFloat(&s, DirectX::XMVector3Dot(
-			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&this->GetOwner()->GetComponent<Transform>()->GetPosition()), Pos), planeN));
-		if (s > 0)	s = r - fabs(s);
-		else		s = r + fabs(s);
-
-		// --- ‚ß‚è‚ñ‚¾ˆÊ’u‚©‚ç•½–Ê‚Ì–@ü•ûŒü‚É–ß‚µ‹——£‚¾‚¯ƒIƒtƒZƒbƒg‚·‚é
-		DirectX::XMFLOAT3 offsetPos;
-		DirectX::XMStoreFloat3(&offsetPos, DirectX::XMVectorScale(planeN, s));
-		this->GetOwner()->GetComponent<Transform>()->SetPosition({
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().x + offsetPos.x,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().y + offsetPos.y,
-			this->GetOwner()->GetComponent<Transform>()->GetPosition().z + offsetPos.z
+	// ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã¨å½“ãŸã£ãŸã¨ãã®å‡¦ç†
+	if (object->GetTag() == TagName::Ground) {
+		// Yè»¸ã®åŠ é€Ÿåº¦ã‚’ã‚¼ãƒ­ã«
+		this->GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().x,
+			0.0f,
+			this->GetOwner()->GetComponent<Rigidbody>()->GetAccele().z
 			});
+
+		// --- ã‚ã‚Šè¾¼ã‚“ã ä½ç½®ã‹ã‚‰Yæ–¹å‘ã«æˆ»ã—è·é›¢ã ã‘ã‚ªãƒ•ã‚»ãƒƒãƒˆã™ã‚‹
+		float offsetPosY =
+			object->GetComponent<AABBCollider>()->GetPrimitive().p.y +
+			object->GetComponent<AABBCollider>()->GetPrimitive().hl.y +
+			this->GetOwner()->GetComponent<AABBCollider>()->GetPrimitive().hl.y;
+		this->GetOwner()->GetComponent<Transform>()->SetPosition({
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().x,
+			offsetPosY,
+			this->GetOwner()->GetComponent<Transform>()->GetPosition().z
+			});
+	}
+
+	// å£ã¨å½“ãŸã£ãŸã¨ãã®å‡¦ç†
+	if (object->GetTag() == TagName::Wall) {
+		GetOwner()->GetComponent<Transform>()->SetPosition(m_prevPos);
+		// åŠ é€Ÿåº¦ã‚’è£œæ­£
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
 
-	// –î‚Æ“–‚½‚Á‚½‚Æ‚«‚Ìˆ—
+	// çŸ¢ã¨å½“ãŸã£ãŸã¨ãã®å‡¦ç†
 	if (object->GetTag() == TagName::Arrow)
 	{
-		//ƒmƒbƒNƒoƒbƒN@–î–ì12/16
-		// ©•ª‚ğíœ
-		ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		DirectX::XMFLOAT3 a = { 0.01f ,0.01f ,0.01f };
+		//ãƒãƒƒã‚¯ãƒãƒƒã‚¯ã€€çŸ¢é‡12/16
+		GetOwner()->GetComponent<Rigidbody>()->SetAccele(
+			object->GetComponent<Rigidbody>()->GetAccele()
+		);
+		//ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å‹•ãã‚’æ­¢ã‚ã‚‹
+		m_MoveSpeed = 0.0f;
+		// è‡ªåˆ†ã‚’å‰Šé™¤
+		//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 	}
 }
 

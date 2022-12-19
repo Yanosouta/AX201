@@ -7,6 +7,7 @@
 #include "Object3D.h"
 #include "Cube.h"
 #include "AABBCollider.h"
+#include "TestAnimation.h" // (ä»®)
 
 #include "Transform.h"
 #include "CameraObjPlayer.h"
@@ -17,70 +18,95 @@
 
 SceneTitle::SceneTitle()
 {
-	//--- •ÏX—pƒ|ƒCƒ“ƒ^
-	std::shared_ptr<MeshRenderer> pMeshRenderer;	// 3DƒIƒuƒWƒFƒNƒg—pƒŒƒ“ƒ_ƒ‰[
-	std::shared_ptr<SpriteRenderer> pSpriteRenderer;// 2DƒIƒuƒWƒFƒNƒg—pƒŒƒ“ƒ_ƒ‰[
-	std::shared_ptr<Transform> pTransform;			// ˆÊ’uî•ñ
-	std::shared_ptr<Rigidbody> pRigidbody;			// •¨—‹““®
-	std::shared_ptr<AABBCollider> pAABBCollider;	// AABB“–‚½‚è”»’è—p
+	//--- å¤‰æ›´ç”¨ãƒã‚¤ãƒ³ã‚¿
+	std::shared_ptr<ObjectBase> pObj;
+	std::shared_ptr<MeshRenderer> pMeshRenderer;	// 3Dã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”¨ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼
+	std::shared_ptr<SpriteRenderer> pSpriteRenderer;// 2Dã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç”¨ãƒ¬ãƒ³ãƒ€ãƒ©ãƒ¼
+	std::shared_ptr<Transform> pTransform;			// ä½ç½®æƒ…å ±
+	std::shared_ptr<Rigidbody> pRigidbody;			// ç‰©ç†æŒ™å‹•
+	std::shared_ptr<AABBCollider> pAABBCollider;	// AABBå½“ãŸã‚Šåˆ¤å®šç”¨
 	std::shared_ptr<CameraPlayer> pCameraPlayer;
 
-	//2022/12/16@¬ŒI‘å‹P
-	//UI‚Ì•`‰æ‚ªÅŒã‚É—ˆ‚é‚æ‚¤‚ÉƒNƒŠƒGƒCƒg‚ÌˆÊ’u‚ğÅ‰‚É‚Á‚Ä‚«‚½
-	//UI•”•ª--------------------------------------------------------------------------------
+	//2022/12/16ã€€å°æ —å¤§è¼
+	//UIã®æç”»ãŒæœ€å¾Œã«æ¥ã‚‹ã‚ˆã†ã«ã‚¯ãƒªã‚¨ã‚¤ãƒˆã®ä½ç½®ã‚’æœ€åˆã«æŒã£ã¦ããŸ
+	//UIéƒ¨åˆ†--------------------------------------------------------------------------------
 	ObjectManager::CreateObject<UI>("UI.2");
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.2")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.2")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/karizanki.png");	//2022/12/14 ¬ŒI‘å‹P@ƒeƒNƒXƒ`ƒƒ‚ğ•ÏX
+	pSpriteRenderer->LoadTexture("Assets/Texture/karizanki.png");	//2022/12/14 å°æ —å¤§è¼ã€€ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å¤‰æ›´
 	pSpriteRenderer->SetSize(300, 80);
 	ObjectManager::FindObjectWithName("UI.2")->SetLayerNum(1);
 	pTransform->SetPosition({ 450.0f, 300.0f, 0.0f });
 
 	//------------------------------------------------------------------------------------
+	
+	// ä»®(ã‚ã«ã‚ãƒ¼ã—ã‚‡ã‚“UI)
+	pObj = ObjectManager::CreateObject<UI>("UI.3");
+	pObj->SetLayerNum(2);
+	pObj->AddComponent<TestAnimation>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/Test.png");
+	pSpriteRenderer->SetSize(80, 80);
+	pTransform = pObj->GetComponent<Transform>();
+	pTransform->SetPosition({ -450.0f, 300.0f, 0.0f });
 
-	//--- ƒIƒuƒWƒFƒNƒgì¬
-	//   Œ^@FCameraPlayer
-	//  –¼‘O FCameraPlayer
-	// ƒ^ƒO–¼FCameraPlayer
+	//--- ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆ
+	//   å‹ã€€ï¼šCameraPlayer
+	//  åå‰ ï¼šCameraPlayer
+	// ã‚¿ã‚°åï¼šCameraPlayer
 	ObjectManager::CreateObject<CameraObjPlayer>("CameraPlayer", TagName::MainCamera);
-	// CameraPlayer‚Ìƒ|ƒCƒ“ƒ^‚ğæ“¾‚·‚é
+	// CameraPlayerã®ãƒã‚¤ãƒ³ã‚¿ã‚’å–å¾—ã™ã‚‹
 	pCameraPlayer = ObjectManager::FindObjectWithName("CameraPlayer")->GetComponent<CameraPlayer>();
-	// Šp“x‚ğİ’è‚·‚é
+	// è§’åº¦ã‚’è¨­å®šã™ã‚‹
 	pCameraPlayer->SetRadY(40);
 	pCameraPlayer->SetRadXZ(0.0f);
 
-	//--- ƒIƒuƒWƒFƒNƒgì¬
-	//   Œ^@FPlayer
-	//  –¼‘O FPlayer
-	// ƒ^ƒO–¼FPlayer
+	//--- ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆ
+	//   å‹ã€€ï¼šPlayer
+	//  åå‰ ï¼šPlayer
+	// ã‚¿ã‚°åï¼šPlayer
 	ObjectManager::CreateObject<Player>("Player", TagName::Player);
-	// Transform‚Ìƒ|ƒCƒ“ƒ^‚ğæ“¾‚·‚é
+	// Transformã®ãƒã‚¤ãƒ³ã‚¿ã‚’å–å¾—ã™ã‚‹
 	pTransform = ObjectManager::FindObjectWithName("Player")->GetComponent<Transform>();
-	// À•W‚ğİ’è‚·‚é
+	// åº§æ¨™ã‚’è¨­å®šã™ã‚‹
 	pTransform->SetPosition({ 0.0f, 0.0f, 0.0f });
 
 	for (int i = 0; i < 3; i++) {
-		//--- ƒIƒuƒWƒFƒNƒgì¬
-		//   Œ^@FEnemy
-		//  –¼‘O FEnemy
-		// ƒ^ƒO–¼FEnemy
+		//--- ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆ
+		//   å‹ã€€ï¼šEnemy
+		//  åå‰ ï¼šEnemy
+		// ã‚¿ã‚°åï¼šEnemy
 		std::shared_ptr<ObjectBase> pObj = ObjectManager::CreateObject<Enemy>("Enemy", TagName::Enemy);
-		// Transform‚Ìƒ|ƒCƒ“ƒ^‚ğæ“¾‚·‚é
+		// Transformã®ãƒã‚¤ãƒ³ã‚¿ã‚’å–å¾—ã™ã‚‹
 		pTransform = pObj->GetComponent<Transform>();
-		// À•W‚ğİ’è‚·‚é
+		// åº§æ¨™ã‚’è¨­å®šã™ã‚‹
 		pTransform->SetPosition({ 2.0f, 0.0f, 2.0f });
 	}
 
-	//--- ƒIƒuƒWƒFƒNƒgì¬
-	//   Œ^@FField
-	//  –¼‘O FField
-	// ƒ^ƒO–¼FField
-	ObjectManager::CreateObject<Field>("Field", TagName::Field);
-	// Transform‚Ìƒ|ƒCƒ“ƒ^‚ğæ“¾‚·‚é
+	//--- ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆ
+	//   å‹ã€€ï¼šField
+	//  åå‰ ï¼šField
+	// ã‚¿ã‚°åï¼šGround
+	ObjectManager::CreateObject<Field>("Field", TagName::Ground);
+	// Transformã®ãƒã‚¤ãƒ³ã‚¿ã‚’å–å¾—ã™ã‚‹
 	pTransform = ObjectManager::FindObjectWithName("Field")->GetComponent<Transform>();
-	// À•W‚ğİ’è
+	// åº§æ¨™ã‚’è¨­å®š
 	pTransform->SetPosition({ 0.0f, -5.0f, 0.0f });
 
+	//--- ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆ
+	//   å‹ã€€ï¼šField
+	//  åå‰ ï¼šField
+	// ã‚¿ã‚°åï¼šWall
+	pObj = ObjectManager::CreateObject<Field>("Field", TagName::Wall);
+	// Transformã®ãƒã‚¤ãƒ³ã‚¿ã‚’å–å¾—ã™ã‚‹
+	pTransform = pObj->GetComponent<Transform>();
+	// åº§æ¨™ã‚’è¨­å®š
+	pTransform->SetPosition({ 0.0f, -4.0f, 4.0f });
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è¾ºã®é•·ã•ã‚’ã‚»ãƒƒãƒˆ
+	pTransform->SetScale({ 2.0f, 5.0f, 5.0f });
+	pTransform->SetAngle({ 0.0f, 70.0f, 0.0f });
+	// å½“ãŸã‚Šåˆ¤å®šã®è¾ºã®é•·ã•ã‚’ã‚»ãƒƒãƒˆ
+	pObj->GetComponent<AABBCollider>()->SetLen({ 2.0f, 5.0f, 5.0f });
 
 }
 

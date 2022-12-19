@@ -9,7 +9,6 @@ public:
 	SamplerState();
 	~SamplerState();
 
-	HRESULT Create(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE address);
 	void Bind();
 
 private:

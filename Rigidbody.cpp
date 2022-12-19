@@ -7,6 +7,9 @@ void Rigidbody::FixedUpdate()
 {
 	// 加速度に重力を適用
 	m_Accele.y -= m_Mass * mc_gravity;
+	//加速度に抵抗を適用
+	m_Accele.x *= m_Drag;
+	m_Accele.z *= m_Drag;
 }
 
 void Rigidbody::LateUpdate()
