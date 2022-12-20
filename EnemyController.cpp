@@ -164,23 +164,24 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 	{
 		// 今プレイヤーが持っている矢であれば処理を行わない
 		if (ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->GetHaveArrow()
-			== object->GetThisPtr()) continue;
+			!= object->GetThisPtr()) {
 			
-		m_bKnockBackFlg = true;
-		m_MoveSpeed = 0.0f;
+			m_bKnockBackFlg = true;
+			m_MoveSpeed = 0.0f;
 
-		//ノックバック　矢野12/16
-		GetOwner()->GetComponent<Rigidbody>()->SetAccele({
-			object->GetComponent<Rigidbody>()->GetAccele().x * m_KnockbackPower,
-			object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
-			object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
-			});
-		//EnemyのHPを減らす
-		m_Hp--;
-		// 自分を削除
-		if (m_Hp == 0)
-		{
-			ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+			//ノックバック　矢野12/16
+			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+				object->GetComponent<Rigidbody>()->GetAccele().x * m_KnockbackPower,
+				object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
+				object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
+				});
+			//EnemyのHPを減らす
+			m_Hp--;
+			// 自分を削除
+			if (m_Hp == 0)
+			{
+				ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+			}
 		}
 	}
 }
