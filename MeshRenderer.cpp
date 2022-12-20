@@ -11,49 +11,22 @@
 #include "CameraDebug.h"
 #include "CameraPlayer.h"
 
-//--- •Ï”éŒ¾
+//--- å¤‰æ•°å®£è¨€
 VertexShader* MeshRenderer::m_pDefVS = nullptr;
 PixelShader* MeshRenderer::m_pDefPS = nullptr;
 unsigned int MeshRenderer::m_shaderRef = 0;
 std::list<std::pair<std::string, MeshRenderer::Info*>> MeshRenderer::m_ModelList;
 
-// ’¸“_î•ñ
-struct MeshRenderer::Vertex
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT2 uv;
-};
-
-// ƒ}ƒeƒŠƒAƒ‹
-struct MeshRenderer::Material
-{
-	DirectX::XMFLOAT4 diffuse;
-	DirectX::XMFLOAT4 ambient;
-	DirectX::XMFLOAT4 specular;
-	ID3D11ShaderResourceView* pTexture;
-};
-// ƒƒbƒVƒ…
-struct MeshRenderer::Mesh
-{
-	Vertex* pVertices;
-	unsigned int vertexNum;
-	unsigned int* pIndices;
-	unsigned int indexNum;
-	unsigned int materialID;
-	MeshBuffer* pMesh;
-};
-
-//--- ƒvƒƒgƒ^ƒCƒvéŒ¾
+//--- ãƒ—ãƒ­ãƒˆã‚¿ã‚¤ãƒ—å®£è¨€
 void MakeDefaultShader(VertexShader** vs, PixelShader** ps);
 
 MeshRenderer::MeshRenderer()
-{
-}
-MeshRenderer::~MeshRenderer()
-{
-}
-
-void MeshRenderer::Start()
+	: m_modelScale(1.0f), m_isModelFlip(false)
+	, m_pMeshes(nullptr), m_meshNum(0)
+	, m_pMaterials(nullptr), m_materialNum(0)
+	, m_playNo(ANIME_NONE), m_blendNo(ANIME_NONE)
+	, m_blendTime(0.0f), m_blendTotalTime(0.0f)
+	, m_parametric{ ANIME_NONE, ANIME_NONE }, m_parametricBlend(0.0f)
 {
 	if (m_shaderRef == 0)
 	{
@@ -63,71 +36,31 @@ void MeshRenderer::Start()
 	m_pPS = m_pDefPS;
 	++m_shaderRef;
 
-	m_pWVP = std::make_shared<ConstantBuffer>();
-	m_pWVP->Create(sizeof(m_Mat));
-
-	// s—ñ‚ğ’PˆÊs—ñ‚É‚·‚é‚½‚ß‚Ìİ’è
-	m_Mat[0]._11 = 1.0f;
-	m_Mat[0]._22 = 1.0f;
-	m_Mat[0]._33 = 1.0f;
-	m_Mat[0]._44 = 1.0f;
+	m_pBones = new ConstantBuffer;
+	m_pBones->Create(sizeof(DirectX::XMFLOAT4X4) * MAX_BONE);
 }
-
-// ŒãXV
-void MeshRenderer::LateUpdate() {
-	// ˆÚ“®s—ñ
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(
-		GetOwner()->GetComponent<Transform>()->GetPosition().x,
-		GetOwner()->GetComponent<Transform>()->GetPosition().y,
-		GetOwner()->GetComponent<Transform>()->GetPosition().z);
-	// X‰ñ“]s—ñ
-	DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(
-		DirectX::XMConvertToRadians(GetOwner()->GetComponent<Transform>()->GetAngle().x));
-	// Y‰ñ“]s—ñ
-	DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(
-		DirectX::XMConvertToRadians(GetOwner()->GetComponent<Transform>()->GetAngle().y));
-	// Z‰ñ“]s—ñ
-	DirectX::XMMATRIX Rz = DirectX::XMMatrixRotationZ(
-		DirectX::XMConvertToRadians(GetOwner()->GetComponent<Transform>()->GetAngle().z));
-	// Šg‘åk¬s—ñ
-	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(
-		GetOwner()->GetComponent<Transform>()->GetScale().x,
-		GetOwner()->GetComponent<Transform>()->GetScale().y,
-		GetOwner()->GetComponent<Transform>()->GetScale().z);
-
-	// ‘S‚Ä‚Ìs—ñ‚ğˆê‚Â‚É‚Ü‚Æ‚ß‚é
-	DirectX::XMMATRIX mat = S * Ry * Rx * Rz * T;
-
-	// ƒVƒF[ƒ_‚É“n‚·‘O‚ÉÀs‚·‚éˆ—
-	mat = DirectX::XMMatrixTranspose(mat);
-
-	DirectX::XMStoreFloat4x4(&m_Mat[0], mat);
-
-	if (ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<Camera>()) {
-		m_Mat[1] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<Camera>()->GetViewMatrix();
-		m_Mat[2] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<Camera>()->GetProjectionMatrix();
-	} else
-	if (ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraDebug>()) {
-		m_Mat[1] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraDebug>()->GetViewMatrix();
-		m_Mat[2] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraDebug>()->GetProjectionMatrix();
-	} else
-	if (ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()) {
-		m_Mat[1] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->GetViewMatrix();
-		m_Mat[2] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->GetProjectionMatrix();
-	}
-
-	m_pWVP->Write(m_Mat);
-}
-
-void MeshRenderer::End()
+MeshRenderer::~MeshRenderer()
 {
-	for (unsigned int i = 0; i < m_MeshInfo.m_meshNum; ++i)
+	delete m_pBones;
+	for (unsigned int i = 0; i < m_meshNum; ++i)
 	{
-		delete[] m_MeshInfo.m_pMeshes[i].pVertices;
-		delete[] m_MeshInfo.m_pMeshes[i].pIndices;
-		delete m_MeshInfo.m_pMeshes[i].pMesh;
+		if (m_pMeshes[i].pBones)
+			delete[] m_pMeshes[i].pBones;
+		delete[] m_pMeshes[i].pVertices;
+		delete[] m_pMeshes[i].pIndices;
+		delete m_pMeshes[i].pMesh;
 	}
-	delete[] m_MeshInfo.m_pMeshes;
+	if (m_pMeshes) {
+		delete[] m_pMeshes;
+	}
+	for (unsigned int i = 0; i < m_materialNum; ++i)
+	{
+		if (m_pMaterials[i].pTexture)
+			m_pMaterials[i].pTexture->Release();
+	}
+	if (m_pMaterials) {
+		delete[] m_pMaterials;
+	}
 
 	--m_shaderRef;
 	if (m_shaderRef <= 0)
@@ -137,15 +70,600 @@ void MeshRenderer::End()
 	}
 }
 
+void MeshRenderer::Start()
+{
+	m_pWVP = std::make_shared<ConstantBuffer>();
+	m_pWVP->Create(sizeof(m_Mat));
+
+	// è¡Œåˆ—ã‚’å˜ä½è¡Œåˆ—ã«ã™ã‚‹ãŸã‚ã®è¨­å®š
+	m_Mat[0]._11 = 1.0f;
+	m_Mat[0]._22 = 1.0f;
+	m_Mat[0]._33 = 1.0f;
+	m_Mat[0]._44 = 1.0f;
+}
+
+MeshRenderer::AnimeNo MeshRenderer::AddAnimation(const char* file)
+{
+	// assimpã®è¨­å®š
+	Assimp::Importer importer;
+	int flag = 0;
+	if (m_isModelFlip) flag |= aiProcess_MakeLeftHanded;
+	// assimpã§èª­ã¿è¾¼ã¿
+	const aiScene* pScene = importer.ReadFile(file, flag);
+	if (!pScene) {
+		MessageBox(nullptr, importer.GetErrorString(), "assimp Anime Error", MB_OK);
+		return ANIME_NONE;
+	}
+
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
+	if (!pScene->HasAnimations())
+	{
+		return ANIME_NONE;
+	}
+
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿é ˜åŸŸè¿½åŠ 
+	aiAnimation* pAnime = pScene->mAnimations[0];
+	m_animes.push_back(Animation());
+	Animation& anime = m_animes.back();
+
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨­å®š
+	anime.totalTime = pAnime->mDuration / pAnime->mTicksPerSecond;
+	anime.channels.resize(pAnime->mNumChannels);
+	std::vector<Channel>::iterator channelIt = anime.channels.begin();
+	while (channelIt != anime.channels.end())
+	{
+		// ãƒãƒ£ãƒ³ãƒãƒ«(ãƒœãƒ¼ãƒ³)åˆ¥ã«ãƒ‡ãƒ¼ã‚¿ã‚’è¨­å®š
+		int channelIdx = channelIt - anime.channels.begin();
+		aiNodeAnim* pChannel = pAnime->mChannels[channelIdx];
+		Mapping::iterator mappingIt = m_boneMapping.find(pChannel->mNodeName.data);
+		if (mappingIt == m_boneMapping.end())
+		{
+			channelIt->index = INDEX_NONE;
+			channelIt++;
+			continue;
+		}
+
+		// å„ã‚­ãƒ¼ã®å€¤ã‚’è¨­å®š
+		channelIt->index = mappingIt->second;
+		// ç§»å‹•
+		channelIt->pos.resize(pChannel->mNumPositionKeys);
+		for (int i = 0; i < channelIt->pos.size(); ++i)
+		{
+			aiVector3D val = pChannel->mPositionKeys[i].mValue;
+			channelIt->pos[i].value = DirectX::XMFLOAT3(val.x * m_modelScale, val.y * m_modelScale, val.z * m_modelScale);
+			channelIt->pos[i].time = pChannel->mPositionKeys[i].mTime / pAnime->mTicksPerSecond;
+		}
+		// å›è»¢
+		channelIt->quat.resize(pChannel->mNumRotationKeys);
+		for (int i = 0; i < channelIt->quat.size(); ++i)
+		{
+			aiQuaternion val = pChannel->mRotationKeys[i].mValue;
+			channelIt->quat[i].value = DirectX::XMFLOAT4(val.x, val.y, val.z, val.w);
+			channelIt->quat[i].time = pChannel->mRotationKeys[i].mTime / pAnime->mTicksPerSecond;
+		}
+		// æ‹¡ç¸®
+		channelIt->scale.resize(pChannel->mNumScalingKeys);
+		for (int i = 0; i < channelIt->scale.size(); ++i)
+		{
+			aiVector3D val = pChannel->mScalingKeys[i].mValue;
+			channelIt->scale[i].value = DirectX::XMFLOAT3(val.x, val.y, val.z);
+			channelIt->scale[i].time = pChannel->mScalingKeys[i].mTime / pAnime->mTicksPerSecond;
+		}
+
+		channelIt++;
+	}
+
+	return m_animes.size() - 1;
+}
+
+void MeshRenderer::Step(float tick)
+{
+	if (m_playNo == ANIME_NONE) { return; }
+
+	if (m_playNo == ANIME_PARAMETRIC || m_blendNo == ANIME_PARAMETRIC)
+	{
+		CalcAnime(ANIME_TRANSFORM_PARAMETRIC0, m_parametric[0]);
+		CalcAnime(ANIME_TRANSFORM_PARAMETRIC1, m_parametric[1]);
+	}
+	if (m_playNo != ANIME_NONE && m_playNo != ANIME_PARAMETRIC)
+	{
+		CalcAnime(ANIME_TRANSFORM_MAIN, m_playNo);
+	}
+	if (m_blendNo != ANIME_NONE && m_blendNo != ANIME_PARAMETRIC)
+	{
+		CalcAnime(ANIME_TRANSFORM_BLEND, m_blendNo);
+	}
+
+	CalcBones(0, DirectX::XMMatrixIdentity());
+
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ™‚é–“æ›´æ–°
+	UpdateAnime(m_playNo, tick);
+	if (m_blendNo != ANIME_NONE)
+	{
+		UpdateAnime(m_blendNo, tick);
+		m_blendTime += tick;
+		if (m_blendTotalTime <= m_blendTime)
+		{
+			m_blendTime = 0.0f;
+			m_blendTotalTime = 0.0f;
+			m_playNo = m_blendNo;
+			m_blendNo = ANIME_NONE;
+		}
+	}
+	if (m_playNo == ANIME_PARAMETRIC || m_blendNo == ANIME_PARAMETRIC)
+	{
+		UpdateAnime(m_parametric[0], tick);
+		UpdateAnime(m_parametric[1], tick);
+	}
+}
+
+void MeshRenderer::Play(AnimeNo no, bool loop)
+{
+	if (!AnimeNoCheck(no)) { return; }
+	if (m_playNo == no) { return; }
+	if (no != ANIME_PARAMETRIC)
+	{
+		InitAnime(no);
+		m_animes[no].isLoop = loop;
+	}
+	else
+	{
+		InitAnime(m_parametric[0]);
+		InitAnime(m_parametric[1]);
+		m_animes[m_parametric[0]].isLoop = loop;
+		m_animes[m_parametric[1]].isLoop = loop;
+	}
+	m_playNo = no;
+}
+void MeshRenderer::PlayBlend(AnimeNo no, float blendTime, bool loop)
+{
+	if (!AnimeNoCheck(no)) { return; }
+	if (no != ANIME_PARAMETRIC)
+	{
+		InitAnime(no);
+		m_animes[no].isLoop = loop;
+	}
+	else
+	{
+		InitAnime(m_parametric[0]);
+		InitAnime(m_parametric[1]);
+		m_animes[m_parametric[0]].isLoop = loop;
+		m_animes[m_parametric[1]].isLoop = loop;
+	}
+	m_blendTime = 0.0f;
+	m_blendTotalTime = blendTime;
+	m_blendNo = no;
+}
+void MeshRenderer::SetParametric(AnimeNo no1, AnimeNo no2)
+{
+	if (!AnimeNoCheck(no1)) { return; }
+	if (!AnimeNoCheck(no2)) { return; }
+	m_parametric[0] = no1;
+	m_parametric[1] = no2;
+	SetParametricBlend(0.0f);
+}
+void MeshRenderer::SetParametricBlend(float blendRate)
+{
+	if (m_parametric[0] == ANIME_NONE || m_parametric[1] == ANIME_NONE) return;
+	Animation& anime1 = m_animes[m_parametric[0]];
+	Animation& anime2 = m_animes[m_parametric[1]];
+	m_parametricBlend = blendRate;
+	float blendTotalTime = anime1.totalTime * (1.0f - m_parametricBlend) + anime2.totalTime * m_parametricBlend;
+	anime1.speed = anime1.totalTime / blendTotalTime;
+	anime2.speed = anime2.totalTime / blendTotalTime;
+}
+bool MeshRenderer::IsPlay(AnimeNo no)
+{
+	if (!AnimeNoCheck(no)) { return false; }
+	if (no == ANIME_PARAMETRIC) { no = m_parametric[0]; }
+	if (m_animes[no].totalTime < m_animes[no].time) { return false; }
+
+	if (m_playNo == no) { return true; }
+	if (m_blendNo == no) { return true; }
+	if (m_playNo == ANIME_PARAMETRIC || m_blendNo == ANIME_PARAMETRIC)
+	{
+		if (m_parametric[0] == no) { return true; }
+		if (m_parametric[1] == no) { return true; }
+	}
+	return false;
+}
+MeshRenderer::AnimeNo MeshRenderer::GetPlayNo()
+{
+	return m_playNo;
+}
+MeshRenderer::AnimeNo MeshRenderer::GetBlendNo()
+{
+	return m_blendNo;
+}
+float MeshRenderer::GetRemainingTime(AnimeNo no)
+{
+	if (!AnimeNoCheck(no)) { return 0.0f; }
+	return max(m_animes[no].totalTime - m_animes[no].time, 0.0f);
+}
+
+void MeshRenderer::MakeNodes(const void* pScene)
+{
+	std::function<NodeIndex(aiNode*, NodeIndex)> AssimpNodeConvert =
+		[&AssimpNodeConvert, this](aiNode* pNode, NodeIndex parent)
+	{
+		// Assimpã®ãƒãƒ¼ãƒ‰ã‚’å¤‰æ›
+		Node node;
+		node.name = pNode->mName.data;
+		node.parent = parent;
+		node.children.resize(pNode->mNumChildren);
+		aiMatrix4x4 mat = pNode->mTransformation;
+		DirectX::XMStoreFloat4x4(&node.offset,
+			DirectX::XMMatrixSet(
+				mat.a1, mat.b1, mat.c1, mat.d1,
+				mat.a2, mat.b2, mat.c2, mat.d2,
+				mat.a3, mat.b3, mat.c3, mat.d3,
+				mat.a4 * m_modelScale, mat.b4 * m_modelScale, mat.c4 * m_modelScale, mat.d4)
+		);
+		node.mat = DirectX::XMLoadFloat4x4(&node.offset);
+		m_nodes.push_back(node);
+
+		// ãƒãƒ¼ãƒ‰åã«åŸºã¥ãå‚ç…§ãƒªã‚¹ãƒˆä½œæˆ
+		NodeIndex index = m_nodes.size() - 1;
+		m_boneMapping.insert(MappingKey(node.name, index));
+
+		// å­è¦ç´ ã«é–¢ã—ã¦ã‚‚å¤‰æ›
+		for (int i = 0; i < pNode->mNumChildren; ++i)
+		{
+			m_nodes[index].children[i] = AssimpNodeConvert(pNode->mChildren[i], index);
+		}
+		return index;
+	};
+
+	// ãƒãƒ¼ãƒ‰ä½œæˆ
+	m_nodes.clear();
+	m_boneMapping.clear();
+	AssimpNodeConvert(reinterpret_cast<const aiScene*>(pScene)->mRootNode, -1);
+	// ãƒãƒ¼ãƒ‰æ•°ã«åŸºã¥ã„ã¦ã€ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ä½œæˆ
+	for (int i = 0; i < MAX_ANIME_TRANSFORM; ++i)
+	{
+		m_animeTransform[i].resize(m_nodes.size());
+		for (NodeTransforms::iterator it = m_animeTransform[i].begin(); it != m_animeTransform[i].end(); ++it)
+		{
+			it->translate = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+			it->quaternion = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+			it->scale = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+		}
+	}
+}
+void MeshRenderer::MakeBoneWeight(const void* scene, int i)
+{
+	const aiScene* pScene = reinterpret_cast<const aiScene*>(scene);
+
+	// ãƒ¡ãƒƒã‚·ãƒ¥ã«å¯¾å¿œã™ã‚‹ãƒœãƒ¼ãƒ³ç•ªå·
+	if (pScene->mMeshes[i]->HasBones())
+	{
+		m_pMeshes[i].boneNum = pScene->mMeshes[i]->mNumBones;
+		m_pMeshes[i].pBones = new Bone[m_pMeshes[i].boneNum];
+		for (unsigned int j = 0; j < m_pMeshes[i].boneNum; ++j)
+		{
+			std::string name = pScene->mMeshes[i]->mBones[j]->mName.data;
+			auto it = m_boneMapping.find(name);
+			if (it != m_boneMapping.end())
+			{
+				m_pMeshes[i].pBones[j].index = it->second;
+				aiMatrix4x4 mat = pScene->mMeshes[i]->mBones[j]->mOffsetMatrix;
+				m_pMeshes[i].pBones[j].invOffset = DirectX::XMFLOAT4X4(
+					mat.a1, mat.b1, mat.c1, mat.d1,
+					mat.a2, mat.b2, mat.c2, mat.d2,
+					mat.a3, mat.b3, mat.c3, mat.d3,
+					mat.a4 * m_modelScale, mat.b4 * m_modelScale, mat.c4 * m_modelScale, mat.d4
+				);
+
+				// ã‚¦ã‚§ã‚¤ãƒˆ
+				unsigned int weightNum = pScene->mMeshes[i]->mBones[j]->mNumWeights;
+				for (int k = 0; k < weightNum; ++k)
+				{
+					aiVertexWeight weight = pScene->mMeshes[i]->mBones[j]->mWeights[k];
+					for (int l = 0; l < 4; ++l)
+					{
+						if (m_pMeshes[i].pVertices[weight.mVertexId].weight[l] <= 0.0f)
+						{
+							m_pMeshes[i].pVertices[weight.mVertexId].index[l] = j;
+							m_pMeshes[i].pVertices[weight.mVertexId].weight[l] = weight.mWeight;
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				m_pMeshes[i].pBones[j].index = -1;
+			}
+		}
+	}
+	else
+	{
+		std::map<std::string, int>::iterator it = m_boneMapping.find(pScene->mMeshes[i]->mName.data);
+		if (it != m_boneMapping.end())
+		{
+			// ãƒ¡ãƒƒã‚·ãƒ¥ã§ãªã„è¦ªãƒãƒ¼ãƒ‰ã‚’æ¢ç´¢
+			std::function<int(int)> FindNodeFunc = [&FindNodeFunc, this, pScene](int index)
+			{
+				std::string name = m_nodes[index].name;
+				for (int i = 0; i < pScene->mNumMeshes; ++i)
+					if (name == pScene->mMeshes[i]->mName.data)
+					{
+						return FindNodeFunc(m_nodes[index].parent);
+					}
+				return index;
+			};
+			// ãƒãƒ¼ãƒ‰ã¾ã§ã®è¡Œåˆ—ã‚’è¨ˆç®—
+			std::function<DirectX::XMMATRIX(int, DirectX::XMMATRIX)> CalcNodeFunc =
+				[&CalcNodeFunc, this](int index, DirectX::XMMATRIX mat)
+			{
+				if (index == -1) return mat;
+				mat = mat * DirectX::XMLoadFloat4x4(&m_nodes[index].offset);
+				return CalcNodeFunc(m_nodes[index].parent, mat);
+			};
+
+			m_pMeshes[i].boneNum = 1;
+			m_pMeshes[i].pBones = new Bone[1];
+			m_pMeshes[i].pBones->index = FindNodeFunc(m_nodes[it->second].parent);
+			DirectX::XMStoreFloat4x4(&m_pMeshes[i].pBones->invOffset, DirectX::XMMatrixInverse(nullptr,
+				CalcNodeFunc(m_pMeshes[i].pBones->index, DirectX::XMMatrixIdentity())
+			));
+			for (unsigned int j = 0; j < m_pMeshes[i].vertexNum; ++j)
+			{
+				m_pMeshes[i].pVertices[j].weight[0] = 1.0f;
+			}
+		}
+		else
+		{
+			m_pMeshes[i].boneNum = 0;
+			m_pMeshes[i].pBones = nullptr;
+		}
+	}
+}
+void MeshRenderer::UpdateBoneMatrix(int i)
+{
+	DirectX::XMFLOAT4X4 boneMat[MAX_BONE];
+	int j;
+	for (j = 0; j < m_pMeshes[i].boneNum && j < MAX_BONE; ++j)
+	{
+		DirectX::XMStoreFloat4x4(&boneMat[j],
+			DirectX::XMMatrixTranspose(
+				DirectX::XMLoadFloat4x4(&m_pMeshes[i].pBones[j].invOffset) *
+				m_nodes[m_pMeshes[i].pBones[j].index].mat
+			));
+	}
+	for (; j < MAX_BONE; ++j)
+	{
+		DirectX::XMStoreFloat4x4(&boneMat[j], DirectX::XMMatrixIdentity());
+	}
+	m_pBones->Write(boneMat);
+	m_pBones->BindVS(1);
+}
+bool MeshRenderer::AnimeNoCheck(AnimeNo no)
+{
+	if (no == ANIME_PARAMETRIC)
+		return m_parametric[0] != ANIME_NONE && m_parametric[1] != ANIME_NONE;
+	else
+		return 0 <= no && no < m_animes.size();
+}
+void MeshRenderer::InitAnime(AnimeNo no)
+{
+	if (no == ANIME_NONE || no == ANIME_PARAMETRIC) { return; }
+
+	Animation& anime = m_animes[no];
+	anime.time = 0.0f;
+	anime.speed = 1.0f;
+	anime.isLoop = false;
+}
+void MeshRenderer::UpdateAnime(AnimeNo no, float tick)
+{
+	if (no == ANIME_PARAMETRIC) { return; }
+	Animation& anime = m_animes[no];
+	anime.time += anime.speed * tick;
+	if (anime.isLoop)
+		while (anime.time >= anime.totalTime)
+			anime.time -= anime.totalTime;
+}
+void MeshRenderer::CalcBones(NodeIndex index, DirectX::XMMATRIX parent)
+{
+	//--- ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã”ã¨ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’åˆæˆ
+	meshTransform transform;
+	// ãƒ‘ãƒ©ãƒ¡ãƒˆãƒªãƒƒã‚¯ãƒ–ãƒ¬ãƒ³ãƒ‰
+	if (m_playNo == ANIME_PARAMETRIC || m_blendNo == ANIME_PARAMETRIC)
+	{
+		meshTransform& parametric0 = m_animeTransform[ANIME_TRANSFORM_PARAMETRIC0][index];
+		meshTransform& parametric1 = m_animeTransform[ANIME_TRANSFORM_PARAMETRIC1][index];
+		transform.translate = Lerp(parametric0.translate, parametric1.translate, m_parametricBlend);
+		transform.quaternion = Lerp(parametric0.quaternion, parametric1.quaternion, m_parametricBlend);
+		transform.scale = Lerp(parametric0.scale, parametric1.scale, m_parametricBlend);
+		if (m_playNo == ANIME_PARAMETRIC)
+			m_animeTransform[ANIME_TRANSFORM_MAIN][index] = transform;
+		if (m_blendNo == ANIME_PARAMETRIC)
+			m_animeTransform[ANIME_TRANSFORM_BLEND][index] = transform;
+	}
+	// ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ãƒ–ãƒ¬ãƒ³ãƒ‰
+	if (m_blendNo != ANIME_NONE)
+	{
+		meshTransform& anime0 = m_animeTransform[ANIME_TRANSFORM_MAIN][index];
+		meshTransform& anime1 = m_animeTransform[ANIME_TRANSFORM_BLEND][index];
+		float rate = m_blendTime / m_blendTotalTime;
+		transform.translate = Lerp(anime0.translate, anime1.translate, rate);
+		transform.quaternion = Lerp(anime0.quaternion, anime1.quaternion, rate);
+		transform.scale = Lerp(anime0.scale, anime1.scale, rate);
+	}
+	else
+	{
+		transform = m_animeTransform[ANIME_TRANSFORM_MAIN][index];
+	}
+
+	// ãƒãƒ¼ãƒ‰ã”ã¨ã®å§¿å‹¢è¡Œåˆ—ã‚’è¨ˆç®—
+	Node& node = m_nodes[index];
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(transform.translate.x, transform.translate.y, transform.translate.z);
+	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&transform.quaternion);
+	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(Q);
+	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, transform.scale.z);
+	DirectX::XMMATRIX mat = S * R * T;
+	node.mat = mat * parent;
+
+	// å­è¦ç´ ã®å§¿å‹¢ã‚’æ›´æ–°
+	Children::iterator it = node.children.begin();
+	while (it != node.children.end())
+	{
+		CalcBones(*it, node.mat);
+		++it;
+	}
+}
+void MeshRenderer::CalcAnime(AnimeTransformKind kind, AnimeNo no)
+{
+	Animation& anime = m_animes[no];
+	Channels::iterator channelIt = anime.channels.begin();
+	while (channelIt != anime.channels.end())
+	{
+		// ä¸€è‡´ã™ã‚‹ãƒœãƒ¼ãƒ³ãŒãªã‘ã‚Œã°ã‚¹ã‚­ãƒƒãƒ—
+		if (channelIt->index == INDEX_NONE)
+		{
+			++channelIt;
+			continue;
+		}
+
+		// åº§æ¨™
+		DirectX::XMFLOAT3 pos;
+		if (anime.time <= channelIt->pos[0].time) { pos = channelIt->pos[0].value; }
+		else if (channelIt->pos.back().time <= anime.time) { pos = channelIt->pos.back().value; }
+		else
+		{
+			for (int i = 0; i < channelIt->pos.size() - 1; ++i)
+			{
+				if (channelIt->pos[i].time < anime.time && anime.time <= channelIt->pos[i + 1].time)
+				{
+					float timeLen = channelIt->pos[i + 1].time - channelIt->pos[i].time;
+					float rate = (anime.time - channelIt->pos[i].time) / timeLen;
+					pos = Lerp(channelIt->pos[i].value, channelIt->pos[i + 1].value, rate);
+					break;
+				}
+			}
+		}
+		// å›è»¢
+		DirectX::XMFLOAT4 quat;
+		if (anime.time <= channelIt->quat[0].time) { quat = channelIt->quat[0].value; }
+		else if (channelIt->quat.back().time <= anime.time) { quat = channelIt->quat.back().value; }
+		else
+		{
+			for (int i = 0; i < channelIt->quat.size() - 1; ++i)
+			{
+				if (channelIt->quat[i].time < anime.time && anime.time <= channelIt->quat[i + 1].time)
+				{
+					float timeLen = channelIt->quat[i + 1].time - channelIt->quat[i].time;
+					float rate = (anime.time - channelIt->quat[i].time) / timeLen;
+					quat = Lerp(channelIt->quat[i].value, channelIt->quat[i + 1].value, rate);
+					break;
+				}
+			}
+		}
+		// æ‹¡å¤§ç¸®å°
+		DirectX::XMFLOAT3 scale;
+		if (anime.time <= channelIt->scale[0].time) { scale = channelIt->scale[0].value; }
+		else if (channelIt->scale.back().time <= anime.time) { scale = channelIt->scale.back().value; }
+		else
+		{
+			for (int i = 0; i < channelIt->scale.size() - 1; ++i)
+			{
+				if (channelIt->scale[i].time < anime.time && anime.time <= channelIt->scale[i + 1].time)
+				{
+					float timeLen = channelIt->scale[i + 1].time - channelIt->scale[i].time;
+					float rate = (anime.time - channelIt->scale[i].time) / timeLen;
+					scale = Lerp(channelIt->scale[i].value, channelIt->scale[i + 1].value, rate);
+					break;
+				}
+			}
+		}
+
+		m_animeTransform[kind][channelIt->index].translate = pos;
+		m_animeTransform[kind][channelIt->index].quaternion = quat;
+		m_animeTransform[kind][channelIt->index].scale = scale;
+		channelIt++;
+	}
+}
+
+DirectX::XMFLOAT3 MeshRenderer::Lerp(DirectX::XMFLOAT3& a, DirectX::XMFLOAT3& b, float rate)
+{
+	DirectX::XMFLOAT3 out;
+	DirectX::XMVECTOR vA = DirectX::XMLoadFloat3(&a);
+	DirectX::XMVECTOR vB = DirectX::XMLoadFloat3(&b);
+	DirectX::XMStoreFloat3(&out, DirectX::XMVectorAdd(
+		DirectX::XMVectorScale(vA, 1.0f - rate), DirectX::XMVectorScale(vB, rate)
+	));
+	return out;
+}
+DirectX::XMFLOAT4 MeshRenderer::Lerp(DirectX::XMFLOAT4& a, DirectX::XMFLOAT4& b, float rate)
+{
+	DirectX::XMFLOAT4 out;
+	DirectX::XMVECTOR vA = DirectX::XMLoadFloat4(&a);
+	DirectX::XMVECTOR vB = DirectX::XMLoadFloat4(&b);
+	DirectX::XMStoreFloat4(&out, DirectX::XMVector4Normalize(
+		DirectX::XMQuaternionSlerp(vA, vB, rate)
+	));
+	return out;
+}
+
+// å¾Œæ›´æ–°
+void MeshRenderer::LateUpdate() {
+	// ç§»å‹•è¡Œåˆ—
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(
+		GetOwner()->GetComponent<Transform>()->GetPosition().x,
+		GetOwner()->GetComponent<Transform>()->GetPosition().y,
+		GetOwner()->GetComponent<Transform>()->GetPosition().z);
+	// Xå›è»¢è¡Œåˆ—
+	DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(
+		DirectX::XMConvertToRadians(GetOwner()->GetComponent<Transform>()->GetAngle().x));
+	// Yå›è»¢è¡Œåˆ—
+	DirectX::XMMATRIX Ry = DirectX::XMMatrixRotationY(
+		DirectX::XMConvertToRadians(GetOwner()->GetComponent<Transform>()->GetAngle().y));
+	// Zå›è»¢è¡Œåˆ—
+	DirectX::XMMATRIX Rz = DirectX::XMMatrixRotationZ(
+		DirectX::XMConvertToRadians(GetOwner()->GetComponent<Transform>()->GetAngle().z));
+	// æ‹¡å¤§ç¸®å°è¡Œåˆ—
+	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(
+		GetOwner()->GetComponent<Transform>()->GetScale().x,
+		GetOwner()->GetComponent<Transform>()->GetScale().y,
+		GetOwner()->GetComponent<Transform>()->GetScale().z);
+
+	// å…¨ã¦ã®è¡Œåˆ—ã‚’ä¸€ã¤ã«ã¾ã¨ã‚ã‚‹
+	DirectX::XMMATRIX mat = S * Ry * Rx * Rz * T;
+
+	// ã‚·ã‚§ãƒ¼ãƒ€ã«æ¸¡ã™å‰ã«å®Ÿè¡Œã™ã‚‹å‡¦ç†
+	mat = DirectX::XMMatrixTranspose(mat);
+
+	DirectX::XMStoreFloat4x4(&m_Mat[0], mat);
+
+	if (ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<Camera>()) {
+		m_Mat[1] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<Camera>()->GetViewMatrix();
+		m_Mat[2] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<Camera>()->GetProjectionMatrix();
+	}
+	else
+		if (ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraDebug>()) {
+			m_Mat[1] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraDebug>()->GetViewMatrix();
+			m_Mat[2] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraDebug>()->GetProjectionMatrix();
+		}
+		else
+			if (ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()) {
+				m_Mat[1] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->GetViewMatrix();
+				m_Mat[2] = ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->GetProjectionMatrix();
+			}
+
+	m_pWVP->Write(m_Mat);
+}
+
 void MeshRenderer::Draw()
 {
+	Step(1.0f / 60);
 	m_pVS->Bind();
 	m_pPS->Bind();
 	m_pWVP->BindVS(0);
-	for (unsigned int i = 0; i < m_MeshInfo.m_meshNum; ++i)
+	for (unsigned int i = 0; i < m_meshNum; ++i)
 	{
-		SetTexturePS(m_MeshInfo.m_pMaterials[m_MeshInfo.m_pMeshes[i].materialID].pTexture, 0);
-		m_MeshInfo.m_pMeshes[i].pMesh->Draw();
+		UpdateBoneMatrix(i);
+		SetTexturePS(m_pMaterials[m_pMeshes[i].materialID].pTexture, 0);
+		m_pMeshes[i].pMesh->Draw();
 	}
 }
 
@@ -161,13 +679,13 @@ const MeshRenderer::Mesh* MeshRenderer::GetMesh(unsigned int index)
 {
 	if (index >= GetMeshNum())
 	{
-		return &m_MeshInfo.m_pMeshes[index];
+		return &m_pMeshes[index];
 	}
 	return nullptr;
 }
 uint32_t MeshRenderer::GetMeshNum()
 {
-	return m_MeshInfo.m_meshNum;
+	return m_meshNum;
 }
 
 void MakeDefaultShader(VertexShader** vs, PixelShader** ps)
@@ -182,128 +700,123 @@ void MakeDefaultShader(VertexShader** vs, PixelShader** ps)
 	}
 }
 
-bool MeshRenderer::LoadModel(const char* file, float scale)
+bool MeshRenderer::LoadModel(const char* file, float scale, bool flip)
 {
-	// “o˜^Ï‚İ‚Ìƒ‚ƒfƒ‹‚ªŒ©‚Â‚©‚Á‚½‚ç
-	// ƒ[ƒh‚¹‚¸‚É“o˜^Ï‚İ‚Ìƒ‚ƒfƒ‹ƒf[ƒ^‚ğ•Ô‚·B
-	for (auto it = m_ModelList.begin(); it != m_ModelList.end(); it++)
-		if (it->first == file) {
-			m_MeshInfo = *it->second;
-			return true;
-		}
-
-	// assimp‚Ì“Ç‚İ‚İ‚Ìİ’è
+	// assimpã®èª­ã¿è¾¼ã¿æ™‚ã®è¨­å®š
 	Assimp::Importer importer;
 	int flag = 0;
 	flag |= aiProcess_Triangulate;
-	flag |= aiProcess_PreTransformVertices;
+	//flag |= aiProcess_PreTransformVertices;
 	flag |= aiProcess_JoinIdenticalVertices;
 	flag |= aiProcess_FlipUVs;
-	//	if (flip) flag |= aiProcess_MakeLeftHanded;
-		// assimp‚Å“Ç‚İ‚İ
+	if (flip) flag |= aiProcess_MakeLeftHanded;
+	// assimpã§èª­ã¿è¾¼ã¿
 	const aiScene* pScene = importer.ReadFile(file, flag);
 	if (!pScene) {
-		MessageBox(nullptr, "ƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚ğƒZƒbƒg‚µ‚Ä‚­‚¾‚³‚¢", "Error", MB_OK);
 		return false;
 	}
-	// “Ç‚İ‚ñ‚¾ƒf[ƒ^‚ğŠî‚ÉƒƒbƒVƒ…‚Ìƒf[ƒ^‚ğŠm•Û
-	m_MeshInfo.m_meshNum = pScene->mNumMeshes;
-	m_MeshInfo.m_pMeshes = new Mesh[m_MeshInfo.m_meshNum];
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã®è¨­å®š
+	m_modelScale = scale;
+	m_isModelFlip = flip;
+	MakeNodes(pScene);
+	// èª­ã¿è¾¼ã‚“ã ãƒ‡ãƒ¼ã‚¿ã‚’åŸºã«ãƒ¡ãƒƒã‚·ãƒ¥ã®ãƒ‡ãƒ¼ã‚¿ã‚’ç¢ºä¿
+	m_meshNum = pScene->mNumMeshes;
+	m_pMeshes = new Mesh[m_meshNum];
 
-	// ƒƒbƒVƒ…‚²‚Æ‚É’¸“_ƒf[ƒ^AƒCƒ“ƒfƒbƒNƒXƒf[ƒ^‚ğ“Ç‚İæ‚è
-	for (unsigned int i = 0; i < m_MeshInfo.m_meshNum; ++i) {
-		// ƒƒbƒVƒ…‚ğŠî‚É’¸“_‚Ìƒf[ƒ^‚ğŠm•Û
+	// ãƒ¡ãƒƒã‚·ãƒ¥ã”ã¨ã«é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã€ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿å–ã‚Š
+	for (unsigned int i = 0; i < m_meshNum; ++i) {
+		// ãƒ¡ãƒƒã‚·ãƒ¥ã‚’åŸºã«é ‚ç‚¹ã®ãƒ‡ãƒ¼ã‚¿ã‚’ç¢ºä¿
 		aiVector3D zero(0.0f, 0.0f, 0.0f);
-		m_MeshInfo.m_pMeshes[i].vertexNum = pScene->mMeshes[i]->mNumVertices;
-		m_MeshInfo.m_pMeshes[i].pVertices = new MeshRenderer::Vertex[m_MeshInfo.m_pMeshes[i].vertexNum];
+		m_pMeshes[i].vertexNum = pScene->mMeshes[i]->mNumVertices;
+		m_pMeshes[i].pVertices = new MeshRenderer::Vertex[m_pMeshes[i].vertexNum];
 
-		// ƒƒbƒVƒ…“à‚Ì’¸“_ƒf[ƒ^‚ğ“Ç‚İæ‚è
-		for (unsigned int j = 0; j < m_MeshInfo.m_pMeshes[i].vertexNum; ++j) {
-			// ’l‚Ì‹zo‚µ
+		// ãƒ¡ãƒƒã‚·ãƒ¥å†…ã®é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿å–ã‚Š
+		for (unsigned int j = 0; j < m_pMeshes[i].vertexNum; ++j) {
+			// å€¤ã®å¸å‡ºã—
 			aiVector3D pos = pScene->mMeshes[i]->mVertices[j];
 			aiVector3D uv = pScene->mMeshes[i]->HasTextureCoords(0) ?
 				pScene->mMeshes[i]->mTextureCoords[0][j] : zero;
-			// ’l‚ğİ’è
-			m_MeshInfo.m_pMeshes[i].pVertices[j] = {
+			// å€¤ã‚’è¨­å®š
+			m_pMeshes[i].pVertices[j] = {
 				DirectX::XMFLOAT3(pos.x * scale, pos.y * scale, pos.z * scale),
-				DirectX::XMFLOAT2(uv.x, uv.y)
+				DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
+				DirectX::XMFLOAT2(uv.x, uv.y),
+				{0.0f, 0.0f, 0.0f, 0.0f},
+				{0, 0, 0, 0}
 			};
 		}
 
-		// ƒƒbƒVƒ…‚ğŒ³‚ÉƒCƒ“ƒfƒbƒNƒX‚Ìƒf[ƒ^‚ğŠm•Û
-		// ¦face‚Íƒ|ƒŠƒSƒ“‚Ì”‚ğ•\‚·i‚Pƒ|ƒŠƒSƒ“‚Å3ƒCƒ“ƒfƒbƒNƒX
-		m_MeshInfo.m_pMeshes[i].indexNum = pScene->mMeshes[i]->mNumFaces * 3;
-		m_MeshInfo.m_pMeshes[i].pIndices = new unsigned int[m_MeshInfo.m_pMeshes[i].indexNum];
+		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã®è¨­å®š
+		MakeBoneWeight(pScene, i);
 
-		// ƒƒbƒVƒ…“à‚ÌƒCƒ“ƒfƒbƒNƒXƒf[ƒ^‚ğ“Ç‚İæ‚è
+		// ãƒ¡ãƒƒã‚·ãƒ¥ã‚’å…ƒã«ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®ãƒ‡ãƒ¼ã‚¿ã‚’ç¢ºä¿
+		// â€»faceã¯ãƒãƒªã‚´ãƒ³ã®æ•°ã‚’è¡¨ã™ï¼ˆï¼‘ãƒãƒªã‚´ãƒ³ã§3ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+		m_pMeshes[i].indexNum = pScene->mMeshes[i]->mNumFaces * 3;
+		m_pMeshes[i].pIndices = new unsigned int[m_pMeshes[i].indexNum];
+
+		// ãƒ¡ãƒƒã‚·ãƒ¥å†…ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿å–ã‚Š
 		for (unsigned int j = 0; j < pScene->mMeshes[i]->mNumFaces; ++j) {
 			aiFace face = pScene->mMeshes[i]->mFaces[j];
 			int idx = j * 3;
-			m_MeshInfo.m_pMeshes[i].pIndices[idx + 0] = face.mIndices[0];
-			m_MeshInfo.m_pMeshes[i].pIndices[idx + 1] = face.mIndices[1];
-			m_MeshInfo.m_pMeshes[i].pIndices[idx + 2] = face.mIndices[2];
+			m_pMeshes[i].pIndices[idx + 0] = face.mIndices[0];
+			m_pMeshes[i].pIndices[idx + 1] = face.mIndices[1];
+			m_pMeshes[i].pIndices[idx + 2] = face.mIndices[2];
 		}
 
-		// ƒ}ƒeƒŠƒAƒ‹‚ÌŠ„‚è“–‚Ä
-		m_MeshInfo.m_pMeshes[i].materialID = pScene->mMeshes[i]->mMaterialIndex;
+		// ãƒãƒ†ãƒªã‚¢ãƒ«ã®å‰²ã‚Šå½“ã¦
+		m_pMeshes[i].materialID = pScene->mMeshes[i]->mMaterialIndex;
 
-		// ƒƒbƒVƒ…‚ğŒ³‚É’¸“_ƒoƒbƒtƒ@ì¬
+		// ãƒ¡ãƒƒã‚·ãƒ¥ã‚’å…ƒã«é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡ä½œæˆ
 		MeshBuffer::Description desc = {};
-		desc.pVtx = m_MeshInfo.m_pMeshes[i].pVertices;
+		desc.pVtx = m_pMeshes[i].pVertices;
 		desc.vtxSize = sizeof(Vertex);
-		desc.vtxCount = m_MeshInfo.m_pMeshes[i].vertexNum;
-		desc.pIdx = m_MeshInfo.m_pMeshes[i].pIndices;
+		desc.vtxCount = m_pMeshes[i].vertexNum;
+		desc.pIdx = m_pMeshes[i].pIndices;
 		desc.idxSize = sizeof(unsigned int);
-		desc.idxCount = m_MeshInfo.m_pMeshes[i].indexNum;
+		desc.idxCount = m_pMeshes[i].indexNum;
 		desc.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		m_MeshInfo.m_pMeshes[i].pMesh = new MeshBuffer(desc);
+		m_pMeshes[i].pMesh = new MeshBuffer(desc);
 	}
 
-	// ƒeƒNƒXƒ`ƒƒ‚ğ“Ç‚İ‚ŞêŠ‚ğ’Tõ
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’èª­ã¿è¾¼ã‚€å ´æ‰€ã‚’æ¢ç´¢
 	std::string dir = file;
-	dir = dir.substr(0, dir.find_last_of('/') + 1);	// “Ç‚İ‚Şƒtƒ@ƒCƒ‹ƒpƒX‚©‚çƒtƒ@ƒCƒ‹–¼‚ğæ‚èœ‚­
-													// Assets/Model/xx.fbx ¨ Assets/Model/
-	// “Ç‚İ‚ñ‚¾ƒf[ƒ^‚ğŒ³‚Éƒ}ƒeƒŠƒAƒ‹‚Ìƒf[ƒ^‚ÌŠm•Û
-	m_MeshInfo.m_materialNum = pScene->mNumMaterials;
-	m_MeshInfo.m_pMaterials = new Material[m_MeshInfo.m_materialNum];
+	dir = dir.substr(0, dir.find_last_of('/') + 1);	// èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‹ã‚‰ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å–ã‚Šé™¤ã
+													// Assets/Model/xx.fbx â†’ Assets/Model/
+	// èª­ã¿è¾¼ã‚“ã ãƒ‡ãƒ¼ã‚¿ã‚’å…ƒã«ãƒãƒ†ãƒªã‚¢ãƒ«ã®ãƒ‡ãƒ¼ã‚¿ã®ç¢ºä¿
+	m_materialNum = pScene->mNumMaterials;
+	m_pMaterials = new Material[m_materialNum];
 
-	// ƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚Éƒf[ƒ^‚Ì“Ç‚İæ‚è
+	// ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã«ãƒ‡ãƒ¼ã‚¿ã®èª­ã¿å–ã‚Š
 	HRESULT hr;
-	for (unsigned int i = 0; i < m_MeshInfo.m_materialNum; ++i) {
-		// ƒeƒNƒXƒ`ƒƒ‚Ì“Ç‚İæ‚è
+	for (unsigned int i = 0; i < m_materialNum; ++i) {
+		// ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®èª­ã¿å–ã‚Š
 		aiString path;
 		if (pScene->mMaterials[i]->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS) {
-			// ƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚É‹L˜^‚³‚ê‚Ä‚¢‚½ƒtƒ@ƒCƒ‹ƒpƒX‚©‚ç“Ç‚İ‚İ
-			hr = LoadTextureFromFile(path.C_Str(), &m_MeshInfo.m_pMaterials[i].pTexture);
-			const char* t = path.C_Str();
+			// ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã«è¨˜éŒ²ã•ã‚Œã¦ã„ãŸãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‹ã‚‰èª­ã¿è¾¼ã¿
+			hr = LoadTextureFromFile(path.C_Str(), &m_pMaterials[i].pTexture);
 			if (FAILED(hr)) {
-				// ƒ‚ƒfƒ‹‚Æ“¯‚¶ƒtƒHƒ‹ƒ_“à‚ÅƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚İ
+				// ãƒ¢ãƒ‡ãƒ«ã¨åŒã˜ãƒ•ã‚©ãƒ«ãƒ€å†…ã§ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã¿
 				std::string file = dir;
 				file += path.C_Str();
-				hr = LoadTextureFromFile(file.c_str(), &m_MeshInfo.m_pMaterials[i].pTexture);
+				hr = LoadTextureFromFile(file.c_str(), &m_pMaterials[i].pTexture);
 			}
+			// ãƒ‘ã‚¹ã‚’åˆ†è§£ã—ã¦æ¢ç´¢
 			if (FAILED(hr)) {
-				// ƒ‚ƒfƒ‹‚Æ“¯‚¶ƒtƒHƒ‹ƒ_“à‚ÅA
-				// ˆê“I‚ÈDemoCube—p‚¾‚ªA¡Œãg‚¤‚©‚àEg‚¦‚é‚©‚à‚µ‚ê‚È‚¢B
 				std::string file = path.C_Str();
-				// [..\\sourceimages\\]‚ğÈ—ª
-				file = file.substr(16);
-				file = dir + "/" + file;
-				hr = LoadTextureFromFile(file.c_str(), &m_MeshInfo.m_pMaterials[i].pTexture);
+				for (std::string::iterator fileIt = file.begin();
+					fileIt != file.end(); ++fileIt)
+					if ((*fileIt) == '/')
+						(*fileIt) = '\\';
+				file = file.substr(file.find_last_of('\\') + 1);
+				file = dir + file;
+				hr = LoadTextureFromFile(file.c_str(),
+					&m_pMaterials[i].pTexture);
 			}
-			if (FAILED(hr)) { 
-				MessageBox(nullptr, 
-					"ƒeƒNƒXƒ`ƒƒ‚ª“Ç‚İ‚Ü‚ê‚Ä‚¢‚Ü‚¹‚ñBƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚ç‚È‚¢A”j‘¹‚µ‚Ä‚¢‚éA‚Ü‚½‚ÍƒTƒ|[ƒg‚³‚ê‚Ä‚¢‚È‚¢ƒeƒNƒXƒ`ƒƒŒ`®‚Å‚ ‚é‰Â”\«‚ª‚ ‚è‚Ü‚·B", 
-					"MeshRenderer.cpp", MB_OK | MB_ICONERROR);
-				return false;
-			}
+			if (FAILED(hr)) { return false; }
 		}
 		else {
-			m_MeshInfo.m_pMaterials[i].pTexture = nullptr;
+			m_pMaterials[i].pTexture = nullptr;
 		}
 	}
-
-	// “o˜^‚·‚é
-	m_ModelList.push_back(std::pair<std::string, Info*>(file, &m_MeshInfo));
 	return true;
 }
