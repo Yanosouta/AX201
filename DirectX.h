@@ -14,5 +14,5 @@ void UninitDX();
 void BeginDrawDX3D();
 void BeginDrawDX2D();
 void EndDrawDX();
-
+void EnableDepth(bool enable);// 12/20 ’|‰º ƒfƒvƒX‚ð’Ç‰Á
 #endif // __DIRECTX_H__
