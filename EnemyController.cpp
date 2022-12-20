@@ -157,21 +157,24 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 			!= object->GetThisPtr()) {
 
 			m_bKnockBackFlg = true;
-
+			if (this->GetOwner()->GetTag() == TagName::MiddleBoss)
+			{	//BossのHPを減らす
+				m_BossHP--;
+				//ボスの場合ノックバックの距離を減らす
+				m_KnockbackPower = 0.3f;
+			}
+			else {
+				//EnemyのHPを減らす
+				m_Hp--;
+				m_KnockbackPower = 0.7f;
+			}
 			//ノックバック　矢野12/16
 			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
 				object->GetComponent<Rigidbody>()->GetAccele().x * m_KnockbackPower,
 				object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
 				object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
 				});
-			if (this->GetOwner()->GetTag() == TagName::MiddleBoss)
-			{	//BossのHPを減らす
-				m_BossHP--;
-			}
-			else {
-				//EnemyのHPを減らす
-				m_Hp--;
-			}
+			
 			// 自分を削除
 			if (m_Hp == 0 || m_BossHP == 0)
 			{
