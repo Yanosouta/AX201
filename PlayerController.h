@@ -32,6 +32,9 @@ public:
 	void OnCollisionEnter(ObjectBase* object);
 	void OnCollisionStay(ObjectBase* object);
 	void OnCollisionExit(ObjectBase* object);
+	
+	//--- ゲット関数
+	std::shared_ptr<ObjectBase> GetHaveArrow() { return m_haveArrow; }
 };
 
 #endif //!___PLAYER_CONTROLLER_H___
