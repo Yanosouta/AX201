@@ -6,7 +6,15 @@
 
 class ArrowController : public ComponentBase
 {
+public:
+	// 矢の種類
+	enum ARROW_TYPE {
+		NORMAL,	// 通常
+		SUPER
+	};	// 溜め撃ち
 private:
+	// 矢の種類
+	ARROW_TYPE m_ArrowType;
 public:
 	// コンストラクタ
 	ArrowController() {}
@@ -22,6 +30,9 @@ public:
 	void OnCollisionEnter(ObjectBase* object);
 	void OnCollisionStay(ObjectBase* object);
 	void OnCollisionExit(ObjectBase* object);
+	
+	//--- セット関数
+	void SetArrowType(ARROW_TYPE Type) { m_ArrowType = Type; }
 };
 
 #endif //!___ARROW_CONTROLLER_H___
