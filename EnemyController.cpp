@@ -127,6 +127,32 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 		// 加速度を補正
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
+
+	// 矢と当たったときの処理
+	if (object->GetTag() == TagName::Arrow)
+	{
+		// 今プレイヤーが持っている矢であれば処理を行わない
+		if (ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->GetHaveArrow()
+			!= object->GetThisPtr()) {
+
+			m_bKnockBackFlg = true;
+			m_MoveSpeed = 0.0f;
+
+			//ノックバック　矢野12/16
+			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+				object->GetComponent<Rigidbody>()->GetAccele().x * m_KnockbackPower,
+				object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
+				object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
+				});
+			//EnemyのHPを減らす
+			m_Hp--;
+			// 自分を削除
+			if (m_Hp == 0)
+			{
+				ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+			}
+		}
+	}
 }
 
 void EnemyController::OnCollisionStay(ObjectBase* object)
@@ -159,31 +185,6 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
 
-	// 矢と当たったときの処理
-	if (object->GetTag() == TagName::Arrow)
-	{
-		// 今プレイヤーが持っている矢であれば処理を行わない
-		if (ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->GetHaveArrow()
-			!= object->GetThisPtr()) {
-			
-			m_bKnockBackFlg = true;
-			m_MoveSpeed = 0.0f;
-
-			//ノックバック　矢野12/16
-			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
-				object->GetComponent<Rigidbody>()->GetAccele().x * m_KnockbackPower,
-				object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
-				object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
-				});
-			//EnemyのHPを減らす
-			m_Hp--;
-			// 自分を削除
-			if (m_Hp == 0)
-			{
-				ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
-			}
-		}
-	}
 }
 
 void EnemyController::OnCollisionExit(ObjectBase* object)
