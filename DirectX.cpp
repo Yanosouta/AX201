@@ -174,3 +174,14 @@ void EndDrawDX()
 	g_pSwapChain->Present(0, 0);
 }
 
+void EnableDepth(bool enable)
+{
+	if (enable)
+	{
+		g_pContext->OMSetRenderTargets(1, &g_pRTV, g_pDSV);
+	}
+	else
+	{ // 深度バッファ無効(2D表示
+		g_pContext->OMSetRenderTargets(1, &g_pRTV, nullptr);
+	}
+}

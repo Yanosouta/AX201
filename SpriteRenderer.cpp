@@ -147,8 +147,12 @@ void SpriteRenderer::Draw()
 	// テクスチャ設定
 	SetTexturePS(m_SpriteInfo.pTexture, 0);
 
+	//深度バッファ 2D表示
+	EnableDepth(false); // 12/20 竹下
 	// 描画
 	m_SpriteInfo.pVtxBuf->Draw();
+	// 深度バッファ 3D表示
+	EnableDepth(true); // 12/20 竹下
 }
 
 void SpriteRenderer::End()
