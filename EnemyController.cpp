@@ -2,7 +2,7 @@
 //編集履歴
 //2022年12月16日　矢野　ノックバック追加
 //2022年12月19日　矢野　EnemyのHPを追加
-//
+//2022年12月19日　矢野　中ボスを追加
 //
 //
 //
@@ -27,7 +27,10 @@ void EnemyController::Update()
 {
 	// 座標を保存する
 	m_prevPos = GetOwner()->GetComponent<Transform>()->GetPosition();
-	
+	//当たり判定用のプレイヤーの座標
+	DirectX::XMFLOAT3 HeadPlayerPos = ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<Transform>()->GetPosition();
+	//当たり判定用のエネミーの座標
+	DirectX::XMFLOAT3 HeadEnemyPos = GetOwner()->GetComponent<Transform>()->GetPosition();
 	//--- Playerを追いかける処理
 	DirectX::XMFLOAT3 rotateDirection;
 	m_tic++;
@@ -38,7 +41,6 @@ void EnemyController::Update()
 		// ターゲットとなるプレイヤーの座標をランダムでずらす
 		PlayerPos.x += rand() % 8 - 4;
 		PlayerPos.z += rand() % 8 - 4;
-
 		// ターゲットまでのベクトルを算出
 		DirectX::XMVECTOR vTargetVector =
 			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&PlayerPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
@@ -52,6 +54,8 @@ void EnemyController::Update()
 		if (m_bKnockBackFlg)
 		{
 			m_FlgCount--;
+			m_MoveSpeed = 0.0f;					//動きを止める為に0を設定
+			m_TargetVector = { 0.0f,0.0f,0.0f };//動きを止める為に0を設定
 			if (m_FlgCount <= 0)
 			{
 				//初期化処理
@@ -60,6 +64,22 @@ void EnemyController::Update()
 				m_FlgCount = 5.0f;		
 			}
 		}
+		//プレイヤーとエネミーの当たり判定
+		//Enemyが一定範囲に入ると攻撃モーションになる
+		if ((HeadPlayerPos.x - HeadEnemyPos.x) * (HeadPlayerPos.x - HeadEnemyPos.x) +	
+			(HeadPlayerPos.z - HeadEnemyPos.z) * (HeadPlayerPos.z - HeadEnemyPos.z) <=
+			(m_EAttackErea + 0.5f)*(m_EAttackErea + 0.5f))
+		{
+			m_bAttackFlg = true;
+			m_MoveSpeed = 0.0f;
+			m_TargetVector = { 0.0f,0.0f,0.0f };	//攻撃モーションに入る
+		}
+		else
+		{
+			m_bAttackFlg = false;
+			m_MoveSpeed = 0.05f;//速度を元に戻す
+		}
+		
 		// 移動した場合、移動した方向に回転する
 		if (m_TargetVector.x != 0.0f || m_TargetVector.y != 0.0f || m_TargetVector.z != 0.0f) {
 			m_TargetRotY = 0.0f;
@@ -128,6 +148,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
 
+
 	// 矢と当たったときの処理
 	if (object->GetTag() == TagName::Arrow)
 	{
@@ -136,7 +157,6 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 			!= object->GetThisPtr()) {
 
 			m_bKnockBackFlg = true;
-			m_MoveSpeed = 0.0f;
 
 			//ノックバック　矢野12/16
 			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
@@ -144,10 +164,16 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
 				object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
 				});
-			//EnemyのHPを減らす
-			m_Hp--;
+			if (this->GetOwner()->GetTag() == TagName::MiddleBoss)
+			{	//BossのHPを減らす
+				m_BossHP--;
+			}
+			else {
+				//EnemyのHPを減らす
+				m_Hp--;
+			}
 			// 自分を削除
-			if (m_Hp == 0)
+			if (m_Hp == 0 || m_BossHP == 0)
 			{
 				ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 			}
@@ -184,7 +210,6 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 		// 加速度を補正
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 	}
-
 }
 
 void EnemyController::OnCollisionExit(ObjectBase* object)

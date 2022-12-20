@@ -27,12 +27,16 @@ private:
 	float m_TargetRotY;	// ターゲットまでのベクトルのY角度
 	float m_lateRotY;	// 遅れてついてくるY角度
 	DirectX::XMFLOAT3 m_prevPos;	// ひとつ前の座標
-	int m_Hp;	//Enemyの体力
 	
 	//--- ノックバック用
 	float m_KnockbackPower;	// 押される力
 	bool m_bKnockBackFlg; //ノックバック中にフラグを立てる
 	float m_FlgCount;	//フラグを立てている時にカウント
+	float m_EAttackErea;//エネミーの攻撃範囲
+	int m_Hp;		//EnemyのHP
+	int m_BossHP;	//BossのHP
+	bool m_bAttackFlg;
+	
 public:
 	// コンストラクタ
 	EnemyController()
@@ -42,9 +46,12 @@ public:
 		, m_TargetRotY(0.0f)
 		, m_lateRotY(0.0f)
 		, m_Hp(2)
+		, m_BossHP(4)
 		, m_bKnockBackFlg(false)
 		, m_FlgCount(5.0f)
 		, m_KnockbackPower(0.7f)
+		, m_EAttackErea(1.5f)
+		, m_bAttackFlg(false)
 	{}
 	// デストラクタ
 	~EnemyController() {}
