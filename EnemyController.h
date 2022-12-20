@@ -35,7 +35,7 @@ private:
 	float m_EAttackErea;//エネミーの攻撃範囲
 	int m_Hp;		//EnemyのHP
 	int m_BossHP;	//BossのHP
-	bool m_bAttackFlg;
+	bool m_bAttackFlg;//攻撃モーションに入るエリア
 	
 public:
 	// コンストラクタ
