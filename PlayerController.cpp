@@ -155,11 +155,16 @@ void PlayerController::Update()
 		if (m_tic > m_ChargeTime) {
 			// サイズを設定
 			trans->SetScale({ 0.6f, 0.6f, 0.6f });
+			rb->SetDrag(1.0f);
+			rb->SetMass(0.0f);
+			m_haveArrow->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::SUPER);
 		}
 		// 通常の場合
 		else {
 			// サイズを設定
 			trans->SetScale({ 0.3f, 0.3f, 0.3f });
+			rb->SetDrag(1.0f);
+			m_haveArrow->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::NORMAL);
 		}
 
 		// 溜め中なので加速度を0.0fに設定
