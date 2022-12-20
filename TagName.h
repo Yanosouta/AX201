@@ -8,6 +8,7 @@ namespace TagName {
 	const std::string Wall = "Wall";
 	const std::string Player = "Player";
 	const std::string Enemy = "Enemy";
+	const std::string MiddleBoss = "MiddleBoss";
 	const std::string Arrow = "Arrow";
 
 }

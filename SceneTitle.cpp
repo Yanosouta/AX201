@@ -140,7 +140,7 @@ SceneTitle::SceneTitle()
 	// 座標を設定する
 	pTransform->SetPosition({ 0.0f, 0.0f, 0.0f });
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 1; i++) {
 		//--- オブジェクト作成
 		//   型　：Enemy
 		//  名前 ：Enemy
@@ -151,6 +151,17 @@ SceneTitle::SceneTitle()
 		// 座標を設定する
 		pTransform->SetPosition({ 2.0f, 0.0f, 2.0f });
 	}
+	//--- オブジェクト作成
+		//   型　：Enemy
+		//  名前 ：Enemy
+		// タグ名：MiddleBoss
+	std::shared_ptr<ObjectBase> pMBObj = ObjectManager::CreateObject<Enemy>("Enemy", TagName::MiddleBoss);
+	// Transformのポインタを取得する
+	pTransform = pMBObj->GetComponent<Transform>();
+	// 座標を設定する
+	pTransform->SetPosition({ 2.0f, 0.0f, -2.0f });
+	//サイズを変更
+	pTransform->SetScale({ 2.0f, 2.0f, 2.0f });
 
 	//--- オブジェクト作成
 	//   型　：Field
