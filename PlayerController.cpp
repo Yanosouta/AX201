@@ -188,6 +188,8 @@ void PlayerController::Update()
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.3f
 				});
 		}
+		// 矢を離したためポインタをnullptrにする
+		m_haveArrow = nullptr;
 	}
 
 	//--- 座標補正
