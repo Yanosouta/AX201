@@ -4,25 +4,25 @@
 #include "ComponentBase.h"
 #include <DirectXMath.h>
 
-// X,Z ‚Ì‰Á‘¬“x‚Í–¢À‘•
+// X,Z ã®åŠ é€Ÿåº¦ã¯æœªå®Ÿè£…
 
 class Rigidbody : public ComponentBase
 {
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Rigidbody()
 		: m_Mass(0.03f)
 		, m_Accele({0.0f, 0.0f, 0.0f})
 		, m_Drag(0.95f)
 	{}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	virtual ~Rigidbody(){}
 
-	// XV
+	// æ›´æ–°
 	void FixedUpdate() override;
 	void LateUpdate() override;
 
-	// ‰Á‘¬“x‚ğ‰Á‚¦‚é
+	// åŠ é€Ÿåº¦ã‚’åŠ ãˆã‚‹
 	void AddForce(DirectX::XMFLOAT3 force) {
 		m_Accele = {
 			m_Accele.x + force.x,
@@ -31,23 +31,25 @@ public:
 		};
 	}
 
-	//--- ƒQƒbƒgŠÖ”
+	//--- ã‚²ãƒƒãƒˆé–¢æ•°
 	float GetMass(void) { return m_Mass; }
 	DirectX::XMFLOAT3 GetAccele(void) { return m_Accele; }
+	float GetDrag(void) { return m_Drag; }
 
-	//--- ƒZƒbƒgŠÖ”
+	//--- ã‚»ãƒƒãƒˆé–¢æ•°
 	void SetMass(float mass) { m_Mass = mass; }
 	void SetAccele(DirectX::XMFLOAT3 accele) { m_Accele = accele; }
+	void SetDrag(float drag) { m_Drag = drag; }
 
-	// d—Í
+	// é‡åŠ›
 	constexpr static float mc_gravity = 0.1f;
 
 private:
-	// ¿—Êid—Êj
+	// è³ªé‡ï¼ˆé‡é‡ï¼‰
 	float m_Mass;
-	// ‰Á‘¬“x
+	// åŠ é€Ÿåº¦
 	DirectX::XMFLOAT3 m_Accele;
-	//’ïR(Œ¸‘¬—¦)
+	//æŠµæŠ—(æ¸›é€Ÿç‡)
 	float m_Drag;
 };
 
