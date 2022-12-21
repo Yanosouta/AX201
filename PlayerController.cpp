@@ -13,6 +13,8 @@
 #include "Arrow.h"
 #include <math.h>
 #include "CameraPlayer.h"
+#include "Life.h"	//
+#include "clicAtk.h"
 
 void PlayerController::Start()
 {
@@ -121,6 +123,10 @@ void PlayerController::Update()
 
 	}
 	if (IsKeyPress(VK_SPACE)) {
+		//UIのuv座標の切り替え
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(1);
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
+
 		m_tic++;	// 押している間、カウントする
 		// 変更用ポインタ
 		std::shared_ptr<Transform> trans;
@@ -195,8 +201,16 @@ void PlayerController::Update()
 		}
 		// 矢を離したためポインタをnullptrにする
 		m_haveArrow = nullptr;
-	}
 
+
+		//仮配置<UI切り替え>ーーーーーーーーーーーーー
+				//UIのuv座標の切り替え
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);	
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+	}
+	
 	//--- 座標補正
 	// 落下判定
 	if (GetOwner()->GetComponent<Rigidbody>()) {
