@@ -11,6 +11,7 @@
 //---12/20 竹下------
 #include "Zanki.h"//仮
 #include "Life.h"
+#include "clicAtk.h"
 
 #include "Transform.h"
 #include "CameraObjPlayer.h"
@@ -48,7 +49,8 @@ SceneTitle::SceneTitle()
 	// 中央真ん中HPの中身(まだ配置しかしてないのでアニメーションの追加をする)
 	pObj = ObjectManager::CreateObject<UI>("UI.5");
 	pObj->SetLayerNum(4);
-	pObj->AddComponent<Life>();
+	pObj->AddComponent<Life>(); //LifeのUpdateって指定しても
+	pObj->AddComponent<SpriteAnimation>();
 	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/Life.png");
 	pSpriteRenderer->SetSize(220, 145);
@@ -74,12 +76,13 @@ SceneTitle::SceneTitle()
 	pTransform->SetPosition({ -530.0f, -40.0f, 0.0f });
 
 	// 攻撃アイコン
-	ObjectManager::CreateObject<UI>("UI.8");
-	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.8")->GetComponent<SpriteRenderer>();
-	pTransform = ObjectManager::FindObjectWithName("UI.8")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/ATK.png");
+	pObj = ObjectManager::CreateObject<UI>("UI.8");
+	pObj->SetLayerNum(7);
+	pObj->AddComponent<clicAtk>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/normalAtk.png");	
 	pSpriteRenderer->SetSize(150, 150);
-	ObjectManager::FindObjectWithName("UI.8")->SetLayerNum(7);
+	pTransform = pObj->GetComponent<Transform>();
 	pTransform->SetPosition({ -400.0f, -230.0f, 0.0f });
 
 	// 残機数
