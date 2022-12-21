@@ -20,6 +20,8 @@
 #include "Field.h"
 #include "UI.h"
 #include"EnemyManager.h"
+#include "Stage.h"
+
 SceneTitle::SceneTitle()
 {
 	//--- 変更用ポインタ
@@ -175,6 +177,10 @@ SceneTitle::SceneTitle()
 	pTransform->SetAngle({ 0.0f, 70.0f, 0.0f });
 	// 当たり判定の辺の長さをセット
 	pObj->GetComponent<AABBCollider>()->SetLen({ 2.0f, 5.0f, 5.0f });
+	
+	//--- ステージ作成
+	// Stage* pStage = new Stage(); のスマートポインタバージョン。
+	std::shared_ptr<Stage> pStage = std::make_shared<Stage>();
 
 	pObj = ObjectManager::CreateObject<ObjectBase>("EnemyManager");
 	pObj->AddComponent<EnemyManager>();
