@@ -15,6 +15,8 @@
 #include "ObjectManager.h"
 #include "Arrow.h"
 #include "PlayerController.h"
+#include"EnemyRepop.h"
+#include "AABBCollider.h"
 
 void EnemyController::Start()
 {
@@ -25,6 +27,7 @@ void EnemyController::Start()
 
 void EnemyController::Update()
 {
+	
 	// 座標を保存する
 	m_prevPos = GetOwner()->GetComponent<Transform>()->GetPosition();
 	//当たり判定用のプレイヤーの座標
@@ -33,6 +36,7 @@ void EnemyController::Update()
 	DirectX::XMFLOAT3 HeadEnemyPos = GetOwner()->GetComponent<Transform>()->GetPosition();
 	//--- Playerを追いかける処理
 	DirectX::XMFLOAT3 rotateDirection;
+	
 	m_tic++;
 	if (m_tic >= m_ChangeTargetTime) {
 		m_tic = rand() % (int)m_ChangeTargetTime;
@@ -178,6 +182,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 			// 自分を削除
 			if (m_Hp == 0 || m_BossHP == 0)
 			{
+				m_breakCount++;
 				ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 			}
 		}
@@ -219,3 +224,5 @@ void EnemyController::OnCollisionExit(ObjectBase* object)
 {
 
 }
+
+
