@@ -6,18 +6,12 @@
 class Field : public Object3D
 {
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	Field(std::string name, std::string tag) : Object3D(name, tag) {
-		// ƒvƒŒƒCƒ„[‚Ìƒ‚ƒfƒ‹‚ğƒ[ƒh‚·‚éi‰¼‚ÅƒLƒ…[ƒu‚ÌƒIƒuƒWƒFƒNƒgj
-		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/DemoCube/DemoCube.fbx", 1.0f);
-		// ƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ’Ç‰Á
-		AddComponent<AABBCollider>();
-		// ƒIƒuƒWƒFƒNƒg‚Ì•Ó‚Ì’·‚³‚ğƒZƒbƒg
-		GetComponent<Transform>()->SetScale({ 20.0f, 1.0f, 20.0f });
-		// “–‚½‚è”»’è‚Ì•Ó‚Ì’·‚³‚ğƒZƒbƒg
-		GetComponent<AABBCollider>()->SetLen({ 20.0f,1.0f,20.0f });
+		// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒ¢ãƒ‡ãƒ«ã‚’ãƒ­ãƒ¼ãƒ‰ã™ã‚‹ï¼ˆä»®ã§ã‚­ãƒ¥ãƒ¼ãƒ–ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼‰
+		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/Stage/Stage.fbx", 0.05f);
 	}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~Field() {}
 };
 
