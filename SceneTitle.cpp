@@ -12,13 +12,14 @@
 #include "Zanki.h"//仮
 #include "Life.h"
 
+
 #include "Transform.h"
 #include "CameraObjPlayer.h"
 #include "Player.h"
 #include "Enemy.h"
 #include "Field.h"
 #include "UI.h"
-
+#include"EnemyManager.h"
 SceneTitle::SceneTitle()
 {
 	//--- 変更用ポインタ
@@ -174,6 +175,9 @@ SceneTitle::SceneTitle()
 	pTransform->SetAngle({ 0.0f, 70.0f, 0.0f });
 	// 当たり判定の辺の長さをセット
 	pObj->GetComponent<AABBCollider>()->SetLen({ 2.0f, 5.0f, 5.0f });
+
+	pObj = ObjectManager::CreateObject<ObjectBase>("EnemyManager");
+	pObj->AddComponent<EnemyManager>();
 
 }
 
