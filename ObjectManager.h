@@ -4,9 +4,9 @@
 #include <list>
 #include <memory>
 #include <string>
-#include <algorithm>
 #include "ObjectBase.h"
 #include <vector>
+#include <algorithm>
 
 class ObjectBase;
 
@@ -14,6 +14,7 @@ class ObjectManager
 {
 	friend class ObjectBase;
 	using ObjectPool = std::list<std::shared_ptr<ObjectBase>>;
+	using vObjectPool = std::vector<std::shared_ptr<ObjectBase>>;
 
 private:
 	// オブジェクトプール
@@ -130,9 +131,12 @@ public:
 	}
 	// オブジェクトの描画
 	static void Draw() {
-		// 描画順レイヤーによってソートする
-		//std::sort(m_ObjectPool.begin(), m_ObjectPool.end());
+		vObjectPool drawObjPool;
 		for (auto it = m_ObjectPool.begin(); it != m_ObjectPool.end(); it++)
+			drawObjPool.push_back(*it);
+		// 描画順レイヤーによってソートする
+		std::sort(drawObjPool.begin(), drawObjPool.end());
+		for (auto it = drawObjPool.begin(); it != drawObjPool.end(); it++)
 			if (!(*it)->GetDestroy())
 				(*it)->Draw();
 	}
