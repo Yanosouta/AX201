@@ -10,11 +10,12 @@ EnemyManager::EnemyManager()
 	, m_tick(0.0f)
 {
 	//ƒŠƒ|ƒbƒv‚·‚éêŠ
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{10.0f, 0.0f, 0.0f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{ 5.0f, 0.0f, 0.0f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{ 0.0f, 0.0f, 0.0f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{-5.0f, 0.0f, 0.0f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{-10.0f,0.0f, 0.0f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -28.0f,-5.4f, 3.1f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -23.0f,-5.4f, 5.0f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -14.5f,-5.4f, 2.2f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{   7.1f,-5.4f, 1.9f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{  14.0f,-5.4f, 2.6f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{  20.5f,-5.4f, 3.2f });
 }
 
 void EnemyManager::Update()
@@ -32,6 +33,8 @@ void EnemyManager::Update()
 		pTrans->SetPosition(m_RepopPosList[rand() % m_RepopPosList.size()]);
 		pTrans->SetScale({ 1.0f,1.0f,1.0f });
 
-		m_tick = 0.0f;
+		//m_tick = 0.0f;
 	}
+
+	
 }
