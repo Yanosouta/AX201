@@ -92,7 +92,7 @@ SceneTitle::SceneTitle()
 	// カウントダウンするようにした。
 	// 時間じゃなくHPが減ったらに変えたい
 	pObj = ObjectManager::CreateObject<UI>("UI.9");
-	pObj->SetLayerNum(8);
+	pObj->SetLayerNum(10);
 	pObj->AddComponent<Zanki>();
 	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/number.png");
