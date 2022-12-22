@@ -41,12 +41,12 @@ SceneTitle::SceneTitle()
 	// UIアニメーションを追加
 	//----------------------------------------------------------------------------------------
 	// 中央真ん中HPの枠
-	ObjectManager::CreateObject<UI>("UI.4");
+	pObj = ObjectManager::CreateObject<UI>("UI.4");
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.4")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.4")->GetComponent<Transform>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/HP_Waku.png");
 	pSpriteRenderer->SetSize(450, 130);
-	ObjectManager::FindObjectWithName("UI.4")->SetLayerNum(3);
+	ObjectManager::FindObjectWithName("UI.4")->SetLayerNum(5);
 	pTransform->SetPosition({ 0.0f, -280.0f, 0.0f });
 
 	// 中央真ん中HPの中身(まだ配置しかしてないのでアニメーションの追加をする)
