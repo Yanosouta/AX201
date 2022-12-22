@@ -139,6 +139,7 @@ public:
 		for (auto it = drawObjPool.begin(); it != drawObjPool.end(); it++)
 			if (!(*it)->GetDestroy())
 				(*it)->Draw();
+		drawObjPool.clear();
 	}
 
 private:
