@@ -61,7 +61,7 @@ void Update(float deltaTime)
 }
 void Draw()
 {
-	BeginDrawDX3D();
+	BeginDrawDX();
 	g_pGame->Draw();
 	EndDrawDX();
 }
