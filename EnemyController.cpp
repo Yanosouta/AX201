@@ -38,6 +38,7 @@ void EnemyController::Update()
 	DirectX::XMFLOAT3 rotateDirection;
 	
 	m_tic++;
+	
 	if (m_tic >= m_ChangeTargetTime) {
 		m_tic = rand() % (int)m_ChangeTargetTime;
 		// Playerタグのオブジェクトの座標を取得
@@ -54,36 +55,7 @@ void EnemyController::Update()
 		vTargetVector = DirectX::XMVectorScale(vTargetVector, m_MoveSpeed);
 		// Float3に変換する
 		DirectX::XMStoreFloat3(&m_TargetVector, vTargetVector);
-		//ノックバック後のスタン
-		if (m_bKnockBackFlg)
-		{
-			m_FlgCount--;
-			m_MoveSpeed = 0.0f;					//動きを止める為に0を設定
-			m_TargetVector = { 0.0f,0.0f,0.0f };//動きを止める為に0を設定
-			if (m_FlgCount <= 0)
-			{
-				//初期化処理
-				m_MoveSpeed = 0.05f;	//速度を元に戻す
-				m_bKnockBackFlg = false;
-				m_FlgCount = 5.0f;		
-			}
-		}
-		//プレイヤーとエネミーの当たり判定
-		//Enemyが一定範囲に入ると攻撃モーションになる
-		if ((HeadPlayerPos.x - HeadEnemyPos.x) * (HeadPlayerPos.x - HeadEnemyPos.x) +	
-			(HeadPlayerPos.z - HeadEnemyPos.z) * (HeadPlayerPos.z - HeadEnemyPos.z) <=
-			(m_EAttackErea + 0.5f)*(m_EAttackErea + 0.5f))
-		{
-			m_bAttackFlg = true;
-			m_MoveSpeed = 0.0f;
-			m_TargetVector = { 0.0f,0.0f,0.0f };	//攻撃モーションに入る
-		}
-		else
-		{
-			m_bAttackFlg = false;
-			m_MoveSpeed = 0.05f;//速度を元に戻す
-		}
-		
+	
 		// 移動した場合、移動した方向に回転する
 		if (m_TargetVector.x != 0.0f || m_TargetVector.y != 0.0f || m_TargetVector.z != 0.0f) {
 			m_TargetRotY = 0.0f;
@@ -102,24 +74,83 @@ void EnemyController::Update()
 			if (rotateDirection.y > 0) m_TargetRotY = 180.0f + (180.0f - m_TargetRotY);
 		}
 	}
+	
+	if (m_EnemyMotionType == NORMAL)
+	{
+		//ノックバック後のスタン
+		if (m_bKnockBackFlg)
+		{
+			m_FlgCount--;
+			m_MoveSpeed = 0.0f;					//動きを止める為に0を設定
+			m_TargetVector = { 0.0f,0.0f,0.0f };//動きを止める為に0を設定
+			if (m_FlgCount <= 0)
+			{
+				//初期化処理
+				m_MoveSpeed = 0.05f;	//速度を元に戻す
+				m_bKnockBackFlg = false;
+				m_FlgCount = 100.0f;
+			}
+		}
+		//プレイヤーとエネミーの当たり判定
+		//Enemyが一定範囲に入ると攻撃モーションになる
+		if ((HeadPlayerPos.x - HeadEnemyPos.x) * (HeadPlayerPos.x - HeadEnemyPos.x) +
+			(HeadPlayerPos.z - HeadEnemyPos.z) * (HeadPlayerPos.z - HeadEnemyPos.z) <=
+			(m_EAttackErea + 0.5f)*(m_EAttackErea + 0.5f))
+		{
+			m_EnemyMotionType = ATTACK;
+			m_MoveSpeed = 0.0f;
+			m_TargetVector = { 0.0f,0.0f,0.0f };	//攻撃モーションに入る
+		}
+		else
+		{
+			m_MoveSpeed = 0.05f;//速度を元に戻す
+		}
+	}
+	if (m_EnemyMotionType == DEAD)
+	{
+		// ターゲットまでのベクトルを算出
+		DirectX::XMVECTOR DeadVector =
+			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&m_DeadPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
+		// ベクトルを正規化
+		DeadVector = DirectX::XMVector3Normalize(DeadVector);
+		// 移動スピードを掛ける
+		DeadVector = DirectX::XMVectorScale(DeadVector, m_MoveSpeed);
+		// Float3に変換する
+		DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
+		// 座標に適用する
+		GetOwner()->GetComponent<Transform>()->SetPosition({
+			GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
+			GetOwner()->GetComponent<Transform>()->GetPosition().y,
+			GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
+			});
 
-	// 座標に適用する
-	GetOwner()->GetComponent<Transform>()->SetPosition({
-		GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
-		GetOwner()->GetComponent<Transform>()->GetPosition().y,
-		GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
-		});
+	}
+	else
+	{
+		//// 座標に適用する
+		GetOwner()->GetComponent<Transform>()->SetPosition({
+			GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
+			GetOwner()->GetComponent<Transform>()->GetPosition().y,
+			GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
+			});
 
-	// 二つの間の角度が180°超えていた場合、逆回転の方が速いため、補正
-	if (abs(m_lateRotY - m_TargetRotY) >= 180.0f) 
-		if (m_TargetRotY < 0.0f) m_TargetRotY = (int)m_TargetRotY + 360;
-		else if (m_TargetRotY >= 0.0f) m_TargetRotY = (int)m_TargetRotY - 360;
-	// 180°を超えたもしくは、-180°以下になったときに範囲内に補正する
-	if (m_lateRotY < -180)  m_lateRotY = ((int)(fabs(m_lateRotY) + 180) % 360 - 180) * -1.0f;
-	if ( 180 <= m_lateRotY) m_lateRotY = (int)(m_lateRotY + 180) % 360 - 180;
-	// 遅れてついていく場合の角度を計算し適応する
-	m_lateRotY = (m_TargetRotY - m_lateRotY) * 0.05f + m_lateRotY;
-	GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, m_lateRotY,0.0f });
+		// 二つの間の角度が180°超えていた場合、逆回転の方が速いため、補正
+		if (abs(m_lateRotY - m_TargetRotY) >= 180.0f)
+			if (m_TargetRotY < 0.0f) m_TargetRotY = (int)m_TargetRotY + 360;
+			else if (m_TargetRotY >= 0.0f) m_TargetRotY = (int)m_TargetRotY - 360;
+		// 180°を超えたもしくは、-180°以下になったときに範囲内に補正する
+		if (m_lateRotY < -180)  m_lateRotY = ((int)(fabs(m_lateRotY) + 180) % 360 - 180) * -1.0f;
+		if (180 <= m_lateRotY) m_lateRotY = (int)(m_lateRotY + 180) % 360 - 180;
+		// 遅れてついていく場合の角度を計算し適応する
+		m_lateRotY = (m_TargetRotY - m_lateRotY) * 0.05f + m_lateRotY;
+		GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, m_lateRotY,0.0f });
+		
+		m_EnemyMotionType = NORMAL;
+	}
+		
+	
+	
+	
 }
 
 void EnemyController::OnCollisionEnter(ObjectBase* object)
@@ -182,8 +213,8 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 			// 自分を削除
 			if (m_Hp == 0 || m_BossHP == 0)
 			{
-				m_breakCount++;
-				ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+				m_EnemyMotionType = DEAD;
+				//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 			}
 		}
 	}
