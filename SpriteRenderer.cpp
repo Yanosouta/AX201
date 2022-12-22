@@ -27,16 +27,16 @@ SpriteRenderer::SpriteRenderer()
 		}
 		// PixelShaderを作成
 		m_pDefPS = new PixelShader();
-		if (FAILED(m_pDefPS->Load("Assets/Shader/ModelPS.cso"))) {
-			MessageBox(nullptr, "ModelPS.cso", "Error", MB_OK);
+		if (FAILED(m_pDefPS->Load("Assets/Shader/UIPS.cso"))) {
+			MessageBox(nullptr, "UIPS.cso", "Error", MB_OK);
 		}
 
-		// Anime用ConstantBufferを作成
-		m_pConst[0] = new ConstantBuffer;
-		m_pConst[0]->Create(sizeof(AnimeUV));
 		// Transform用ConstantBufferを作成
+		m_pConst[0] = new ConstantBuffer;
+		m_pConst[0]->Create(sizeof(m_SpriteInfo.m_Mat));
+		// Anime用ConstantBufferを作成
 		m_pConst[1] = new ConstantBuffer;
-		m_pConst[1]->Create(sizeof(DirectX::XMFLOAT4X4) * 3);
+		m_pConst[1]->Create(sizeof(m_SpriteInfo.m_Param));
 	}
 	++m_shaderRef;
 
@@ -76,21 +76,22 @@ void SpriteRenderer::Start()
 	m_SpriteInfo.animeUV.uvWidth = 1.0f;
 	m_SpriteInfo.animeUV.uvTopLeftU = 0.0f;
 	m_SpriteInfo.animeUV.uvTopLeftV = 0.0f;
-	// 行列を単位行列にするための設定
-	m_SpriteInfo.m_Mat[0]._11 = 1.0f;
-	m_SpriteInfo.m_Mat[0]._22 = 1.0f;
-	m_SpriteInfo.m_Mat[0]._33 = 1.0f;
-	m_SpriteInfo.m_Mat[0]._44 = 1.0f;
+	// パラメーター
+	m_SpriteInfo.m_Param[0] = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	m_SpriteInfo.m_Param[1] = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	m_SpriteInfo.m_Param[2] = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[0], DirectX::XMMatrixIdentity());
+	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[1], DirectX::XMMatrixIdentity());
+	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[2], DirectX::XMMatrixIdentity());
 }
 
 void SpriteRenderer::LateUpdate()
 {
-	//--- UIはオブジェクトの手前に描画する
-	// 0.25 上下0.5/√3 [720]
+	// ワールド行列で画面の表示位置を計算
 	// 移動行列
 	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(
-		-GetOwner()->GetComponent<Transform>()->GetPosition().x / 720 * (0.5f / std::sqrtf(3.0f)),
-		GetOwner()->GetComponent<Transform>()->GetPosition().y / 720 * (0.5f / std::sqrtf(3.0f)),
+		GetOwner()->GetComponent<Transform>()->GetPosition().x,
+		GetOwner()->GetComponent<Transform>()->GetPosition().y,
 		GetOwner()->GetLayerNum() * 1e-8f);
 	// X回転行列
 	DirectX::XMMATRIX Rx = DirectX::XMMatrixRotationX(
@@ -103,8 +104,8 @@ void SpriteRenderer::LateUpdate()
 		GetOwner()->GetComponent<Transform>()->GetAngle().z);
 	// 拡大縮小行列
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(
-		GetOwner()->GetComponent<Transform>()->GetScale().x / 720 * (0.5f / std::sqrtf(3.0f)),
-		GetOwner()->GetComponent<Transform>()->GetScale().y / 720 * (0.5f / std::sqrtf(3.0f)),
+		1.0f,/*GetOwner()->GetComponent<Transform>()->GetScale().x*/
+		1.0f,/*GetOwner()->GetComponent<Transform>()->GetScale().y*/
 		1.0f/*GetOwner()->GetComponent<Transform>()->GetScale().z*/);
 
 	// 全ての行列を一つにまとめる
@@ -115,34 +116,44 @@ void SpriteRenderer::LateUpdate()
 
 	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[0], mat);
 
-	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[1], 
-		DirectX::XMMatrixTranspose(DirectX::XMMatrixLookAtLH(
-		DirectX::XMVectorSet(0.0f, 0.0f, 0.25f, 0),
-		DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0),
-		DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0))));
-	DirectX::XMStoreFloat4x4(&m_SpriteInfo.m_Mat[2], 
-		DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveFovLH(
-			DirectX::XMConvertToRadians(60.0f), 16.0f / 9.0f, 0.2f, 0.3f)));
+	// ビュー行列
+	DirectX::XMFLOAT4X4 fView;
+	DirectX::XMStoreFloat4x4(&fView,
+		DirectX::XMMatrixIdentity());
+	m_SpriteInfo.m_Mat[1] = fView;
+	// プロジェクション行列
+	DirectX::XMFLOAT4X4 fProj;
+	DirectX::XMStoreFloat4x4(&fProj,
+		DirectX::XMMatrixTranspose(
+			DirectX::XMMatrixOrthographicOffCenterLH(
+				-640.0f,	// 画面左端の座標
+				640.0f,		// 画面右端の座標
+				-360.0f,	// 画面下端の座標
+				360.0f,		// 画面上端の座標
+				-1.0f,		// Z値で写す範囲の最小値
+				1.0f		// Z値で写す範囲の最大値
+			)
+		));
+	m_SpriteInfo.m_Mat[2] = fProj;
 }
 
 // 描画
 void SpriteRenderer::Draw()
 {
-	// ConstantBufferを設定
-	m_pConst[0]->Write(&m_SpriteInfo.animeUV);
-	m_pConst[1]->Write(&m_SpriteInfo.m_Mat);
-	m_pAlphaBlend->Bind();		// αブレンド用BlendStateを設定
-	m_pSamplerState->Bind();	// SamplerState設定
+	// セットする
+	m_SpriteInfo.m_Param[1].x = m_SpriteInfo.animeUV.uvTopLeftU;
+	m_SpriteInfo.m_Param[1].y = m_SpriteInfo.animeUV.uvTopLeftV;
+	m_SpriteInfo.m_Param[1].z = m_SpriteInfo.animeUV.uvWidth;
+	m_SpriteInfo.m_Param[1].w = m_SpriteInfo.animeUV.uvHeight;
 	m_pDefVS->Bind();		// VertexShader設定
 	m_pDefPS->Bind();		// PixelShader設定
-
-	for (int i = 0; i < 2; i++)
-	{
-		if (m_pConst[i])
-		{
-			m_pConst[i]->BindVS(i);
-		}
-	}
+	m_pAlphaBlend->Bind();		// αブレンド用BlendStateを設定
+	m_pSamplerState->Bind();	// SamplerState設定
+	// ConstantBufferを設定
+	m_pConst[0]->Write(m_SpriteInfo.m_Mat);
+	m_pConst[0]->BindVS(0);
+	m_pConst[1]->Write(m_SpriteInfo.m_Param);
+	m_pConst[1]->BindVS(1);
 
 	// テクスチャ設定
 	SetTexturePS(m_SpriteInfo.pTexture, 0);
@@ -171,10 +182,37 @@ void SpriteRenderer::End()
 void SpriteRenderer::SetSize(float width, float height)
 {
 	Vertex vtx[4] = {
-		{{(width / 2), (height / 2), 0.0f}, {0.0f, 0.0f}},
-		{{-(width / 2), (height / 2), 0.0f}, {1.0f, 0.0f}},
-		{{(width / 2), -(height / 2), 0.0f}, {0.0f, 1.0f}},
-		{{ -(width / 2),  -(height / 2), 0.0f}, {1.0f, 1.0f}} };
+		{{-(width / 2), (height / 2), 0.0f}, {0.0f, 0.0f}},
+		{{(width / 2), (height / 2), 0.0f}, {1.0f, 0.0f}},
+		{{-(width / 2), -(height / 2), 0.0f}, {0.0f, 1.0f}},
+		{{(width / 2),  -(height / 2), 0.0f}, {1.0f, 1.0f}} };
 	m_SpriteInfo.pVtxBuf = new VertexBuffer;
 	m_SpriteInfo.pVtxBuf->Create(vtx, 4);
+}
+
+
+void SpriteRenderer::SetOffset(DirectX::XMFLOAT2 offset)
+{
+	m_SpriteInfo.m_Param[0].x = offset.x;
+	m_SpriteInfo.m_Param[0].y = offset.y;
+}
+void SpriteRenderer::SetSize(DirectX::XMFLOAT2 size)
+{
+	m_SpriteInfo.m_Param[0].z = size.x;
+	m_SpriteInfo.m_Param[0].w = size.y;
+}
+
+void SpriteRenderer::SetUVPos(DirectX::XMFLOAT2 pos)
+{
+	m_SpriteInfo.m_Param[1].x = pos.x;
+	m_SpriteInfo.m_Param[1].y = pos.y;
+}
+void SpriteRenderer::SetUVScale(DirectX::XMFLOAT2 scale)
+{
+	m_SpriteInfo.m_Param[1].x = scale.x;
+	m_SpriteInfo.m_Param[1].z = scale.y;
+}
+void SpriteRenderer::SetColor(DirectX::XMFLOAT4 color)
+{
+	m_SpriteInfo.m_Param[2] = color;
 }
