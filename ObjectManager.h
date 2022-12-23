@@ -61,6 +61,7 @@ public:
 		// オブジェクトプールを全て削除
 		m_AppendObjectPool.clear();
 		m_ObjectPool.clear();
+		m_DestroyObjectPool.clear();
 	}
 
 	// オブジェクトの取得
