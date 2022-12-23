@@ -14,6 +14,8 @@
 #include <math.h>
 #include "CameraPlayer.h"
 #include "Life.h"	//
+#include "Zanki.h" //
+#include "SceneManager.h" // 
 #include "clicAtk.h"
 
 void PlayerController::Start()
@@ -208,8 +210,8 @@ void PlayerController::Update()
 				//UIのuv座標の切り替え
 		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(0);
 		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
-		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);	
-		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		//ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);	
+		//ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
 	}
 	
 	//--- 座標補正
@@ -258,6 +260,81 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 
 		// 加速度を補正
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
+	}
+
+	//-------------------------------------------------------------------------------
+	// 12/22
+	// 竹下　敵と当たった時の朱里
+	//-------------------------------------------------------------------------------
+	if (object->GetTag() == TagName::Enemy || object->GetTag() == TagName::MiddleBoss)
+	{
+
+
+		m_bLifeFlg = true;
+		if (m_bLifeFlg)
+		{
+			m_FlgCount--;
+			m_Life--;
+			if (m_FlgCount <= 0)
+			{
+				//初期化処理
+				m_bLifeFlg = false;
+				m_FlgCount = 5.0f;
+			}
+		}
+		// HP_MAX
+		if (m_Life == 4)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_75%
+		if (m_Life == 3)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_50%
+		if (m_Life == 2)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(2);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_25%
+		if (m_Life == 1)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(3);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_0%
+		if (m_Life == 0)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(4);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+	}
+	//HP_0 -> MAX
+	if (m_Life <= 0)
+	{
+		m_Life = 4;
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		m_Zanki--;
+		if (m_Zanki == 8) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(1);
+		if (m_Zanki == 7) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(2);
+		if (m_Zanki == 6) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(3);
+		if (m_Zanki == 5) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(4);
+		if (m_Zanki == 4) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(5);
+		if (m_Zanki == 3) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(6);
+		if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
+		if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
+		// 残機が0でシーン移動
+		if (m_Zanki <= 0)
+		{
+			ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
+			SceneManager::LoadScene(SceneName::SceneGame01);
+		}
+
 	}
 }
 
