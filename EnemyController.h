@@ -66,7 +66,7 @@ public:
 		, m_KnockbackPower(0.7f)
 		, m_EAttackErea(1.5f)
 		, m_EnemyMotionType(NORMAL)
-		, m_DeadPos(-34.0f, -5.4, -9.0f)
+		, m_DeadPos(-44.0f, -5.4, -9.0f)
 	{}
 	// デストラクタ
 	~EnemyController() {}

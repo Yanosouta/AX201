@@ -119,10 +119,19 @@ void EnemyController::Update()
 		DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
 		// 座標に適用する
 		GetOwner()->GetComponent<Transform>()->SetPosition({
-			GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
+			GetOwner()->GetComponent<Transform>()->GetPosition().x ,
 			GetOwner()->GetComponent<Transform>()->GetPosition().y,
 			GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
 			});
+		if (HeadEnemyPos.z <= -5.0f &&
+			HeadEnemyPos.z >= -15.0f)
+		{
+			GetOwner()->GetComponent<Transform>()->SetPosition({
+			GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
+			GetOwner()->GetComponent<Transform>()->GetPosition().y,
+			GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
+				});
+		}
 
 	}
 	else
@@ -155,6 +164,8 @@ void EnemyController::Update()
 
 void EnemyController::OnCollisionEnter(ObjectBase* object)
 {
+	
+
 	// フィールドと当たったときの処理
 	if (object->GetTag() == TagName::Ground) {
 		// Y軸の加速度をゼロに
@@ -185,39 +196,49 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 
 
 	// 矢と当たったときの処理
-	if (object->GetTag() == TagName::Arrow)
+	if (m_EnemyMotionType == NORMAL || m_EnemyMotionType == ATTACK)
 	{
-		// 今プレイヤーが持っている矢であれば処理を行わない
-		if (ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->GetHaveArrow()
-			!= object->GetThisPtr()) {
+		if (object->GetTag() == TagName::Arrow)
+		{
+			// 今プレイヤーが持っている矢であれば処理を行わない
+			if (ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->GetHaveArrow()
+				!= object->GetThisPtr()) {
 
-			m_bKnockBackFlg = true;
-			if (this->GetOwner()->GetTag() == TagName::MiddleBoss)
-			{	//BossのHPを減らす
-				m_BossHP--;
-				//ボスの場合ノックバックの距離を減らす
-				m_KnockbackPower = 0.3f;
-			}
-			else {
-				//EnemyのHPを減らす
-				m_Hp--;
-				m_KnockbackPower = 0.7f;
-			}
-			//ノックバック　矢野12/16
-			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
-				object->GetComponent<Rigidbody>()->GetAccele().x * m_KnockbackPower,
-				object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
-				object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
-				});
-			
-			// 自分を削除
-			if (m_Hp == 0 || m_BossHP == 0)
-			{
-				m_EnemyMotionType = DEAD;
-				//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+				m_bKnockBackFlg = true;
+				
+				if (this->GetOwner()->GetTag() == TagName::MiddleBoss)
+				{	
+					//ノックバックとスタンをしない
+					m_KnockbackPower = 0.0f;
+					m_FlgCount = 0.0f;
+					if (ArrowController::ARROW_TYPE::SUPER == object->GetComponent<ArrowController>()->GetArrowType())
+					{
+						//BossのHPを減らす
+						m_BossHP--;
+					}
+				}
+				else {
+					//EnemyのHPを減らす
+					m_Hp--;
+					m_KnockbackPower = 0.7f;
+				}
+				//ノックバック　矢野12/16
+				GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+					object->GetComponent<Rigidbody>()->GetAccele().x * m_KnockbackPower,
+					object->GetComponent<Rigidbody>()->GetAccele().y * m_KnockbackPower,
+					object->GetComponent<Rigidbody>()->GetAccele().z * m_KnockbackPower
+					});
+
+				// 自分を削除
+				if (m_Hp == 0 || m_BossHP == 0)
+				{
+					m_EnemyMotionType = DEAD;
+					//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+				}
 			}
 		}
 	}
+	
 }
 
 void EnemyController::OnCollisionStay(ObjectBase* object)

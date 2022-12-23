@@ -33,6 +33,8 @@ public:
 	
 	//--- セット関数
 	void SetArrowType(ARROW_TYPE Type) { m_ArrowType = Type; }
+	//--- ゲット関数
+	ARROW_TYPE GetArrowType() { return m_ArrowType; }
 };
 
 #endif //!___ARROW_CONTROLLER_H___
