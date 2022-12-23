@@ -15,10 +15,22 @@ private:
 	float m_tic; // フレームカウント
 	std::shared_ptr<ObjectBase> m_haveArrow; // 現在プレイヤーが持っている矢のポインタ
 	DirectX::XMFLOAT3 m_prevPos;	// ひとつ前の座標
+
+	// 12/23 竹下　プレイヤーのライフ
+	int m_Life;
+	bool m_bLifeFlg;  // [EnemyControllerの見よう見まねで作ったので、いるか分かりません
+	float m_FlgCount; // [cppの269行目あたりで使ってると思うので見てあんま意味なければ消してもいいです
+	// 12/23 竹下　プレイヤーの残機
+	unsigned int m_Zanki;
+
 public:
 	// コンストラクタ
 	PlayerController()
 		: m_ChargeTime(30.0f) // 60 fps の場合 0.5 秒
+		, m_Life(4)
+		, m_Zanki(9)
+		, m_bLifeFlg(false)
+		, m_FlgCount(5.0f)
 	{}
 	// デストラクタ
 	~PlayerController() {}
