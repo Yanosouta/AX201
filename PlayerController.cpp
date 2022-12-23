@@ -163,6 +163,7 @@ void PlayerController::Update()
 			trans->SetScale({ 0.6f, 0.6f, 0.6f });
 			rb->SetDrag(1.0f);
 			rb->SetMass(0.01f);
+
 			m_haveArrow->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::SUPER);
 		}
 		// 通常の場合
