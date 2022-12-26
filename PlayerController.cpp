@@ -20,8 +20,20 @@
 
 void PlayerController::Start()
 {
+	// 当たり判定をとるタグ名を設定
 	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Ground);
 	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Wall);
+	
+	// 設定した残機の数でUIを初期化
+	if (m_Zanki == 8) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(1);
+	if (m_Zanki == 7) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(2);
+	if (m_Zanki == 6) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(3);
+	if (m_Zanki == 5) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(4);
+	if (m_Zanki == 4) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(5);
+	if (m_Zanki == 3) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(6);
+	if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
+	if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
+	if (m_Zanki == 0) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
 }
 
 void PlayerController::Update()
