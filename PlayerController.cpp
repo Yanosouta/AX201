@@ -58,7 +58,7 @@ void PlayerController::Update()
 	if (IsKeyPress('D')) vMove = DirectX::XMVectorAdd(vMove, vSide);
 	// 斜め移動のときに移動量が多くなってしまうため、正規化する
 	vMove = DirectX::XMVector3Normalize(vMove);
-	vMove = DirectX::XMVectorScale(vMove, 0.1f);
+	vMove = DirectX::XMVectorScale(vMove, 0.3f);
 
 	DirectX::XMFLOAT3 move;
 	DirectX::XMStoreFloat3(&move, vMove);
