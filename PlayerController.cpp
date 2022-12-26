@@ -62,11 +62,23 @@ void PlayerController::Update()
 
 	DirectX::XMFLOAT3 move;
 	DirectX::XMStoreFloat3(&move, vMove);
-	GetOwner()->GetComponent<Transform>()->SetPosition({
-		GetOwner()->GetComponent<Transform>()->GetPosition().x + move.x,
-		GetOwner()->GetComponent<Transform>()->GetPosition().y + move.y,
-		GetOwner()->GetComponent<Transform>()->GetPosition().z + move.z
-		});
+	// ノックバック中であれば
+	if (m_bKnockBackFlg) {
+		m_KnockBackCount--;
+		if (m_KnockBackCount < 0) {
+			m_bKnockBackFlg = false;
+			m_KnockBackCount = 20;
+		}
+	}
+	else 
+	{
+		// 移動量を加える
+		GetOwner()->GetComponent<Transform>()->SetPosition({
+			GetOwner()->GetComponent<Transform>()->GetPosition().x + move.x,
+			GetOwner()->GetComponent<Transform>()->GetPosition().y + move.y,
+			GetOwner()->GetComponent<Transform>()->GetPosition().z + move.z
+			});
+	}
 	// 移動した場合、移動した方向に回転する
 	if (move.x != 0.0f || move.y != 0.0f || move.z != 0.0f) {
 		float radY = 0.0f;
@@ -191,6 +203,13 @@ void PlayerController::Update()
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.6f,
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.6f,
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.6f
+				});
+			// 自分に撃った反動を加える
+			m_bKnockBackFlg = true;
+			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * -m_KnockBackPower
 				});
 		}
 		// 通常の場合
