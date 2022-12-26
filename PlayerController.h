@@ -22,6 +22,11 @@ private:
 	float m_FlgCount; // [cppの269行目あたりで使ってると思うので見てあんま意味なければ消してもいいです
 	// 12/23 竹下　プレイヤーの残機
 	unsigned int m_Zanki;
+	
+	//--- ノックバック用
+	float m_KnockBackPower;	// 押される力
+	bool  m_bKnockBackFlg; //ノックバック中にフラグを立てる
+	float m_KnockBackCount;	//フラグを立てている時にカウント
 
 public:
 	// コンストラクタ
@@ -31,6 +36,9 @@ public:
 		, m_Zanki(9)
 		, m_bLifeFlg(false)
 		, m_FlgCount(5.0f)
+		, m_bKnockBackFlg(false)
+		, m_KnockBackCount(20.0f)
+		, m_KnockBackPower(0.05f)
 	{}
 	// デストラクタ
 	~PlayerController() {}
