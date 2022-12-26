@@ -293,7 +293,11 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 		if (m_bLifeFlg)
 		{
 			m_FlgCount--;
-			m_Life--;
+			// ダメージ量を敵の種類によって分割
+			if (object->GetTag() == TagName::Enemy)
+				m_Life -= 1;
+			else if (object->GetTag() == TagName::MiddleBoss)
+				m_Life -= 2;
 			if (m_FlgCount <= 0)
 			{
 				//初期化処理
