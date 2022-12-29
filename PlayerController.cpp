@@ -34,6 +34,7 @@ void PlayerController::Start()
 	if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
 	if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
 	if (m_Zanki == 0) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
+
 }
 
 void PlayerController::Update()
@@ -260,6 +261,13 @@ void PlayerController::Update()
 			GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 		}
 	}
+
+
+	//UI関係の処理------
+	if (m_LivesHighlighting)	//残機強調表示中
+	{
+		LivesHighlight();
+	}
 }
 
 void PlayerController::OnCollisionEnter(ObjectBase* object)
@@ -363,6 +371,11 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 		if (m_Zanki == 3) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(6);
 		if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
 		if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
+
+
+		//残機UI減少ハイライト----------小栗
+		m_LivesHighlighting = true;
+
 		// 残機が0でシーン移動
 		if (m_Zanki <= 0)
 		{
@@ -406,5 +419,39 @@ void PlayerController::OnCollisionStay(ObjectBase* object)
 
 void PlayerController::OnCollisionExit(ObjectBase* object)
 {
+
+}
+
+//小栗大輝----------------------
+void PlayerController::LivesHighlight()
+{
+	//終了したかどうか
+	bool endflg = false;
+
+	if(m_LivesIV.x <= 2.0f && m_LivesHalf == false)
+	{
+		m_LivesIV.x += 0.1f;
+		m_LivesIV.y += 0.3f;
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetSize(DirectX::XMFLOAT2(m_LivesIV.x,m_LivesIV.y));
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetColor(DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+		if (m_LivesIV.x >= 2.0f)	m_LivesHalf = true;
+	}
+	if(m_LivesHalf)
+	{
+		m_LivesIV.x -= 0.1f;
+		m_LivesIV.y -= 0.3f;
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetSize(DirectX::XMFLOAT2(m_LivesIV.x, m_LivesIV.y));
+		//初期値と同じサイズに戻ったらフラグを折る
+		if (m_LivesIV.x <= 1.0f)	endflg = true;
+	}
+
+	if (endflg)	//終了時元の色に戻してアニメーション中フラグを下げる
+	{
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));	//色を戻す
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetSize(DirectX::XMFLOAT2(1.0f, 1.0f));	//大きさを戻す
+		m_LivesHighlighting = false;
+		m_LivesHalf = false;
+	}
+
 
 }

@@ -28,6 +28,11 @@ private:
 	bool  m_bKnockBackFlg; //ノックバック中にフラグを立てる
 	float m_KnockBackCount;	//フラグを立てている時にカウント
 
+	//UI強調表示用
+	bool m_LivesHighlighting;		//強調表示中フラグ
+	DirectX::XMFLOAT2 m_LivesIV;	//UIの初期値
+	bool m_LivesHalf;				//強調表示の折り返し	
+
 public:
 	// コンストラクタ
 	PlayerController()
@@ -39,6 +44,9 @@ public:
 		, m_bKnockBackFlg(false)
 		, m_KnockBackCount(20.0f)
 		, m_KnockBackPower(0.05f)
+		, m_LivesHighlighting(false)
+		, m_LivesHalf(false)
+		,m_LivesIV(DirectX::XMFLOAT2(1.0f,1.0f))
 	{}
 	// デストラクタ
 	~PlayerController() {}
@@ -55,6 +63,12 @@ public:
 	
 	//--- ゲット関数
 	std::shared_ptr<ObjectBase> GetHaveArrow() { return m_haveArrow; }
+
+	
+
+	//UI関係
+	void LivesHighlight();
+
 };
 
 #endif //!___PLAYER_CONTROLLER_H___
