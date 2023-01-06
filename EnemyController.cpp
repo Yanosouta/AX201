@@ -106,60 +106,93 @@ void EnemyController::Update()
 			m_MoveSpeed = 0.05f;//速度を元に戻す
 		}
 	}
-	if (m_EnemyMotionType == DEAD)
+	else if (m_EnemyMotionType == DEAD)
 	{
-		// ターゲットまでのベクトルを算出
-		DirectX::XMVECTOR DeadVector =
-			DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&m_DeadPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
-		// ベクトルを正規化
-		DeadVector = DirectX::XMVector3Normalize(DeadVector);
-		// 移動スピードを掛ける
-		DeadVector = DirectX::XMVectorScale(DeadVector, m_MoveSpeed);
-		// Float3に変換する
-		DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
-		// 座標に適用する
-		GetOwner()->GetComponent<Transform>()->SetPosition({
-			GetOwner()->GetComponent<Transform>()->GetPosition().x ,
-			GetOwner()->GetComponent<Transform>()->GetPosition().y,
-			GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
-			});
-		if (HeadEnemyPos.z <= -5.0f &&
-			HeadEnemyPos.z >= -15.0f)
+		m_MoveSpeed = 0.0f;					//動きを止める為に0を設定
+		m_TargetVector = { 0.0f,0.0f,0.0f };//動きを止める為に0を設定
+		if (m_MoveStopCount >= 180.0f)	//動きを止める時間
 		{
-			GetOwner()->GetComponent<Transform>()->SetPosition({
-			GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
-			GetOwner()->GetComponent<Transform>()->GetPosition().y,
-			GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
-				});
+			m_MoveSpeed = 0.05f;	//速度を元に戻す
+			DirectX::XMVECTOR DeadVector = DirectX::XMVectorZero();
+			if (HeadEnemyPos.z <= -5.0f &&
+				HeadEnemyPos.z >= -15.0f)
+			{
+				DeadVector =
+					DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&m_DeadPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
+				// ベクトルを正規化
+				DeadVector = DirectX::XMVector3Normalize(DeadVector);
+				// 移動スピードを掛ける
+				DeadVector = DirectX::XMVectorScale(DeadVector, m_MoveSpeed);
+				// Float3に変換する
+				DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
+			}
+			else {
+				DirectX::XMFLOAT3 deadPos = m_DeadPos;
+				DirectX::XMFLOAT3 myPos = GetOwner()->GetComponent<Transform>()->GetPosition();
+				// X軸への移動を打ち消す
+				deadPos.x = 0.0f;
+				myPos.x = 0.0f;
+				DeadVector =
+					DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&deadPos), DirectX::XMLoadFloat3(&myPos));
+				// ベクトルを正規化
+				DeadVector = DirectX::XMVector3Normalize(DeadVector);
+				// 移動スピードを掛ける
+				DeadVector = DirectX::XMVectorScale(DeadVector, m_MoveSpeed);
+				// Float3に変換する
+				DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
+			}
+
+			// --- コピペした↓
+			// 移動した場合、移動した方向に回転する
+			if (m_TargetVector.x != 0.0f || m_TargetVector.y != 0.0f || m_TargetVector.z != 0.0f) {
+				m_TargetRotY = 0.0f;
+				// Z方向へのベクトル(モデルの正面方向のベクトル)
+				DirectX::XMFLOAT3 zVector = { 0.0f, 0.0f, 1.0f };
+				// 内積とベクトルの長さを使ってcosθを求める
+				DirectX::XMStoreFloat(&m_TargetRotY, DirectX::XMVector3Dot(DirectX::XMVector3Normalize(DeadVector), DirectX::XMLoadFloat3(&zVector)));
+				// 内積から角度を求める
+				m_TargetRotY = ::acos(m_TargetRotY);
+				// ラジアン角からおなじみの角度に変更
+				m_TargetRotY = DirectX::XMConvertToDegrees(m_TargetRotY);
+				// 回転が右回転か左回転かを判別するために、外積で求める
+				// 求めた外積のY成分がプラスだったら左回り。
+				// 求めた外積のY成分がマイナスだったら右回り。
+				DirectX::XMStoreFloat3(&rotateDirection, DirectX::XMVector3Cross(DirectX::XMVector3Normalize(DeadVector), DirectX::XMLoadFloat3(&zVector)));
+				if (rotateDirection.y > 0) m_TargetRotY = 180.0f + (180.0f - m_TargetRotY);
+			}
 		}
-
+		//フレームカウントの初期化
+		m_MoveStopCount++;
 	}
-	else
+	else if (m_EnemyMotionType == ATTACK)
 	{
-		//// 座標に適用する
-		GetOwner()->GetComponent<Transform>()->SetPosition({
-			GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
-			GetOwner()->GetComponent<Transform>()->GetPosition().y,
-			GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
-			});
-
-		// 二つの間の角度が180°超えていた場合、逆回転の方が速いため、補正
-		if (abs(m_lateRotY - m_TargetRotY) >= 180.0f)
-			if (m_TargetRotY < 0.0f) m_TargetRotY = (int)m_TargetRotY + 360;
-			else if (m_TargetRotY >= 0.0f) m_TargetRotY = (int)m_TargetRotY - 360;
-		// 180°を超えたもしくは、-180°以下になったときに範囲内に補正する
-		if (m_lateRotY < -180)  m_lateRotY = ((int)(fabs(m_lateRotY) + 180) % 360 - 180) * -1.0f;
-		if (180 <= m_lateRotY) m_lateRotY = (int)(m_lateRotY + 180) % 360 - 180;
-		// 遅れてついていく場合の角度を計算し適応する
-		m_lateRotY = (m_TargetRotY - m_lateRotY) * 0.05f + m_lateRotY;
-		GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, m_lateRotY,0.0f });
-		
 		m_EnemyMotionType = NORMAL;
 	}
+
+	// 座標に適用する
+	GetOwner()->GetComponent<Transform>()->SetPosition({
+		GetOwner()->GetComponent<Transform>()->GetPosition().x + m_TargetVector.x,
+		GetOwner()->GetComponent<Transform>()->GetPosition().y,
+		GetOwner()->GetComponent<Transform>()->GetPosition().z + m_TargetVector.z
+		});
+
+	// 二つの間の角度が180°超えていた場合、逆回転の方が速いため、補正
+	if (abs(m_lateRotY - m_TargetRotY) >= 180.0f)
+		if (m_TargetRotY < 0.0f) m_TargetRotY = (int)m_TargetRotY + 360;
+		else if (m_TargetRotY >= 0.0f) m_TargetRotY = (int)m_TargetRotY - 360;
+	// 180°を超えたもしくは、-180°以下になったときに範囲内に補正する
+	if (m_lateRotY < -180)  m_lateRotY = ((int)(fabs(m_lateRotY) + 180) % 360 - 180) * -1.0f;
+	if (180 <= m_lateRotY) m_lateRotY = (int)(m_lateRotY + 180) % 360 - 180;
+	// 遅れてついていく場合の角度を計算し適応する
+	m_lateRotY = (m_TargetRotY - m_lateRotY) * 0.05f + m_lateRotY;
+	GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, m_lateRotY,0.0f });
 		
-	
-	
-	
+		//敵を削除
+	if (GetOwner()->GetComponent<Transform>()->GetPosition().x <= -40.0f)
+	{
+		m_MoveStopCount = 0.0f;	//カウントの初期化
+		ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+	}
 }
 
 void EnemyController::OnCollisionEnter(ObjectBase* object)
@@ -233,7 +266,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				if (m_Hp == 0 || m_BossHP == 0)
 				{
 					m_EnemyMotionType = DEAD;
-					//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+					
 				}
 			}
 		}

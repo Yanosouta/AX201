@@ -8,6 +8,7 @@
 EnemyManager::EnemyManager()
 	: m_RepopTime(240.0f)
 	, m_tick(0.0f)
+	, m_AppearCount(0)
 {
 	//ƒŠƒ|ƒbƒv‚·‚éêŠ
 	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -28.0f,-5.4f, 3.1f });
@@ -28,13 +29,23 @@ void EnemyManager::Update()
 	{
 		std::shared_ptr<ObjectBase> pEnemy;
 		std::shared_ptr<Transform> pTrans;
-		pEnemy = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::Enemy);
+ 		pEnemy = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::Enemy);
 		pTrans = pEnemy->GetComponent<Transform>();
 		pTrans->SetPosition(m_RepopPosList[rand() % m_RepopPosList.size()]);
 		pTrans->SetScale({ 1.0f,1.0f,1.0f });
 
-		//m_tick = 0.0f;
+		m_AppearCount++;
+		m_tick = 0.0f;
 	}
-
-	
+	if (m_AppearCount >= 10)
+	{
+		std::shared_ptr<ObjectBase> pFinalBoss;
+		std::shared_ptr<Transform> pBossTrans;
+		pFinalBoss = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::FinalBoss);
+		pBossTrans = pFinalBoss->GetComponent<Transform>();
+		pBossTrans->SetPosition({0.0f,2.0f,0.0f});
+		pBossTrans->SetScale({ 3.0f,3.0f,3.0f });
+		m_AppearCount = 0;
+	}
+	//m_tick = 0.0f;
 }
