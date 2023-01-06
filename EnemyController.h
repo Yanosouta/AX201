@@ -44,6 +44,8 @@ private:
 	int m_Hp;		//EnemyのHP
 	int m_BossHP;	//BossのHP
 
+	float m_MoveStopCount;	//Enemyの止める時間のカウント
+
 	//エネミーの状態種類
 	ENEMY_MOTION_TYPE m_EnemyMotionType;
 	
@@ -67,6 +69,7 @@ public:
 		, m_EAttackErea(1.5f)
 		, m_EnemyMotionType(NORMAL)
 		, m_DeadPos(-44.0f, -5.4, -9.0f)
+		, m_MoveStopCount(0.0f)
 	{}
 	// デストラクタ
 	~EnemyController() {}
