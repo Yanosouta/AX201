@@ -150,10 +150,9 @@ void UninitDX()
 
 	g_pDevice->Release();
 }
-void BeginDrawDX3D()
+void BeginDrawDX()
 {
 	// 描画先（レンダーターゲット）と深度バッファを設定
-//	g_pContext->OMSetRenderTargets(1, &g_pRTV, g_pDSV);
 	float color[4] = { 0.8f, 0.8f, 0.9f, 1.0f };
 	g_pContext->ClearRenderTargetView(g_pRTV, color);
 	g_pContext->ClearDepthStencilView(
@@ -162,13 +161,6 @@ void BeginDrawDX3D()
 	);
 }
 
-void BeginDrawDX2D()
-{
-	// 描画先（レンダーターゲット）と深度バッファを設定
-	g_pContext->OMSetRenderTargets(1, &g_pRTV, nullptr);
-	float color[4] = { 0.8f, 0.8f, 0.9f, 1.0f };
-	g_pContext->ClearRenderTargetView(g_pRTV, color);
-}
 void EndDrawDX()
 {
 	g_pSwapChain->Present(0, 0);

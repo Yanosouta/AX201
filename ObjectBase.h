@@ -159,8 +159,7 @@ protected:
 	int m_LayerNum;
 };
 
-//--- レイヤー番号による比較
-//bool operator<(const std::shared_ptr<ObjectBase>& left, const std::shared_ptr<ObjectBase>& right);
-//bool operator>(const std::shared_ptr<ObjectBase>& left, const std::shared_ptr<ObjectBase>& right);
-
+// レイヤー番号による比較
+bool operator<(const std::shared_ptr<ObjectBase>& left, const std::shared_ptr<ObjectBase>& right);
+bool operator>(const std::shared_ptr<ObjectBase>& left, const std::shared_ptr<ObjectBase>& right);
 #endif //!___OBJECT_H___

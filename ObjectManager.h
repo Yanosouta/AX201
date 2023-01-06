@@ -4,9 +4,9 @@
 #include <list>
 #include <memory>
 #include <string>
-#include <algorithm>
 #include "ObjectBase.h"
 #include <vector>
+#include <algorithm>
 
 class ObjectBase;
 
@@ -14,135 +14,144 @@ class ObjectManager
 {
 	friend class ObjectBase;
 	using ObjectPool = std::list<std::shared_ptr<ObjectBase>>;
+	using vObjectPool = std::vector<std::shared_ptr<ObjectBase>>;
 
 private:
-	// ƒIƒuƒWƒFƒNƒgƒv[ƒ‹
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¼ãƒ«
 	static ObjectPool m_AppendObjectPool;
 	static ObjectPool m_ObjectPool;
 	static ObjectPool m_DestroyObjectPool;
 public:
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	ObjectManager() {}
-	// ƒfƒXƒgƒ‰ƒNƒ^
+	// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~ObjectManager() {
 		m_AppendObjectPool.clear();
 		m_ObjectPool.clear();
 		m_DestroyObjectPool.clear();
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚ğì¬
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆ
 	template <class T>
 	static std::shared_ptr<ObjectBase> CreateObject(std::string name, std::string tag = TagName::Untagged) {
 		std::shared_ptr<ObjectBase> pObject = std::make_shared<T>(name, tag);
-		// ©•ª©g‚ğw‚·ƒ|ƒCƒ“ƒ^‚ğƒZƒbƒg‚·‚é
+		// è‡ªåˆ†è‡ªèº«ã‚’æŒ‡ã™ãƒã‚¤ãƒ³ã‚¿ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
 		pObject->m_this = pObject;
-		// ƒIƒuƒWƒFƒNƒgƒv[ƒ‹‚ÉƒIƒuƒWƒFƒNƒg‚ğ’Ç‰Á
+		// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¼ãƒ«ã«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¿½åŠ 
 		AddObject(pObject);
 		return pObject;
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚ğ“o˜^
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç™»éŒ²
 	static void AddObject(std::shared_ptr<ObjectBase> pObject) {
-		// ƒIƒuƒWƒFƒNƒgƒv[ƒ‹‚ÉƒIƒuƒWƒFƒNƒg‚ğ’Ç‰Á
+		// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¼ãƒ«ã«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¿½åŠ 
 		m_AppendObjectPool.push_front(pObject);
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚ğíœ
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å‰Šé™¤
 	static void RemoveObject(std::shared_ptr<ObjectBase> pObject) {
-		// íœƒv[ƒ‹‚ÉƒIƒuƒWƒFƒNƒg‚ğ’Ç‰Á
+		// å‰Šé™¤ãƒ—ãƒ¼ãƒ«ã«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¿½åŠ 
 		m_DestroyObjectPool.push_back(pObject);
-		// ƒIƒuƒWƒFƒNƒg‚Ìíœ”»’è‚ğON‚É
+		// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‰Šé™¤åˆ¤å®šã‚’ONã«
 		pObject->SetDestroy(true);
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚ğ‘S‚Äíœ
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å…¨ã¦å‰Šé™¤
 	static void DestroyAllObject() {
-		// ƒIƒuƒWƒFƒNƒgƒv[ƒ‹‚ğ‘S‚Äíœ
+		// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¼ãƒ«ã‚’å…¨ã¦å‰Šé™¤
 		m_AppendObjectPool.clear();
 		m_ObjectPool.clear();
+		m_DestroyObjectPool.clear();
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚Ìæ“¾
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å–å¾—
 	static std::shared_ptr<ObjectBase> FindObjectWithName(const std::string& name) {
 		for (auto it = m_AppendObjectPool.begin(); it != m_AppendObjectPool.end(); it++) {
-			// –¼‘O‚ª“¯‚¶‚©”»’è‚·‚é
+			// åå‰ãŒåŒã˜ã‹åˆ¤å®šã™ã‚‹
 			if ((*it)->GetName() == name)
 				return (*it);
 		}
 		for (auto it = m_ObjectPool.begin(); it != m_ObjectPool.end(); it++) {
-			// –¼‘O‚ª“¯‚¶‚©”»’è‚·‚é
+			// åå‰ãŒåŒã˜ã‹åˆ¤å®šã™ã‚‹
 			if ((*it)->GetName() == name)
 				return (*it);
 		}
-		// Œ©‚Â‚©‚ç‚È‚©‚Á‚½‚çnullptr‚ğ•Ô‚·
+		// è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰nullptrã‚’è¿”ã™
 		return nullptr;
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚Ìæ“¾
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å–å¾—
 	static std::shared_ptr<ObjectBase> FindObjectWithTag(const std::string& tag) {
 		for (auto it = m_AppendObjectPool.begin(); it != m_AppendObjectPool.end(); it++) {
-			// ƒ^ƒO–¼‚ª“¯‚¶‚©”»’è‚·‚é
+			// ã‚¿ã‚°åãŒåŒã˜ã‹åˆ¤å®šã™ã‚‹
 			if ((*it)->GetTag() == tag)
 				return (*it);
 		}
 		for (auto it = m_ObjectPool.begin(); it != m_ObjectPool.end(); it++) {
-			// ƒ^ƒO–¼‚ª“¯‚¶‚©”»’è‚·‚é
+			// ã‚¿ã‚°åãŒåŒã˜ã‹åˆ¤å®šã™ã‚‹
 			if ((*it)->GetTag() == tag)
 				return (*it);
 		}
-		// Œ©‚Â‚©‚ç‚È‚©‚Á‚½‚çnullptr‚ğ•Ô‚·
+		// è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰nullptrã‚’è¿”ã™
 		return nullptr;
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚Ìæ“¾
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å–å¾—
 	static std::list<std::shared_ptr<ObjectBase>> FindObjectListWithTag(const std::string& tag) {
 		std::list< std::shared_ptr<ObjectBase>> pObjList;
 		for (auto it = m_AppendObjectPool.begin(); it != m_AppendObjectPool.end(); it++) {
-			// ƒ^ƒO–¼‚ª“¯‚¶‚©”»’è‚·‚é
+			// ã‚¿ã‚°åãŒåŒã˜ã‹åˆ¤å®šã™ã‚‹
 			if ((*it)->GetTag() == tag)
-				// ƒŠƒXƒg‚É’Ç‰Á
+				// ãƒªã‚¹ãƒˆã«è¿½åŠ 
 				pObjList.push_back((*it));
 		}
 		for (auto it = m_ObjectPool.begin(); it != m_ObjectPool.end(); it++) {
-			// ƒ^ƒO–¼‚ª“¯‚¶‚©”»’è‚·‚é
+			// ã‚¿ã‚°åãŒåŒã˜ã‹åˆ¤å®šã™ã‚‹
 			if ((*it)->GetTag() == tag)
-				// ƒŠƒXƒg‚É’Ç‰Á
+				// ãƒªã‚¹ãƒˆã«è¿½åŠ 
 				pObjList.push_back((*it));
 		}
-		// ƒIƒuƒWƒFƒNƒgƒŠƒXƒg‚ğ•Ô‚·B
+		// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒªã‚¹ãƒˆã‚’è¿”ã™ã€‚
 		return pObjList;
 	}
 
-	// ƒIƒuƒWƒFƒNƒg‚Ì‘OXV
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‰æ›´æ–°
 	static void FixedUpdate() {
 		for (auto it = m_ObjectPool.begin(); it != m_ObjectPool.end(); it++)
 			if (!(*it)->GetDestroy())
 				(*it)->FixedUpdate();
 	}
-	// ƒIƒuƒWƒFƒNƒg‚ÌXV
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ›´æ–°
 	static void Update();
-	// ƒIƒuƒWƒFƒNƒg‚ÌŒãXV
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å¾Œæ›´æ–°
 	static void LateUpdate() {
 		for (auto it = m_ObjectPool.begin(); it != m_ObjectPool.end(); it++)
 			if (!(*it)->GetDestroy())
 				(*it)->LateUpdate();
 		Delete();
 	}
-	// ƒIƒuƒWƒFƒNƒg‚Ì•`‰æ
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æç”»
 	static void Draw() {
-		// •`‰æ‡ƒŒƒCƒ„[‚É‚æ‚Á‚Äƒ\[ƒg‚·‚é
-		//std::sort(m_ObjectPool.begin(), m_ObjectPool.end());
+		vObjectPool drawObjPool;
 		for (auto it = m_ObjectPool.begin(); it != m_ObjectPool.end(); it++)
+			drawObjPool.push_back(*it);
+		// æç”»é †ãƒ¬ã‚¤ãƒ¤ãƒ¼ã«ã‚ˆã£ã¦ã‚½ãƒ¼ãƒˆã™ã‚‹
+		std::sort(drawObjPool.begin(), drawObjPool.end());
+		for (auto it = drawObjPool.begin(); it != drawObjPool.end(); it++)
 			if (!(*it)->GetDestroy())
 				(*it)->Draw();
+		drawObjPool.clear();
 	}
 
 private:
-	// íœƒIƒuƒWƒFƒNƒg‚ğíœ
+	// å‰Šé™¤ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å‰Šé™¤
 	static void Delete() {
-		// ƒŠƒXƒg‚ª‹ó‚È‚ç”²‚¯‚é
+		// ãƒªã‚¹ãƒˆãŒç©ºãªã‚‰æŠœã‘ã‚‹
 		if (m_DestroyObjectPool.empty()) return;
-		// ƒŠƒXƒg‚Ì’†g‚ğíœ
+		// ãƒªã‚¹ãƒˆã®ä¸­èº«ã‚’å‰Šé™¤
+		for (auto DestroyItr = m_DestroyObjectPool.begin(); DestroyItr != m_DestroyObjectPool.end(); ++DestroyItr) {
+			m_ObjectPool.remove(*DestroyItr);
+		}
 		m_DestroyObjectPool.clear();
 	}
 };

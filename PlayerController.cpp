@@ -13,11 +13,28 @@
 #include "Arrow.h"
 #include <math.h>
 #include "CameraPlayer.h"
+#include "Life.h"	//
+#include "Zanki.h" //
+#include "SceneManager.h" // 
+#include "clicAtk.h"
 
 void PlayerController::Start()
 {
+	// 当たり判定をとるタグ名を設定
 	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Ground);
 	GetOwner()->GetComponent<AABBCollider>()->SetTouchOBB(TagName::Wall);
+	
+	// 設定した残機の数でUIを初期化
+	if (m_Zanki == 8) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(1);
+	if (m_Zanki == 7) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(2);
+	if (m_Zanki == 6) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(3);
+	if (m_Zanki == 5) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(4);
+	if (m_Zanki == 4) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(5);
+	if (m_Zanki == 3) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(6);
+	if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
+	if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
+	if (m_Zanki == 0) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
+
 }
 
 void PlayerController::Update()
@@ -54,15 +71,27 @@ void PlayerController::Update()
 	if (IsKeyPress('D')) vMove = DirectX::XMVectorAdd(vMove, vSide);
 	// 斜め移動のときに移動量が多くなってしまうため、正規化する
 	vMove = DirectX::XMVector3Normalize(vMove);
-	vMove = DirectX::XMVectorScale(vMove, 0.1f);
+	vMove = DirectX::XMVectorScale(vMove, 0.3f);
 
 	DirectX::XMFLOAT3 move;
 	DirectX::XMStoreFloat3(&move, vMove);
-	GetOwner()->GetComponent<Transform>()->SetPosition({
-		GetOwner()->GetComponent<Transform>()->GetPosition().x + move.x,
-		GetOwner()->GetComponent<Transform>()->GetPosition().y + move.y,
-		GetOwner()->GetComponent<Transform>()->GetPosition().z + move.z
-		});
+	// ノックバック中であれば
+	if (m_bKnockBackFlg) {
+		m_KnockBackCount--;
+		if (m_KnockBackCount < 0) {
+			m_bKnockBackFlg = false;
+			m_KnockBackCount = 20;
+		}
+	}
+	else 
+	{
+		// 移動量を加える
+		GetOwner()->GetComponent<Transform>()->SetPosition({
+			GetOwner()->GetComponent<Transform>()->GetPosition().x + move.x,
+			GetOwner()->GetComponent<Transform>()->GetPosition().y + move.y,
+			GetOwner()->GetComponent<Transform>()->GetPosition().z + move.z
+			});
+	}
 	// 移動した場合、移動した方向に回転する
 	if (move.x != 0.0f || move.y != 0.0f || move.z != 0.0f) {
 		float radY = 0.0f;
@@ -121,6 +150,10 @@ void PlayerController::Update()
 
 	}
 	if (IsKeyPress(VK_SPACE)) {
+		//UIのuv座標の切り替え
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(1);
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
+
 		m_tic++;	// 押している間、カウントする
 		// 変更用ポインタ
 		std::shared_ptr<Transform> trans;
@@ -156,7 +189,8 @@ void PlayerController::Update()
 			// サイズを設定
 			trans->SetScale({ 0.6f, 0.6f, 0.6f });
 			rb->SetDrag(1.0f);
-			rb->SetMass(0.0f);
+			rb->SetMass(0.01f);
+
 			m_haveArrow->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::SUPER);
 		}
 		// 通常の場合
@@ -183,6 +217,13 @@ void PlayerController::Update()
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.6f,
 				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.6f
 				});
+			// 自分に撃った反動を加える
+			m_bKnockBackFlg = true;
+			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * -m_KnockBackPower
+				});
 		}
 		// 通常の場合
 		else {
@@ -195,8 +236,16 @@ void PlayerController::Update()
 		}
 		// 矢を離したためポインタをnullptrにする
 		m_haveArrow = nullptr;
-	}
 
+
+		//仮配置<UI切り替え>ーーーーーーーーーーーーー
+				//UIのuv座標の切り替え
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
+		//ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);	
+		//ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+	}
+	
 	//--- 座標補正
 	// 落下判定
 	if (GetOwner()->GetComponent<Rigidbody>()) {
@@ -211,6 +260,13 @@ void PlayerController::Update()
 			// 加速度を補正
 			GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
 		}
+	}
+
+
+	//UI関係の処理------
+	if (m_LivesHighlighting)	//残機強調表示中
+	{
+		LivesHighlight();
 	}
 }
 
@@ -243,6 +299,90 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 
 		// 加速度を補正
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
+	}
+
+	//-------------------------------------------------------------------------------
+	// 12/22
+	// 竹下　敵と当たった時の朱里
+	//-------------------------------------------------------------------------------
+	if (object->GetTag() == TagName::Enemy || object->GetTag() == TagName::MiddleBoss)
+	{
+
+
+		m_bLifeFlg = true;
+		if (m_bLifeFlg)
+		{
+			m_FlgCount--;
+			// ダメージ量を敵の種類によって分割
+			if (object->GetTag() == TagName::Enemy)
+				m_Life -= 1;
+			else if (object->GetTag() == TagName::MiddleBoss)
+				m_Life -= 2;
+			if (m_FlgCount <= 0)
+			{
+				//初期化処理
+				m_bLifeFlg = false;
+				m_FlgCount = 5.0f;
+			}
+		}
+		// HP_MAX
+		if (m_Life == 4)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_75%
+		if (m_Life == 3)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_50%
+		if (m_Life == 2)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(2);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_25%
+		if (m_Life == 1)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(3);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+		//HP_0%
+		if (m_Life == 0)
+		{
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(4);
+			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		}
+	}
+	//HP_0 -> MAX
+	if (m_Life <= 0)
+	{
+		m_Life = 4;
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		m_Zanki--;
+		if (m_Zanki == 8) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(1);
+		if (m_Zanki == 7) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(2);
+		if (m_Zanki == 6) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(3);
+		if (m_Zanki == 5) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(4);
+		if (m_Zanki == 4) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(5);
+		if (m_Zanki == 3) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(6);
+		if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
+		if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
+
+
+		//残機UI減少ハイライト----------小栗
+		m_LivesHighlighting = true;
+
+		// 残機が0でシーン移動
+		if (m_Zanki <= 0)
+		{
+			ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
+			SceneManager::LoadScene(SceneName::SceneGame01);
+		}
+
 	}
 }
 
@@ -279,5 +419,39 @@ void PlayerController::OnCollisionStay(ObjectBase* object)
 
 void PlayerController::OnCollisionExit(ObjectBase* object)
 {
+
+}
+
+//小栗大輝----------------------
+void PlayerController::LivesHighlight()
+{
+	//終了したかどうか
+	bool endflg = false;
+
+	if(m_LivesIV.x <= 2.0f && m_LivesHalf == false)
+	{
+		m_LivesIV.x += 0.1f;
+		m_LivesIV.y += 0.3f;
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetSize(DirectX::XMFLOAT2(m_LivesIV.x,m_LivesIV.y));
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetColor(DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+		if (m_LivesIV.x >= 2.0f)	m_LivesHalf = true;
+	}
+	if(m_LivesHalf)
+	{
+		m_LivesIV.x -= 0.1f;
+		m_LivesIV.y -= 0.3f;
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetSize(DirectX::XMFLOAT2(m_LivesIV.x, m_LivesIV.y));
+		//初期値と同じサイズに戻ったらフラグを折る
+		if (m_LivesIV.x <= 1.0f)	endflg = true;
+	}
+
+	if (endflg)	//終了時元の色に戻してアニメーション中フラグを下げる
+	{
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));	//色を戻す
+		ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->GetOwner()->GetComponent<SpriteRenderer>()->SetSize(DirectX::XMFLOAT2(1.0f, 1.0f));	//大きさを戻す
+		m_LivesHighlighting = false;
+		m_LivesHalf = false;
+	}
+
 
 }

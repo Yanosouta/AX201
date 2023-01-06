@@ -11,6 +11,8 @@
 //---12/20 竹下------
 #include "Zanki.h"//仮
 #include "Life.h"
+#include "clicAtk.h"
+
 
 #include "Transform.h"
 #include "CameraObjPlayer.h"
@@ -18,6 +20,8 @@
 #include "Enemy.h"
 #include "Field.h"
 #include "UI.h"
+#include"EnemyManager.h"
+#include "Stage.h"
 
 SceneTitle::SceneTitle()
 {
@@ -37,18 +41,19 @@ SceneTitle::SceneTitle()
 	// UIアニメーションを追加
 	//----------------------------------------------------------------------------------------
 	// 中央真ん中HPの枠
-	ObjectManager::CreateObject<UI>("UI.4");
+	pObj = ObjectManager::CreateObject<UI>("UI.4");
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.4")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.4")->GetComponent<Transform>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/HP_Waku.png");
 	pSpriteRenderer->SetSize(450, 130);
-	ObjectManager::FindObjectWithName("UI.4")->SetLayerNum(3);
+	ObjectManager::FindObjectWithName("UI.4")->SetLayerNum(5);
 	pTransform->SetPosition({ 0.0f, -280.0f, 0.0f });
 
 	// 中央真ん中HPの中身(まだ配置しかしてないのでアニメーションの追加をする)
 	pObj = ObjectManager::CreateObject<UI>("UI.5");
 	pObj->SetLayerNum(4);
-	pObj->AddComponent<Life>();
+	pObj->AddComponent<Life>(); //LifeのUpdateって指定しても
+	pObj->AddComponent<SpriteAnimation>();
 	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/Life.png");
 	pSpriteRenderer->SetSize(220, 145);
@@ -74,19 +79,20 @@ SceneTitle::SceneTitle()
 	pTransform->SetPosition({ -530.0f, -40.0f, 0.0f });
 
 	// 攻撃アイコン
-	ObjectManager::CreateObject<UI>("UI.8");
-	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.8")->GetComponent<SpriteRenderer>();
-	pTransform = ObjectManager::FindObjectWithName("UI.8")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/ATK.png");
+	pObj = ObjectManager::CreateObject<UI>("UI.8");
+	pObj->SetLayerNum(7);
+	pObj->AddComponent<clicAtk>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/normalAtk.png");	
 	pSpriteRenderer->SetSize(150, 150);
-	ObjectManager::FindObjectWithName("UI.8")->SetLayerNum(7);
+	pTransform = pObj->GetComponent<Transform>();
 	pTransform->SetPosition({ -400.0f, -230.0f, 0.0f });
 
 	// 残機数
 	// カウントダウンするようにした。
 	// 時間じゃなくHPが減ったらに変えたい
 	pObj = ObjectManager::CreateObject<UI>("UI.9");
-	pObj->SetLayerNum(8);
+	pObj->SetLayerNum(10);
 	pObj->AddComponent<Zanki>();
 	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/number.png");
@@ -151,29 +157,23 @@ SceneTitle::SceneTitle()
 	pTransform->SetScale({ 2.0f, 2.0f, 2.0f });
 
 	//--- オブジェクト作成
-	//   型　：Field
-	//  名前 ：Field
-	// タグ名：Ground
-	ObjectManager::CreateObject<Field>("Field", TagName::Ground);
+	//   型　：Enemy
+	//  名前 ：Enemy
+	// タグ名：FinalBoss
+	std::shared_ptr<ObjectBase> pFBObj = ObjectManager::CreateObject<Enemy>("Enemy", TagName::FinalBoss);
 	// Transformのポインタを取得する
-	pTransform = ObjectManager::FindObjectWithName("Field")->GetComponent<Transform>();
-	// 座標を設定
-	pTransform->SetPosition({ 0.0f, -5.0f, 0.0f });
+	pTransform = pFBObj->GetComponent<Transform>();
+	// 座標を設定する
+	pTransform->SetPosition({ 2.0f, 0.0f, -2.0f });
+	//サイズを変更
+	pTransform->SetScale({ 3.0f, 3.0f, 3.0f });
+	
+	//--- ステージ作成
+	// Stage* pStage = new Stage(); のスマートポインタバージョン。
+	std::shared_ptr<Stage> pStage = std::make_shared<Stage>();
 
-	//--- オブジェクト作成
-	//   型　：Field
-	//  名前 ：Field
-	// タグ名：Wall
-	pObj = ObjectManager::CreateObject<Field>("Field", TagName::Wall);
-	// Transformのポインタを取得する
-	pTransform = pObj->GetComponent<Transform>();
-	// 座標を設定
-	pTransform->SetPosition({ 0.0f, -4.0f, 4.0f });
-	// オブジェクトの辺の長さをセット
-	pTransform->SetScale({ 2.0f, 5.0f, 5.0f });
-	pTransform->SetAngle({ 0.0f, 70.0f, 0.0f });
-	// 当たり判定の辺の長さをセット
-	pObj->GetComponent<AABBCollider>()->SetLen({ 2.0f, 5.0f, 5.0f });
+	pObj = ObjectManager::CreateObject<ObjectBase>("EnemyManager");
+	pObj->AddComponent<EnemyManager>();
 
 }
 

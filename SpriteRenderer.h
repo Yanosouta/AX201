@@ -31,6 +31,7 @@ public:
 		ID3D11ShaderResourceView* pTexture;
 		// 行列
 		DirectX::XMFLOAT4X4 m_Mat[3];
+		DirectX::XMFLOAT4 m_Param[3];
 	};
 
 public:
@@ -54,6 +55,13 @@ public:
 
 	//--- ゲット関数
 	Info* GetInfo() { return &m_SpriteInfo; }
+
+	//--- セット関数
+	void SetOffset(DirectX::XMFLOAT2 offset);
+	void SetSize(DirectX::XMFLOAT2 size);
+	void SetUVPos(DirectX::XMFLOAT2 pos);
+	void SetUVScale(DirectX::XMFLOAT2 scale);
+	void SetColor(DirectX::XMFLOAT4 color);
 
 private:
 	static VertexShader* m_pDefVS;

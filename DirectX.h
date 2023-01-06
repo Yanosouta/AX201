@@ -11,8 +11,7 @@ IDXGISwapChain* GetSwapChain();
 
 HRESULT InitDX(HWND hWnd, UINT width, UINT height, bool fullscreen);
 void UninitDX();
-void BeginDrawDX3D();
-void BeginDrawDX2D();
+void BeginDrawDX();
 void EndDrawDX();
 void EnableDepth(bool enable);// 12/20 ’|‰º ƒfƒvƒX‚ð’Ç‰Á
 #endif // __DIRECTX_H__

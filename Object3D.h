@@ -11,6 +11,8 @@ public:
 	// コンストラクタ
 	Object3D(std::string name, std::string tag) : ObjectBase(name, tag)
 	{
+		// 3Dオブジェクトと2Dオブジェクトを分離させるため
+		m_LayerNum = -999;
 		// デフォルトコンポーネントを追加
 		this->AddComponent<MeshRenderer>();	// 3Dオブジェクト用（表面的な情報）
 	}
