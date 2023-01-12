@@ -6,6 +6,8 @@
 #include "Game3D.h"
 #include "XInput.h"
 
+//プルリクエスト　テスト　
+
 //--- 定数定義
 const unsigned int SCREEN_WIDTH = 1280;
 const unsigned int SCREEN_HEIGHT = 720;

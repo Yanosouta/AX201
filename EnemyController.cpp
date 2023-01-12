@@ -17,6 +17,7 @@
 #include "PlayerController.h"
 #include"EnemyRepop.h"
 #include "AABBCollider.h"
+#include "Item.h"
 
 void EnemyController::Start()
 {
@@ -192,6 +193,19 @@ void EnemyController::Update()
 	{
 		m_MoveStopCount = 0.0f;	//カウントの初期化
 		ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		
+		//確率でアイテムをドロップ
+		if (rand() % 1 == 0)
+		{
+			std::shared_ptr<ObjectBase> pObj;
+			std::shared_ptr<Transform> pTransform;			// 位置情報
+
+			pObj = ObjectManager::CreateObject<Item>("Item", TagName::Item);
+			pTransform = pObj->GetComponent<Transform>();
+
+			//敵が死んだ位置に出す
+			pTransform->SetPosition(GetOwner()->GetComponent<Transform>()->GetPosition());
+		}
 	}
 }
 

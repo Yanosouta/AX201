@@ -22,6 +22,7 @@
 #include "UI.h"
 #include"EnemyManager.h"
 #include "Stage.h"
+#include "LightObj.h"
 
 SceneTitle::SceneTitle()
 {
@@ -33,6 +34,8 @@ SceneTitle::SceneTitle()
 	std::shared_ptr<Rigidbody> pRigidbody;			// 物理挙動
 	std::shared_ptr<AABBCollider> pAABBCollider;	// AABB当たり判定用
 	std::shared_ptr<CameraPlayer> pCameraPlayer;
+
+	ObjectManager::CreateObject<LightObj>("MainLight", TagName::Light);
 
 	//----------------------------------------------------------------------------------------
 	// 2022/12/19 竹下雄太郎 
@@ -155,6 +158,7 @@ SceneTitle::SceneTitle()
 	pTransform->SetPosition({ 2.0f, 0.0f, -2.0f });
 	//サイズを変更
 	pTransform->SetScale({ 2.0f, 2.0f, 2.0f });
+	pMBObj->GetComponent<AABBCollider>()->SetLen({ 2.0f, 2.0f, 2.0f });
 
 	//--- オブジェクト作成
 	//   型　：Enemy
@@ -167,6 +171,7 @@ SceneTitle::SceneTitle()
 	pTransform->SetPosition({ 2.0f, 0.0f, -2.0f });
 	//サイズを変更
 	pTransform->SetScale({ 3.0f, 3.0f, 3.0f });
+	pFBObj->GetComponent<AABBCollider>()->SetLen({ 3.0f, 3.0f, 3.0f });
 	
 	//--- ステージ作成
 	// Stage* pStage = new Stage(); のスマートポインタバージョン。
