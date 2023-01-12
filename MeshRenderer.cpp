@@ -10,6 +10,7 @@
 
 #include "CameraDebug.h"
 #include "CameraPlayer.h"
+#include "light.h"
 
 //--- 変数宣言
 VertexShader* MeshRenderer::m_pDefVS = nullptr;
@@ -655,6 +656,11 @@ void MeshRenderer::LateUpdate() {
 
 void MeshRenderer::Draw()
 {
+	if (ObjectManager::FindObjectWithTag(TagName::Light))
+	{
+		ObjectManager::FindObjectWithTag(TagName::Light)->GetComponent<light>()->SetLight();
+	}
+
 	Step(1.0f / 60);
 	m_pVS->Bind();
 	m_pPS->Bind();
@@ -734,12 +740,13 @@ bool MeshRenderer::LoadModel(const char* file, float scale, bool flip)
 		for (unsigned int j = 0; j < m_pMeshes[i].vertexNum; ++j) {
 			// 値の吸出し
 			aiVector3D pos = pScene->mMeshes[i]->mVertices[j];
+			aiVector3D normal = pScene->mMeshes[i]->mNormals[j];
 			aiVector3D uv = pScene->mMeshes[i]->HasTextureCoords(0) ?
 				pScene->mMeshes[i]->mTextureCoords[0][j] : zero;
 			// 値を設定
 			m_pMeshes[i].pVertices[j] = {
 				DirectX::XMFLOAT3(pos.x * scale, pos.y * scale, pos.z * scale),
-				DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f),
+				DirectX::XMFLOAT3(normal.x, normal.y, normal.z),
 				DirectX::XMFLOAT2(uv.x, uv.y),
 				{0.0f, 0.0f, 0.0f, 0.0f},
 				{0, 0, 0, 0}
