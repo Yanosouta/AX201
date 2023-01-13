@@ -1,18 +1,15 @@
 struct VS_IN
 {
-	float3 pos    : POSITION;
+	float3 pos : POSITION;
 	float3 normal : NORMAL;
-	float2 uv     : TEXCOORD;
+	float2 uv : TEXCOORD;
 	float4 weight : WEIGHT;
-	uint4 index   : INDEX;
+	uint4 index : INDEX;
 };
 struct VS_OUT
 {
-	float4 pos          : SV_POSITION;
-	float3 normal       : NORMAL;
-	float2 uv           : TEXCOORD0;
-	float3 worldPos     : TEXCOORD1; 
-	float3 normalInView : TEXCOORD2;
+	float4 pos : SV_POSITION;
+	float2 uv : TEXCOORD0;
 };
 
 cbuffer WVP : register(b0)
@@ -38,16 +35,8 @@ VS_OUT main(VS_IN vin)
 	vout.pos = mul(vout.pos, mat);
 
 	vout.pos = mul(vout.pos, world);
-	vout.worldPos = vout.pos;
 	vout.pos = mul(vout.pos, view);
 	vout.pos = mul(vout.pos, proj);
 	vout.uv = vin.uv;
-
-	// 頂点法線をピクセルシェーダーに渡す
-	vout.normal = mul(vin.normal, world); // 法線を回転させる
-
-	//カメラ空間の法線を求める
-	vout.normalInView = mul(vin.normal, view);
-
 	return vout;
 }
