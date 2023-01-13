@@ -11,6 +11,5 @@ namespace TagName {
 	const std::string MiddleBoss = "MiddleBoss";
 	const std::string FinalBoss = "FinalBoss";
 	const std::string Arrow = "Arrow";
-	const std::string Item = "Item";
-	const std::string Light = "Light";
+
 }

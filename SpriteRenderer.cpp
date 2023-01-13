@@ -209,8 +209,8 @@ void SpriteRenderer::SetUVPos(DirectX::XMFLOAT2 pos)
 }
 void SpriteRenderer::SetUVScale(DirectX::XMFLOAT2 scale)
 {
-	m_SpriteInfo.m_Param[1].z = scale.x;
-	m_SpriteInfo.m_Param[1].w = scale.y;
+	m_SpriteInfo.m_Param[1].x = scale.x;
+	m_SpriteInfo.m_Param[1].z = scale.y;
 }
 void SpriteRenderer::SetColor(DirectX::XMFLOAT4 color)
 {
