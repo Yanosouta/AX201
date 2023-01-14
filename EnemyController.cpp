@@ -272,7 +272,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 
 					//確率でアイテムの生成
-					if (rand() % 1 == 0)
+					if (rand() % 5 == 0)
 					{
 						std::shared_ptr<ObjectBase> pObj;
 						std::shared_ptr<Transform> pTransform;			// 位置情報
