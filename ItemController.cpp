@@ -49,7 +49,8 @@ void ItemController::OnCollisionEnter(ObjectBase* object)
 			m_bExist = false;
 
 			//プレイヤーの体力回復、スペシャルゲージの回復の処理
-
+			ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->AddZanki(1);
+			ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 		}
 	}
 }
