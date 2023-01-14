@@ -27,6 +27,10 @@ private:
 	//ラスボスが出るまでの敵の撃退数
 	int m_AppearCount;
 	std::vector<DirectX::XMFLOAT3> m_RepopPosList;
+	//最初だけリポップするフラグ
+	bool m_FirstOnlyFlg;
+	//ボスが出てくるまでのカウント
+	int m_MBCount;
 };
 
 

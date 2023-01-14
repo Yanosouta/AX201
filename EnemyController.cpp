@@ -29,7 +29,7 @@ void EnemyController::Start()
 void EnemyController::Update()
 {
 	
-	// 座標を保存する
+// 座標を保存する
 	m_prevPos = GetOwner()->GetComponent<Transform>()->GetPosition();
 	//当たり判定用のプレイヤーの座標
 	DirectX::XMFLOAT3 HeadPlayerPos = ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<Transform>()->GetPosition();
@@ -164,6 +164,12 @@ void EnemyController::Update()
 		}
 		//フレームカウントの初期化
 		m_MoveStopCount++;
+		//敵を削除
+		if (GetOwner()->GetComponent<Transform>()->GetPosition().x <= -40.0f)
+		{
+			m_MoveStopCount = 0.0f;	//カウントの初期化
+			ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+		}
 	}
 	else if (m_EnemyMotionType == ATTACK)
 	{
@@ -188,12 +194,7 @@ void EnemyController::Update()
 	m_lateRotY = (m_TargetRotY - m_lateRotY) * 0.05f + m_lateRotY;
 	GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, m_lateRotY,0.0f });
 		
-		//敵を削除
-	if (GetOwner()->GetComponent<Transform>()->GetPosition().x <= -40.0f)
-	{
-		m_MoveStopCount = 0.0f;	//カウントの初期化
-		ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
-	}
+	
 }
 
 void EnemyController::OnCollisionEnter(ObjectBase* object)
@@ -268,7 +269,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				{
 					m_EnemyMotionType = DEAD;
 
-					ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+					//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 
 					//確率でアイテムの生成
 					if (rand() % 1 == 0)
