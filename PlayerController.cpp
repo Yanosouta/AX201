@@ -270,7 +270,7 @@ void PlayerController::Update()
 	}
 
 	//ボスがいないのでとりあえず9を押すとクリア(「ク」リアの９)--------
-	if (IsKeyTrigger('9'))
+	if (m_nEnemyNum == mc_nClearEnemyNum)
 	{
 		SceneManager::LoadScene(SceneName::SceneGame01);
 	}
@@ -313,8 +313,6 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 	//-------------------------------------------------------------------------------
 	if (object->GetTag() == TagName::Enemy || object->GetTag() == TagName::MiddleBoss)
 	{
-
-
 		m_bLifeFlg = true;
 		if (m_bLifeFlg)
 		{

@@ -31,7 +31,9 @@ private:
 	//UI強調表示用
 	bool m_LivesHighlighting;		//強調表示中フラグ
 	DirectX::XMFLOAT2 m_LivesIV;	//UIの初期値
-	bool m_LivesHalf;				//強調表示の折り返し	
+	bool m_LivesHalf;				//強調表示の折り返し
+
+	int m_nEnemyNum;	// 倒した敵の数
 
 public:
 	// コンストラクタ
@@ -47,6 +49,7 @@ public:
 		, m_LivesHighlighting(false)
 		, m_LivesHalf(false)
 		,m_LivesIV(DirectX::XMFLOAT2(1.0f,1.0f))
+		, m_nEnemyNum(0)
 	{}
 	// デストラクタ
 	~PlayerController() {}
@@ -69,6 +72,12 @@ public:
 
 	//UI関係
 	void LivesHighlight();
+
+	// 倒した数を増やす
+	void AddBreakEnemy() { m_nEnemyNum++; }
+
+	// クリア条件の敵を倒した数
+	constexpr static int mc_nClearEnemyNum = 11;
 
 };
 

@@ -269,7 +269,8 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				{
 					m_EnemyMotionType = DEAD;
 
-					//ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+					// 倒した数を加算する
+					ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->AddBreakEnemy();
 
 					//確率でアイテムの生成
 					if (rand() % 5 == 0)
