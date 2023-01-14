@@ -65,7 +65,7 @@ public:
 	std::shared_ptr<ObjectBase> GetHaveArrow() { return m_haveArrow; }
 
 	// 残機を増やす
-	void AddZanki(int num) { m_Zanki += num; }
+	void AddZanki(int num);
 
 	//UI関係
 	void LivesHighlight();
