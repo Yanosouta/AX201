@@ -14,14 +14,18 @@ SceneGame01::SceneGame01()
 	std::shared_ptr<Transform> pTransform;			// 位置情報
 	std::shared_ptr<Rigidbody> pRigidbody;			// 物理挙動
 
-	//--- UI作成（例）
-	// UI.1 虹色
-	ObjectManager::CreateObject<UI>("UI.1");
-	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.1")->GetComponent<SpriteRenderer>();
-	pTransform = ObjectManager::FindObjectWithName("UI.1")->GetComponent<Transform>();
+	//--- UI作成
+	//------------------------------------
+	// 1/14 竹下
+	//      タイトル用の画像に差し替え
+	//------------------------------------
+	// UI.1 タイトル画面
+	ObjectManager::CreateObject<UI>("UI.2");
+	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.2")->GetComponent<SpriteRenderer>();
+	pTransform = ObjectManager::FindObjectWithName("UI.2")->GetComponent<Transform>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/Bg.png");
 	pSpriteRenderer->SetSize(1280, 720);
-	ObjectManager::FindObjectWithName("UI.1")->SetLayerNum(2);
+	ObjectManager::FindObjectWithName("UI.2")->SetLayerNum(2);
 	pTransform->SetPosition({ 0.0f, 0.0f, 0.0f });
 	// UI.2 白と赤
 	/*

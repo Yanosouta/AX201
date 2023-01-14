@@ -4,8 +4,9 @@
 namespace SceneName {
 
 	enum SceneName {
-		SceneTitle,
 		SceneGame01,
+		SceneTitle,
+		SceneResult,
 
 		SceneMax
 	};

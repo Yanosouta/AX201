@@ -6,7 +6,7 @@
 Game3D::Game3D()
 {
 	// タイトルシーンへ変更
-	SceneManager::LoadScene(SceneName::SceneTitle);
+	SceneManager::LoadScene(SceneName::SceneGame01); // 最初はタイトルからスタートに変更
 }
 Game3D::~Game3D()
 {

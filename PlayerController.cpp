@@ -268,6 +268,12 @@ void PlayerController::Update()
 	{
 		LivesHighlight();
 	}
+
+	//ボスがいないのでとりあえず9を押すとクリア(「ク」リアの９)--------
+	if (IsKeyTrigger('9'))
+	{
+		SceneManager::LoadScene(SceneName::SceneGame01);
+	}
 }
 
 void PlayerController::OnCollisionEnter(ObjectBase* object)
@@ -380,9 +386,8 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 		if (m_Zanki <= 0)
 		{
 			ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
-			SceneManager::LoadScene(SceneName::SceneGame01);
-		}
-
+			SceneManager::LoadScene(SceneName::SceneResult);
+		}	
 	}
 }
 

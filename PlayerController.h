@@ -38,7 +38,7 @@ public:
 	PlayerController()
 		: m_ChargeTime(30.0f) // 60 fps の場合 0.5 秒
 		, m_Life(4)
-		, m_Zanki(1)
+		, m_Zanki(2)
 		, m_bLifeFlg(false)
 		, m_FlgCount(5.0f)
 		, m_bKnockBackFlg(false)
