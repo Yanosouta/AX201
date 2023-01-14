@@ -19,11 +19,12 @@ SceneGame01::SceneGame01()
 	ObjectManager::CreateObject<UI>("UI.1");
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.1")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.1")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/TEST.jpg");
-	pSpriteRenderer->SetSize(50, 50);
+	pSpriteRenderer->LoadTexture("Assets/Texture/Bg.png");
+	pSpriteRenderer->SetSize(1280, 720);
 	ObjectManager::FindObjectWithName("UI.1")->SetLayerNum(2);
 	pTransform->SetPosition({ 0.0f, 0.0f, 0.0f });
 	// UI.2 îíÇ∆ê‘
+	/*
 	ObjectManager::CreateObject<UI>("UI.2");
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.2")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.2")->GetComponent<Transform>();
@@ -31,6 +32,7 @@ SceneGame01::SceneGame01()
 	pSpriteRenderer->SetSize(50, 50);
 	ObjectManager::FindObjectWithName("UI.2")->SetLayerNum(1);
 	pTransform->SetPosition({ 25.0f, 25.0f, 0.0f });
+	*/
 }
 
 SceneGame01::~SceneGame01()
