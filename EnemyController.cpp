@@ -17,6 +17,7 @@
 #include "PlayerController.h"
 #include"EnemyRepop.h"
 #include "AABBCollider.h"
+#include "Item.h"
 
 void EnemyController::Start()
 {
@@ -266,7 +267,21 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				if (m_Hp == 0 || m_BossHP == 0)
 				{
 					m_EnemyMotionType = DEAD;
-					
+
+					ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
+
+					//確率でアイテムの生成
+					if (rand() % 1 == 0)
+					{
+						std::shared_ptr<ObjectBase> pObj;
+						std::shared_ptr<Transform> pTransform;			// 位置情報
+
+						pObj = ObjectManager::CreateObject<Item>("Item", TagName::Item);
+						pTransform = pObj->GetComponent<Transform>();
+
+						//敵が死んだ位置に出す
+						pTransform->SetPosition(GetOwner()->GetComponent<Transform>()->GetPosition());
+					}
 				}
 			}
 		}

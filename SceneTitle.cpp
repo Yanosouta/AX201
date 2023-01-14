@@ -22,6 +22,7 @@
 #include "UI.h"
 #include"EnemyManager.h"
 #include "Stage.h"
+#include "LightObj.h"
 
 SceneTitle::SceneTitle()
 {
@@ -33,6 +34,8 @@ SceneTitle::SceneTitle()
 	std::shared_ptr<Rigidbody> pRigidbody;			// 物理挙動
 	std::shared_ptr<AABBCollider> pAABBCollider;	// AABB当たり判定用
 	std::shared_ptr<CameraPlayer> pCameraPlayer;
+
+	ObjectManager::CreateObject<LightObj>("MainLight", TagName::Light);
 
 	//----------------------------------------------------------------------------------------
 	// 2022/12/19 竹下雄太郎 
