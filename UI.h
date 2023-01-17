@@ -4,7 +4,7 @@
 #include "ObjectBase.h"
 #include "SpriteRenderer.h"
 #include "DirectX.h"
-#include "UIController.h"
+
 
 class UI : public ObjectBase
 {
@@ -14,7 +14,7 @@ public:
 		// デフォルトコンポーネントを追加
 		this->AddComponent<SpriteRenderer>();	// 2D用表面情報
 		//----1/14 竹下 UIControllerを追加
-		AddComponent<UIController>();
+		//AddComponent<UIController>();
 	
 		// 全ての設定が終わったら呼び出す
 		this->Start();

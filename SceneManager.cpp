@@ -32,3 +32,8 @@ void SceneManager::LoadScene(SceneName::SceneName scene) {
 	m_loadScene = scene;
 	m_bLoad = true;
 }
+
+int SceneManager::GetScene()
+{
+	return m_loadScene;
+}
