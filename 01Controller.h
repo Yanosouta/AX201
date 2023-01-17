@@ -6,15 +6,16 @@
 #include <memory>
 #include <DirectXMath.h>
 
-class UIController : public ComponentBase
+class Game01Controller : public ComponentBase
 {
 private:
-	
+	bool m_NextScene; // UI切り替え用フラグ
+	int m_nSelect;    // 選択用カウンタ
 public:
 	// コンストラクタ
-	UIController() {};
+	Game01Controller() {};
 	// デストラクタ
-	~UIController() {};
+	~Game01Controller() {};
 
 	// 初期化
 	void Start() override;

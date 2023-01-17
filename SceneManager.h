@@ -18,6 +18,9 @@ public:
 	// シーンロード設定
 	static void LoadScene(SceneName::SceneName scene);
 
+	//
+	int GetScene();
+
 private:
 	static bool m_bLoad;
 	static SceneName::SceneName m_loadScene;
