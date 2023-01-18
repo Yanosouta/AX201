@@ -269,7 +269,68 @@ void PlayerController::Update()
 		LivesHighlight();
 	}
 
-	//ボスがいないのでとりあえず9を押すとクリア(「ク」リアの９)--------
+	//--------------------------------------
+	// 1/18
+	//      Update関数で体力テクスチャを変更
+	//--------------------------------------
+	// HP_MAX
+	if (m_Life == 4)
+	{
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+	}
+	//HP_75%
+	if (m_Life == 3)
+	{
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+	}
+	//HP_50%
+	if (m_Life == 2)
+	{
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(2);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+	}
+	//HP_25%
+	if (m_Life == 1)
+	{
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(3);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+	}
+	//HP_0%
+	if (m_Life == 0)
+	{
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(4);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+	}
+	//HP_0 -> MAX
+	if (m_Life <= 0)
+	{
+		m_Life = 4;
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		m_Zanki--;
+		if (m_Zanki == 8) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(1);
+		if (m_Zanki == 7) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(2);
+		if (m_Zanki == 6) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(3);
+		if (m_Zanki == 5) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(4);
+		if (m_Zanki == 4) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(5);
+		if (m_Zanki == 3) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(6);
+		if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
+		if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
+
+
+		//残機UI減少ハイライト----------小栗
+		m_LivesHighlighting = true;
+
+		// 残機が0でシーン移動
+		if (m_Zanki <= 0)
+		{
+			ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
+			SceneManager::LoadScene(SceneName::SceneResult);
+		}
+	}
+	//mc_nClearEnemyNumの数だけ倒すとクリア--------
 	if (m_nEnemyNum == mc_nClearEnemyNum)
 	{
 		SceneManager::LoadScene(SceneName::SceneGame01);
@@ -319,72 +380,15 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 			m_FlgCount--;
 			// ダメージ量を敵の種類によって分割
 			if (object->GetTag() == TagName::Enemy)
-				m_Life -= 1;
+				Reduce(1); // ライフが1減る
 			else if (object->GetTag() == TagName::MiddleBoss)
-				m_Life -= 2;
+				Reduce(2); // ライフが2減る
 			if (m_FlgCount <= 0)
 			{
 				//初期化処理
 				m_bLifeFlg = false;
 				m_FlgCount = 5.0f;
 			}
-		}
-		// HP_MAX
-		if (m_Life == 4)
-		{
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
-		}
-		//HP_75%
-		if (m_Life == 3)
-		{
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
-		}
-		//HP_50%
-		if (m_Life == 2)
-		{
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(2);
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
-		}
-		//HP_25%
-		if (m_Life == 1)
-		{
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(3);
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
-		}
-		//HP_0%
-		if (m_Life == 0)
-		{
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(4);
-			ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
-		}
-	}
-	//HP_0 -> MAX
-	if (m_Life <= 0)
-	{
-		m_Life = 4;
-		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
-		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
-		m_Zanki--;
-		if (m_Zanki == 8) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(1);
-		if (m_Zanki == 7) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(2);
-		if (m_Zanki == 6) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(3);
-		if (m_Zanki == 5) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(4);
-		if (m_Zanki == 4) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(5);
-		if (m_Zanki == 3) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(6);
-		if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
-		if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
-
-
-		//残機UI減少ハイライト----------小栗
-		m_LivesHighlighting = true;
-
-		// 残機が0でシーン移動
-		if (m_Zanki <= 0)
-		{
-			ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
-			SceneManager::LoadScene(SceneName::SceneResult);
 		}	
 	}
 }
@@ -423,6 +427,13 @@ void PlayerController::OnCollisionStay(ObjectBase* object)
 void PlayerController::OnCollisionExit(ObjectBase* object)
 {
 
+}
+
+//--------------------
+// 竹下 Reduce関数で体力を減らす
+void PlayerController::Reduce(int num)
+{
+	m_Life -= num;
 }
 
 //小栗大輝----------------------
