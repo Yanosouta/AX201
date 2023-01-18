@@ -278,7 +278,10 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 						std::shared_ptr<ObjectBase> pObj;
 						std::shared_ptr<Transform> pTransform;			// 位置情報
 
+						//アイテムの生成
 						pObj = ObjectManager::CreateObject<Item>("Item", TagName::Item);
+						//0か1でアイテムの種類を決める
+						pObj->GetComponent<ItemController>()->SetItemKind(rand() % 2);
 						pTransform = pObj->GetComponent<Transform>();
 
 						//敵が死んだ位置に出す

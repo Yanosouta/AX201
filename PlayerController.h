@@ -6,6 +6,8 @@
 #include <memory>
 #include <DirectXMath.h>
 
+#define MAX_LIFE (4)
+
 class PlayerController : public ComponentBase
 {
 private:
@@ -22,6 +24,7 @@ private:
 	float m_FlgCount; // [cppの269行目あたりで使ってると思うので見てあんま意味なければ消してもいいです
 	// 12/23 竹下　プレイヤーの残機
 	unsigned int m_Zanki;
+	bool m_EnableSpecial; //スペシャルの使用可能フラグ
 	
 	//--- ノックバック用
 	float m_KnockBackPower;	// 押される力
@@ -39,7 +42,7 @@ public:
 	// コンストラクタ
 	PlayerController()
 		: m_ChargeTime(30.0f) // 60 fps の場合 0.5 秒
-		, m_Life(4)
+		, m_Life(MAX_LIFE)
 		, m_Zanki(2)
 		, m_bLifeFlg(false)
 		, m_FlgCount(5.0f)
@@ -67,8 +70,11 @@ public:
 	//--- ゲット関数
 	std::shared_ptr<ObjectBase> GetHaveArrow() { return m_haveArrow; }
 
-	// 残機を増やす
-	void AddZanki(int num);
+	//ライフの回復
+	void AddLife(int add);
+
+	//セット関数　スペシャル仕様可能
+	void SetEnableSpecial() { m_EnableSpecial = true; }
 
 	//UI関係
 	void LivesHighlight();
