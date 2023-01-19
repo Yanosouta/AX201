@@ -41,22 +41,22 @@ void EnemyManager::Update()
 			m_AppearCount++;
 			//m_tick = 0.0f;
 		}
-		
+
 	}
 	if (0 == ObjectManager::FindObjectListWithTag(TagName::Enemy).size() + ObjectManager::FindObjectListWithTag(TagName::MiddleBoss).size())
 	{
 		m_FirstOnlyFlg = true;
-		
+
 	}
 	//ボス出現
 	if (m_AppearCount >= 10)
 	{
 		std::shared_ptr<ObjectBase> pFinalBoss;
 		std::shared_ptr<Transform> pBossTrans;
-		pFinalBoss = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::MiddleBoss);
+		pFinalBoss = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::StrFinalBoss);
 		pBossTrans = pFinalBoss->GetComponent<Transform>();
-		pBossTrans->SetPosition({-3.0f,-4.0f,10.0f});
-		pBossTrans->SetScale({ 2.0f,2.0f,2.0f });
+		pBossTrans->SetPosition({ -3.0f,-4.0f,10.0f });
+		pBossTrans->SetScale({ 3.0f,3.0f,3.0f });
 		m_AppearCount = 0;
 		m_MBCount--;
 		m_FirstOnlyFlg = false;
@@ -74,6 +74,36 @@ void EnemyManager::Update()
 
 		m_FirstOnlyFlg = false;
 		m_MBCount = 99;
+	}
+	//通常中ボスの敵の生成
+	if (ObjectManager::FindObjectListWithTag(TagName::FinalBoss).size() == 1)
+	{
+
+		if (m_RepopTime < m_tick&&mc_RepopBossCount > ObjectManager::FindObjectListWithTag(TagName::GenerateEnemy).size())
+		{
+			std::shared_ptr<ObjectBase> pEnemy;
+			std::shared_ptr<Transform> pTrans;
+			pEnemy = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::GenerateEnemy);
+			pTrans = pEnemy->GetComponent<Transform>();
+			pTrans->SetPosition(m_RepopPosList[rand() % m_RepopPosList.size()]);
+			pTrans->SetScale({ 1.0f,1.0f,1.0f });
+			//m_tick = 0.0f;
+		}
+	}
+	//強化中ボスの敵の生成
+	if (ObjectManager::FindObjectListWithTag(TagName::StrFinalBoss).size() == 1)
+	{
+
+		if (m_RepopTime < m_tick&&mc_RepopStrBossCount > ObjectManager::FindObjectListWithTag(TagName::MiddleBoss).size())
+		{
+			std::shared_ptr<ObjectBase> pEnemy;
+			std::shared_ptr<Transform> pTrans;
+			pEnemy = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::MiddleBoss);
+			pTrans = pEnemy->GetComponent<Transform>();
+			pTrans->SetPosition(m_RepopPosList[rand() % m_RepopPosList.size()]);
+			pTrans->SetScale({ 2.0f,2.0f,2.0f });
+			//m_tick = 0.0f;
+		}
 	}
 	//m_tick = 0.0f;
 }

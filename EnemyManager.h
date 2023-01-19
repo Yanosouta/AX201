@@ -18,7 +18,10 @@ public:
 
 	//敵の最大数
 	constexpr static int mc_EnemyMaxNum = 10;
-	
+	//通常中ボスが召喚するエネミーの数
+	constexpr static int mc_RepopBossCount = 8;
+	//強化中ボスが召喚するエネミーの数
+	constexpr static int mc_RepopStrBossCount = 3;
 private:
 	//リポップする間隔
 	float m_RepopTime;
