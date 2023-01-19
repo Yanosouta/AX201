@@ -18,10 +18,10 @@ light::light()
 	//*****************ディレクションライト*****************
 	//******************************************************
 	//ディレクションライトの向きをベクトルに変換
-	m_Light.dirDirection = XMFLOAT4(0.01f, -0.05f, 0.0f, 0.0f);
+	m_Light.dirDirection = XMFLOAT3(1.0f, -1.0f, 0.0f);
 
 	//ディレクションライトの色
-	m_Light.dirColor = XMFLOAT3(0.5f, 0.1f, 0.1f);
+	m_Light.dirColor = XMFLOAT3(0.5f, 0.5f, 0.5f);
 
 	//******************************************************
 	//********************ポイントライト********************
@@ -45,10 +45,10 @@ light::light()
 	m_Light.spColor = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	//スポットライトの影響範囲
-	m_Light.spRange = 10.0f;
+	m_Light.spRange = 0.0f;
 
 	//スポットライトの向き
-	m_Light.spDirection = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_Light.spDirection = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	//スポットライトの角度
 	m_Light.spAngle = XMConvertToRadians(0.0f);
@@ -63,7 +63,7 @@ light::light()
 	m_Light.skyColor = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	//地面の法線　※ここもプレイヤーが立っているブロックの法線情報をもらってくる
-	m_Light.groundNormal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_Light.groundNormal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	//******************************************************
 	//************************その他************************
