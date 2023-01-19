@@ -10,6 +10,9 @@ namespace TagName {
 	const std::string Enemy = "Enemy";
 	const std::string MiddleBoss = "MiddleBoss";
 	const std::string FinalBoss = "FinalBoss";
+	const std::string StrFinalBoss = "StrFinalBoss";
+	const std::string FinalBigBoss = "FinalBigBoss";
+	const std::string GenerateEnemy = "GenerateEnemy";
 	const std::string Arrow = "Arrow";
 	const std::string Item = "Item";
 	const std::string Light = "Light";
