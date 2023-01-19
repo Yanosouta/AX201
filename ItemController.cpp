@@ -42,15 +42,42 @@ void ItemController::OnCollisionEnter(ObjectBase* object)
 	//矢との当たり判定
 	if (object->GetTag() == TagName::Arrow)
 	{
+		std::shared_ptr<ObjectBase> pObj = ObjectManager::FindObjectWithTag(TagName::Player);
+
 		//プレイヤーが持っている矢でないときに処理する
-		if (ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->GetHaveArrow()
+		if (pObj->GetComponent<PlayerController>()->GetHaveArrow()
 			!= object->GetThisPtr())
 		{
-			m_bExist = false;
+			//アイテムの種類によって効果を変える
+			switch (m_eItemKind)
+			{
+				//体力回復
+			case ItemController::E_LIFE_UP: pObj->GetComponent<PlayerController>()->AddLife(1);
+				break;
 
-			//プレイヤーの体力回復、スペシャルゲージの回復の処理
-			ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->AddZanki(1);
+				//スペシャルアップ
+			case ItemController::E_SPECIAL_UP: pObj->GetComponent<PlayerController>()->SetEnableSpecial();
+				break;
+			
+			default:
+				break;
+			}
+
+			//自身の削除
 			ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 		}
 	}
+}
+
+
+
+//=======================
+//アイテムの種類を決める
+//=======================
+void ItemController::SetItemKind(int kind)
+{
+	//体力回復
+	if (kind == 0) m_eItemKind = E_LIFE_UP;
+	//スペシャル
+	if (kind == 1) m_eItemKind = E_SPECIAL_UP;
 }
