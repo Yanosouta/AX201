@@ -70,6 +70,8 @@ public:
 	// 残機を増やす
 	void AddZanki(int num);
 
+	// 体力を減らす
+	void Reduce(int num);
 	//UI関係
 	void LivesHighlight();
 
