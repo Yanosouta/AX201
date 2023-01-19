@@ -172,7 +172,7 @@ float3 CalcPhongSpecular(float3 lightDirection, float3 lightColor, float3 worldP
 	t = max(0.0f, t);
 
 	//‹¾–Ê”½Ë‚Ì‹­‚³‚ği‚é ¦ˆø”‚Ì’l‚ğ•Ï‚¦‚é‚Æ‹­‚³‚ª•Ï‚í‚é
-	t = pow(t, 5.0f);
+	t = pow(t, 0.7f);
 
 	//‹¾–Ê”½ËŒõ‚ğ‹‚ß‚é
 	return lightColor * t;
@@ -185,9 +185,9 @@ float3 CalcPhongSpecular(float3 lightDirection, float3 lightColor, float3 worldP
 float3 CalcLigFromDirectionLight(PSIn psin)
 {
 	//ŠgU”½ËŒõ‚ğ‹‚ß‚é
-	float3 diffDirection = CalcLambertDiffuse(dirDirection, dirColor, psin.normal);
+	float3 diffDirection = CalcLambertDiffuse(dirDirection, dirColor, normalize(psin.normal));
 	//‹¾–Ê”½ËŒõ‚ğ‹‚ß‚é
-	float3 specDirection = CalcPhongSpecular(dirDirection, dirColor, psin.worldPos, psin.normal);
+	float3 specDirection = CalcPhongSpecular(dirDirection, dirColor, psin.worldPos, normalize(psin.normal));
 
 	return diffDirection + specDirection;
 }

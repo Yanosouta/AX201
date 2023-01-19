@@ -14,7 +14,8 @@ public:
 	struct Light
 	{
 		//XMVECTOR dirDirection;    //ディレクションライトの方向      00  x,y,z,w
-		XMFLOAT4 dirDirection;    //ディレクションライトの方向      00  x,y,z,w
+		XMFLOAT3 dirDirection;    //ディレクションライトの方向      00  x,y,z,w
+		float pad111;                //パディング                      28  w
 		XMFLOAT3 dirColor;        //ディレクションライトのカラー    16  x,y,z
 		float pad;                //パディング                      28  w
 
@@ -28,14 +29,16 @@ public:
 		XMFLOAT3 spColor;         //スポットライトの色              80  x,y,z
 		float spAngle;            //スポットライトの角度            92  w
 		//XMVECTOR spDirection;     //スポットライトの方向            96  x,y,z,w
-		XMFLOAT4 spDirection;     //スポットライトの方向            96  x,y,z,w
+		XMFLOAT3 spDirection;     //スポットライトの方向            96  x,y,z,w
+		float pad112;                //パディング                      28  w
 
 		XMFLOAT3 groundColor;     //地面の色
 		float pad1;               //パディング
 		XMFLOAT3 skyColor;        //空の色
 		float pad2;               //パディング
 		//XMVECTOR groundNormal;    //地面の法線
-		XMFLOAT4 groundNormal;    //地面の法線
+		XMFLOAT3 groundNormal;    //地面の法線
+		float pad1231;                //パディング                      28  w
 
 		XMFLOAT3 eyePos;          //視点の位置                     
 		float pad3;               //パディング                     
