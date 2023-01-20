@@ -12,6 +12,7 @@
 #include "Zanki.h"//仮
 #include "Life.h"
 #include "clicAtk.h"
+#include "AtkGauge.h"
 
 
 #include "Transform.h"
@@ -73,13 +74,30 @@ SceneTitle::SceneTitle()
 	pTransform->SetPosition({ -530.0f, -180.0f, 0.0f });
 
 	// 必殺技ゲージ(後ろ透過されちゃうので後から場所は後からいじる)
-	ObjectManager::CreateObject<UI>("UI.7");
-	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.7")->GetComponent<SpriteRenderer>();
-	pTransform = ObjectManager::FindObjectWithName("UI.7")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/SP_gage.png");
-	pSpriteRenderer->SetSize(120, 120);
-	ObjectManager::FindObjectWithName("UI.7")->SetLayerNum(6);
-	pTransform->SetPosition({ -530.0f, -40.0f, 0.0f });
+	//ObjectManager::CreateObject<UI>("UI.7");
+	//pSpriteRenderer = ObjectManager::FindObjectWithName("UI.7")->GetComponent<SpriteRenderer>();
+	//pTransform = ObjectManager::FindObjectWithName("UI.7")->GetComponent<Transform>();
+	//pSpriteRenderer->LoadTexture("Assets/Texture/1.png");
+	//pSpriteRenderer->SetSize(150, 150);
+	//ObjectManager::FindObjectWithName("UI.7")->SetLayerNum(6);
+	//pTransform->SetPosition({ -400.0f, -230.0f, 0.0f });
+
+	//pObj = ObjectManager::CreateObject<UI>("UI.7");
+	//pObj->SetLayerNum(6);
+	//pObj->AddComponent<AtkGauge>();
+	//pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	//pSpriteRenderer->LoadTexture("Assets/Texture/16.png");
+	//pSpriteRenderer->SetSize(154, 154);
+	//pTransform = pObj->GetComponent<Transform>();
+	//pTransform->SetPosition({ -398.0f, -232.0f, 0.0f });
+	pObj = ObjectManager::CreateObject<UI>("UI.7");
+	pObj->SetLayerNum(6);
+	pObj->AddComponent<AtkGauge>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/mystery16.png");
+	pSpriteRenderer->SetSize(150, 150);
+	pTransform = pObj->GetComponent<Transform>();
+	pTransform->SetPosition({ -400.0f, -230.0f, 0.0f });
 
 	// 攻撃アイコン
 	pObj = ObjectManager::CreateObject<UI>("UI.8");
