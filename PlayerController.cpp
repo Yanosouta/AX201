@@ -18,6 +18,7 @@
 #include "SceneManager.h" // 
 #include "clicAtk.h"
 #include "AtkGauge.h"
+#include "FadeManager.h"
 
 void PlayerController::Start()
 {
@@ -354,13 +355,15 @@ void PlayerController::Update()
 		if (m_Zanki <= 0)
 		{
 			ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
-			SceneManager::LoadScene(SceneName::SceneResult);
+			//SceneManager::LoadScene(SceneName::SceneResult);
+			FadeManager::CreateFadeOut(SceneName::SceneResult);
 		}
 	}
 	//mc_nClearEnemyNumの数だけ倒すとクリア--------
 	if (m_nEnemyNum == mc_nClearEnemyNum)
 	{
-		SceneManager::LoadScene(SceneName::SceneGame01);
+		//SceneManager::LoadScene(SceneName::SceneGame01);
+		FadeManager::CreateFadeOut(SceneName::SceneGame01);
 	}
 }
 

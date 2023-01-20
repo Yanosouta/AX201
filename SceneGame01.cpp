@@ -7,6 +7,7 @@
 #include "Ui.h"
 #include "Game01.h"
 #include "SBotton.h"
+#include "FadeManager.h"
 
 SceneGame01::SceneGame01()
 {
@@ -16,6 +17,10 @@ SceneGame01::SceneGame01()
 	std::shared_ptr<Transform> pTransform;			// 位置情報
 	std::shared_ptr<Rigidbody> pRigidbody;			// 物理挙動
 	std::shared_ptr<ObjectBase> pObj;               //
+
+	//--- シーン切り替え時なのでフェードインを作成
+	FadeManager::CreateFadeIn();
+
 	//--- UI作成
 	//------------------------------------
 	// 1/14 竹下

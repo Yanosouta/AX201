@@ -24,6 +24,7 @@
 #include"EnemyManager.h"
 #include "Stage.h"
 #include "LightObj.h"
+#include "FadeManager.h"
 
 SceneTitle::SceneTitle()
 {
@@ -37,6 +38,9 @@ SceneTitle::SceneTitle()
 	std::shared_ptr<CameraPlayer> pCameraPlayer;
 
 	ObjectManager::CreateObject<LightObj>("MainLight", TagName::Light);
+
+	//--- シーン切り替え時なのでフェードインを作成
+	FadeManager::CreateFadeIn();
 
 	//----------------------------------------------------------------------------------------
 	// 2022/12/19 竹下雄太郎 
