@@ -39,6 +39,7 @@ private:
 	float m_KnockbackPower;	// 押される力
 	bool m_bKnockBackFlg; //ノックバック中にフラグを立てる
 	float m_FlgCount;	//フラグを立てている時にカウント
+	float m_StanCount;	//スタンするまでに必要な攻撃数
 	//---敵のパラメータ
 	float m_EAttackErea;//エネミーの攻撃範囲
 	int m_Hp;		//EnemyのHP
@@ -51,7 +52,8 @@ private:
 	
 	//死んだ後に行く場所
 	DirectX::XMFLOAT3 m_DeadPos;
-	
+	//死んだ後に行く場所(右)
+	DirectX::XMFLOAT3 m_RDeadPos;
 	
 public:
 	// コンストラクタ
@@ -70,6 +72,8 @@ public:
 		, m_EnemyMotionType(NORMAL)
 		, m_DeadPos(-44.0f, -5.4, -9.0f)
 		, m_MoveStopCount(0.0f)
+		, m_StanCount(3.0f)
+		, m_RDeadPos(44.0f, -5.4, -9.0f)
 	{}
 	// デストラクタ
 	~EnemyController() {}
