@@ -9,7 +9,6 @@
 #include "SceneManager.h"
 #include "SBotton.h"
 #include "ObjectManager.h"
-#include "FadeManager.h"
 
 void Game01Controller::Start()
 {
@@ -22,8 +21,7 @@ void Game01Controller::Update()
 	//エンターを押すとゲームシーンに移動
 	if (m_NextScene)	
 	{
-		//SceneManager::LoadScene(SceneName::SceneTitle);	// フェードアウトなしで開始
-		 FadeManager::CreateFadeOut(SceneName::SceneTitle); // フェードアウトで開始
+		SceneManager::LoadScene(SceneName::SceneTitle);	
 	}
 	if (IsKeyTrigger(VK_UP))
 	{
