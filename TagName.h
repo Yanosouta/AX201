@@ -3,6 +3,8 @@
 namespace TagName {
 	const std::string Untagged = "Untagged";
 	const std::string MainCamera = "MainCamera";
+	const std::string FadeIn = "FadeIn";
+	const std::string FadeOut = "FadeOut";
 	// ˆÈ‰º‚É’Ç‰Á
 	const std::string Ground = "Ground";
 	const std::string Wall = "Wall";
