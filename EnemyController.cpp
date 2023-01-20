@@ -118,14 +118,28 @@ void EnemyController::Update()
 			if (HeadEnemyPos.z <= -5.0f &&
 				HeadEnemyPos.z >= -15.0f)
 			{
-				DeadVector =
-					DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&m_DeadPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
-				// ベクトルを正規化
-				DeadVector = DirectX::XMVector3Normalize(DeadVector);
-				// 移動スピードを掛ける
-				DeadVector = DirectX::XMVectorScale(DeadVector, m_MoveSpeed);
-				// Float3に変換する
-				DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
+				if (HeadEnemyPos.x <= -3.0f) // 左側ver
+				{
+					DeadVector =
+						DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&m_DeadPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
+					// ベクトルを正規化
+					DeadVector = DirectX::XMVector3Normalize(DeadVector);
+					// 移動スピードを掛ける
+					DeadVector = DirectX::XMVectorScale(DeadVector, m_MoveSpeed);
+					// Float3に変換する
+					DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
+				}
+				else //右側ver
+				{
+					DeadVector =
+						DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&m_RDeadPos), DirectX::XMLoadFloat3(&GetOwner()->GetComponent<Transform>()->GetPosition()));
+					// ベクトルを正規化
+					DeadVector = DirectX::XMVector3Normalize(DeadVector);
+					// 移動スピードを掛ける
+					DeadVector = DirectX::XMVectorScale(DeadVector, m_MoveSpeed);
+					// Float3に変換する
+					DirectX::XMStoreFloat3(&m_TargetVector, DeadVector);
+				}
 			}
 			else {
 				DirectX::XMFLOAT3 deadPos = m_DeadPos;
@@ -165,11 +179,13 @@ void EnemyController::Update()
 		//フレームカウントの初期化
 		m_MoveStopCount++;
 		//敵を削除
-		if (GetOwner()->GetComponent<Transform>()->GetPosition().x <= -40.0f)
+		if (GetOwner()->GetComponent<Transform>()->GetPosition().x <= -40.0f || GetOwner()->GetComponent<Transform>()->GetPosition().x >= 32.0f)
 		{
 			m_MoveStopCount = 0.0f;	//カウントの初期化
 			ObjectManager::RemoveObject(GetOwner()->GetThisPtr());
 		}
+		
+
 	}
 	else if (m_EnemyMotionType == ATTACK)
 	{
@@ -239,23 +255,69 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 			if (ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->GetHaveArrow()
 				!= object->GetThisPtr()) {
 
-				m_bKnockBackFlg = true;
-				
-				if (this->GetOwner()->GetTag() == TagName::MiddleBoss)
-				{	
+				//==========================
+				//=====通常エネミーの処理===
+				//==========================
+				if (this->GetOwner()->GetTag() == TagName::Enemy || this->GetOwner()->GetTag() == TagName::GenerateEnemy)
+				{
+					//EnemyのHPを減らす
+					m_Hp--;
+					m_KnockbackPower = 0.7f;
+					//ノックバックフラグを起動
+					m_bKnockBackFlg = true;
+				}
+				//==========================
+				//=====強化エネミーの処理===
+				//==========================
+				if (this->GetOwner()->GetTag() == TagName::MiddleBoss || this->GetOwner()->GetTag() == TagName::GenerateStrEnemy)
+				{
 					//ノックバックとスタンをしない
+
 					m_KnockbackPower = 0.0f;
 					m_FlgCount = 0.0f;
 					if (ArrowController::ARROW_TYPE::SUPER == object->GetComponent<ArrowController>()->GetArrowType())
 					{
-						//BossのHPを減らす
-						m_BossHP--;
+						m_Hp--;
 					}
+
 				}
-				else {
-					//EnemyのHPを減らす
-					m_Hp--;
-					m_KnockbackPower = 0.7f;
+				//=======================
+				//===通常中ボスの処理====
+				//=======================
+				if (this->GetOwner()->GetTag() == TagName::FinalBoss)
+				{
+					//ノックバックとスタンをしない
+					m_KnockbackPower = 0.0f;
+					m_FlgCount = 0.0f;
+					m_bKnockBackFlg = true;
+					m_BossHP--;
+				}
+
+				//=======================
+				//===強化中ボスの処理====
+				//=======================
+				if (this->GetOwner()->GetTag() == TagName::StrFinalBoss)
+				{
+					//ノックバックとスタンをしない
+					m_KnockbackPower = 0.0f;
+					//m_FlgCount = 0.0f;
+					if (ArrowController::ARROW_TYPE::SUPER == object->GetComponent<ArrowController>()->GetArrowType())
+					{
+						//BossのHPを減らす
+						//m_BossHP--;
+						m_StanCount--;
+					}
+					//カウントが０になったらスタンさせる
+					if (m_StanCount <= 0.0f)
+					{
+						m_bKnockBackFlg = true;
+					}
+					//スタンしている時にダメージが入る
+					if (m_StanCount == 0 && m_FlgCount < 300.0f)
+					{
+						m_BossHP--;
+						m_StanCount = 3.0f;
+					}
 				}
 				//ノックバック　矢野12/16
 				GetOwner()->GetComponent<Rigidbody>()->SetAccele({
