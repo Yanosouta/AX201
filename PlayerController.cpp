@@ -17,6 +17,7 @@
 #include "Zanki.h" //
 #include "SceneManager.h" // 
 #include "clicAtk.h"
+#include "AtkGauge.h"
 
 void PlayerController::Start()
 {
@@ -34,6 +35,9 @@ void PlayerController::Start()
 	if (m_Zanki == 2) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(7);
 	if (m_Zanki == 1) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(8);
 	if (m_Zanki == 0) ObjectManager::FindObjectWithName("UI.9")->GetComponent<Zanki>()->Swapframe(9);
+
+	//通常攻撃のゲージを初期化
+	ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
 
 }
 
@@ -164,6 +168,27 @@ void PlayerController::Update()
 		rb = m_haveArrow->GetComponent<Rigidbody>();
 		// チャージ時間の割合を求める
 		float ChargePer = m_tic > m_ChargeTime ? m_ChargeTime/m_ChargeTime : m_tic/m_ChargeTime;
+
+		//
+		int SwapGauge = ChargePer / (1.0f / 16.0f);
+		if (SwapGauge == 0) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
+		if (SwapGauge == 1) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(1);
+		if (SwapGauge == 2) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(2);
+		if (SwapGauge == 3) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(3);
+		if (SwapGauge == 4) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(4);
+		if (SwapGauge == 5) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(5);
+		if (SwapGauge == 6) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(6);
+		if (SwapGauge == 7) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(7);
+		if (SwapGauge == 8) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(8);
+		if (SwapGauge == 9) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(9);
+  		if (SwapGauge == 10)		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(10);
+		if (SwapGauge == 11) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(11);
+		if (SwapGauge == 12) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(12);
+		if (SwapGauge == 13) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(13);
+		if (SwapGauge == 14) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(14);
+		if (SwapGauge == 15) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(15);
+		if (SwapGauge == 16) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(16);
+
 		// 割合を逆にする
 		ChargePer = 1 - ChargePer;
 		// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
@@ -205,6 +230,8 @@ void PlayerController::Update()
 		rb->SetAccele({ 0.0f, 0.0f, 0.0f});
 	}
 	if (IsKeyRelease(VK_SPACE)) {
+		//ゲージのリセット
+		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
 		// 変更用ポインタ
 		std::shared_ptr<Rigidbody> rb;
 		// 今持っているArrowのRigidbodyを取得
