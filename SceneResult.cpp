@@ -9,6 +9,7 @@
 #include "Rigidbody.h"
 #include "ObjectManager.h"
 #include "Ui.h"
+#include "FadeManager.h"
 
 SceneResult::SceneResult()
 {
@@ -16,6 +17,8 @@ SceneResult::SceneResult()
 	std::shared_ptr<ObjectBase> pObj;
 	std::shared_ptr<SpriteRenderer> pSpriteRenderer;// 2Dオブジェクト用レンダラー
 	std::shared_ptr<Transform> pTransform;			// 位置情報
+
+	FadeManager::CreateFadeIn();  //シーン生成時にフェード
 
 	pObj = ObjectManager::CreateObject<UI>("UI.1");
 	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();

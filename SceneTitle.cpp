@@ -12,7 +12,7 @@
 #include "Zanki.h"//仮
 #include "Life.h"
 #include "clicAtk.h"
-
+#include "FadeManager.h"
 
 #include "Transform.h"
 #include "CameraObjPlayer.h"
@@ -34,9 +34,10 @@ SceneTitle::SceneTitle()
 	std::shared_ptr<Rigidbody> pRigidbody;			// 物理挙動
 	std::shared_ptr<AABBCollider> pAABBCollider;	// AABB当たり判定用
 	std::shared_ptr<CameraPlayer> pCameraPlayer;
+	// シーン生成時　フェードイン
+	FadeManager::CreateFadeIn();
 
 	ObjectManager::CreateObject<LightObj>("MainLight", TagName::Light);
-
 	//----------------------------------------------------------------------------------------
 	// 2022/12/19 竹下雄太郎 
 	// UIをいい感じに配置
