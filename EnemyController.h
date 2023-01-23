@@ -44,12 +44,14 @@ private:
 	float m_EAttackErea;//エネミーの攻撃範囲
 	int m_Hp;		//EnemyのHP
 	int m_BossHP;	//BossのHP
+	int m_ChargeTime;	//エネミーの攻撃時間
 
 	float m_MoveStopCount;	//Enemyの止める時間のカウント
 
 	//エネミーの状態種類
 	ENEMY_MOTION_TYPE m_EnemyMotionType;
-	
+	// 攻撃用
+	std::shared_ptr<ObjectBase> m_haveShockWave; // 現在敵が持っている矢のポインタ
 	//死んだ後に行く場所
 	DirectX::XMFLOAT3 m_DeadPos;
 	//死んだ後に行く場所(右)
@@ -74,6 +76,7 @@ public:
 		, m_MoveStopCount(0.0f)
 		, m_StanCount(3.0f)
 		, m_RDeadPos(44.0f, -5.4, -9.0f)
+		, m_ChargeTime(120)
 	{}
 	// デストラクタ
 	~EnemyController() {}
