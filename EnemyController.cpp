@@ -39,6 +39,7 @@ void EnemyController::Update()
 	DirectX::XMFLOAT3 rotateDirection;
 	
 	m_tic++;
+	m_ChargeTime--;
 	
 	if (m_tic >= m_ChangeTargetTime) {
 		m_tic = rand() % (int)m_ChangeTargetTime;
@@ -187,9 +188,68 @@ void EnemyController::Update()
 		
 
 	}
-	else if (m_EnemyMotionType == ATTACK)
+	if (m_EnemyMotionType == ATTACK)
 	{
-		m_EnemyMotionType = NORMAL;
+		if (this->GetOwner()->GetTag() == TagName::FinalBigBoss)
+		{
+
+
+			if (m_ChargeTime <= 0)
+			{
+
+				// 変更用ポインタ
+				std::shared_ptr<Transform> trans;
+				std::shared_ptr<Rigidbody> rb;
+
+				//--- オブジェクト作成
+				m_haveShockWave = ObjectManager::CreateObject<Arrow>("ShockWave", TagName::ShockWave);
+				// 今持っているArrowのTransformを取得
+				trans = m_haveShockWave->GetComponent<Transform>();
+				//Rigidbodyを取得
+				rb = m_haveShockWave->GetComponent<Rigidbody>();
+				// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
+				// 要約：右前
+				trans->SetPosition({
+					GetOwner()->GetComponent<Transform>()->GetPosition().x ,
+					GetOwner()->GetComponent<Transform>()->GetPosition().y +
+						GetOwner()->GetComponent<Transform>()->GetVectorRight().y +
+						GetOwner()->GetComponent<Transform>()->GetVectorForword().y,
+					GetOwner()->GetComponent<Transform>()->GetPosition().z
+					});
+				// 角度を自分のオブジェクトの角度に設定
+				trans->SetAngle({
+					GetOwner()->GetComponent<Transform>()->GetAngle().x,
+					GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
+					GetOwner()->GetComponent<Transform>()->GetAngle().z
+					});
+
+				rb->SetAccele({
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.6f,
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.6f,
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.6f
+					});
+
+				trans->SetScale({ 1.2f, 0.6f, 0.3f });
+				rb->SetDrag(1.0f);
+				rb->SetMass(0.01f);
+
+				//初期化
+				m_ChargeTime = 120;
+			}
+		}
+		if ((HeadPlayerPos.x - HeadEnemyPos.x) * (HeadPlayerPos.x - HeadEnemyPos.x) +
+			(HeadPlayerPos.z - HeadEnemyPos.z) * (HeadPlayerPos.z - HeadEnemyPos.z) <=
+			(m_EAttackErea + 0.5f)*(m_EAttackErea + 0.5f))
+		{
+			m_EnemyMotionType = ATTACK;
+			m_MoveSpeed = 0.0f;
+			m_TargetVector = { 0.0f,0.0f,0.0f };	//攻撃モーションに入る
+		}
+		else
+		{
+			m_EnemyMotionType = NORMAL;
+			m_MoveSpeed = 0.05f;//速度を元に戻す
+		}
 	}
 
 	// 座標に適用する

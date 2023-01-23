@@ -17,6 +17,7 @@ namespace TagName {
 	const std::string GenerateEnemy = "GenerateEnemy";			//生成された強化エネミー
 	const std::string GenerateStrEnemy = "GenerateStrEnemy";	//生成された強化エネミー
 	const std::string Arrow = "Arrow";
+	const std::string ShockWave = "ShockWave";
 	const std::string Item = "Item";
 	const std::string Light = "Light";
 }
