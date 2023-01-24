@@ -43,7 +43,10 @@ private:
 	//---敵のパラメータ
 	float m_EAttackErea;//エネミーの攻撃範囲
 	int m_Hp;		//EnemyのHP
+	int m_StrHp;	//強化エネミーのHP
 	int m_BossHP;	//BossのHP
+	int m_StrBossHP;//強化ボスのHP
+	int m_BigBossHp;//大ボスのHP
 	int m_ChargeTime;	//エネミーの攻撃時間
 
 	float m_MoveStopCount;	//Enemyの止める時間のカウント
@@ -65,8 +68,11 @@ public:
 		, m_tic(m_ChangeTargetTime)
 		, m_TargetRotY(0.0f)
 		, m_lateRotY(0.0f)
-		, m_Hp(2)
-		, m_BossHP(4)
+		, m_Hp(1)
+		, m_StrHp(5)
+		, m_BossHP(50)
+		, m_StrBossHP(50)
+		, m_BigBossHp(150)
 		, m_bKnockBackFlg(false)
 		, m_FlgCount(100.0f)
 		, m_KnockbackPower(0.7f)
@@ -92,6 +98,10 @@ public:
 
 	//--- セット関数
 	void SetMoveSpeed(float speed) { m_MoveSpeed = speed; }
+
+	//--- ゲット関数
+	int GetStrBossHp();
+	int GetBigBossHp();
 };
 
 #endif //!___ENEMY_CONTROLLER_H___
