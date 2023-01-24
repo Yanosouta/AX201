@@ -11,6 +11,7 @@
 //---12/20 竹下------
 #include "Zanki.h"//仮
 #include "Life.h"
+#include "LifeNumber.h" // 1/24 竹下 追加
 #include "clicAtk.h"
 #include "AtkGauge.h"
 
@@ -133,6 +134,16 @@ SceneTitle::SceneTitle()
 	pSpriteRenderer->SetSize(400, 150);
 	ObjectManager::FindObjectWithName("UI.10")->SetLayerNum(9);
 	pTransform->SetPosition({ -500.0f, 330.0f, 0.0f });
+
+	// ライフ%の数字
+	pObj = ObjectManager::CreateObject<UI>("UI.11");
+	pObj->SetLayerNum(11);
+	pObj->AddComponent<LifeNumber>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/Number2.png");
+	pSpriteRenderer->SetSize(50, 50);
+	pTransform = pObj->GetComponent<Transform>();
+	pTransform->SetPosition({ 130.0f, -310.0f, 0.0f });
 	//------------------------------------------------------------------------------------
 
 
