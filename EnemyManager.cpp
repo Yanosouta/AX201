@@ -44,34 +44,34 @@ void EnemyManager::Update()
 	
 
 	//リポップするか判定
-	//if (m_FirstOnlyFlg)
-	//{
-	//	EnemyRepop({ m_RepopPosList[rand() % m_RepopPosList.size()] }, { 1.0f,1.0f,1.0f });
-	//
-	//}
-	//if (0 == ObjectManager::FindObjectListWithTag(TagName::Enemy).size() + ObjectManager::FindObjectListWithTag(TagName::MiddleBoss).size())
-	//{
-	//	m_FirstOnlyFlg = true;
-	//}
-	////強化エネミー出現
-	//if (m_AppearCount >= 10)
-	//{
-	//	StrEnemyRepop({ -3.0f,-4.0f,10.0f }, { 1.5f,1.5f,1.5f });
-	//	
-	//}
-	////ボス出現
-	//if (m_MBCount == 0)
-	//{
-	//	std::shared_ptr<ObjectBase> pFinalBoss;
-	//	std::shared_ptr<Transform> pBossTrans;
-	//	pFinalBoss = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::FinalBoss);
-	//	pBossTrans = pFinalBoss->GetComponent<Transform>();
-	//	pBossTrans->SetPosition({ -3.0f,-4.0f,20.0f });
-	//	pBossTrans->SetScale({ 2.0f,2.0f,2.0f });
-	//	m_AppearCount = 0;
-	//	m_FirstOnlyFlg = false;
-	//	m_MBCount = 99;
-	//}
+	if (m_FirstOnlyFlg)
+	{
+		EnemyRepop({ m_RepopPosList[rand() % m_RepopPosList.size()] }, { 1.0f,1.0f,1.0f });
+	
+	}
+	if (0 == ObjectManager::FindObjectListWithTag(TagName::Enemy).size() + ObjectManager::FindObjectListWithTag(TagName::MiddleBoss).size())
+	{
+		m_FirstOnlyFlg = true;
+	}
+	//強化エネミー出現
+	if (m_AppearCount >= 10)
+	{
+		StrEnemyRepop({ -3.0f,-4.0f,10.0f }, { 1.5f,1.5f,1.5f });
+		
+	}
+	//ボス出現
+	if (m_MBCount == 0)
+	{
+		std::shared_ptr<ObjectBase> pFinalBoss;
+		std::shared_ptr<Transform> pBossTrans;
+		pFinalBoss = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::FinalBoss);
+		pBossTrans = pFinalBoss->GetComponent<Transform>();
+		pBossTrans->SetPosition({ -3.0f,-4.0f,20.0f });
+		pBossTrans->SetScale({ 2.0f,2.0f,2.0f });
+		m_AppearCount = 0;
+		m_FirstOnlyFlg = false;
+		m_MBCount = 99;
+	}
 
 	//通常中ボスの敵の生成
 	if (ObjectManager::FindObjectListWithTag(TagName::FinalBoss).size() == 1)
