@@ -399,7 +399,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					});
 
 				// 自分を削除
-				if (m_Hp == 0 || m_BossHP == 0)
+				if (m_Hp == 0 || m_StrHp == 0|| m_BossHP == 0 || m_StrBossHP == 0 ||m_BigBossHp == 0)
 				{
 					m_EnemyMotionType = DEAD;
 
