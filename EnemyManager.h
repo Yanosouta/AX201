@@ -51,6 +51,10 @@ private:
 	float m_FBBRepopTime;
 	//大ボスが生成するエネミー数
 	int m_FBBEnemyCount;
+	//強化ボスのHP
+	int m_StrBossHP;
+	//大ボスのHP
+	int m_FinalBigBossHP;
 };
 
 

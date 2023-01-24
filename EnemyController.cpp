@@ -116,8 +116,8 @@ void EnemyController::Update()
 		{
 			m_MoveSpeed = 0.05f;	//速度を元に戻す
 			DirectX::XMVECTOR DeadVector = DirectX::XMVectorZero();
-			if (HeadEnemyPos.z <= -5.0f &&
-				HeadEnemyPos.z >= -15.0f)
+			if (HeadEnemyPos.z <= -7.0f &&
+				HeadEnemyPos.z >= -10.0f)
 			{
 				if (HeadEnemyPos.x <= -3.0f) // 左側ver
 				{
@@ -337,7 +337,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					m_FlgCount = 0.0f;
 					if (ArrowController::ARROW_TYPE::SUPER == object->GetComponent<ArrowController>()->GetArrowType())
 					{
-						m_Hp--;
+						m_StrHp--;
 					}
 
 				}
@@ -375,9 +375,20 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					//スタンしている時にダメージが入る
 					if (m_StanCount == 0 && m_FlgCount < 300.0f)
 					{
-						m_BossHP--;
+						m_StrBossHP--;
 						m_StanCount = 3.0f;
 					}
+				}
+				//=======================
+				//=====大ボスの処理======
+				//=======================
+				if (this->GetOwner()->GetTag() == TagName::FinalBigBoss)
+				{
+					//ノックバックとスタンをしない
+					m_KnockbackPower = 0.0f;
+					m_FlgCount = 0.0f;
+					//m_bKnockBackFlg = true;
+					m_BigBossHp--;
 				}
 				//ノックバック　矢野12/16
 				GetOwner()->GetComponent<Rigidbody>()->SetAccele({
@@ -451,5 +462,17 @@ void EnemyController::OnCollisionExit(ObjectBase* object)
 {
 
 }
+
+int EnemyController::GetStrBossHp()
+{
+	return m_StrBossHP;
+}
+
+int EnemyController::GetBigBossHp()
+{
+	return m_BigBossHp;
+}
+
+
 
 
