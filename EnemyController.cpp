@@ -276,8 +276,6 @@ void EnemyController::Update()
 
 void EnemyController::OnCollisionEnter(ObjectBase* object)
 {
-	
-
 	// フィールドと当たったときの処理
 	if (object->GetTag() == TagName::Ground) {
 		// Y軸の加速度をゼロに
@@ -301,6 +299,8 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 
 	// 壁と当たったときの処理
 	if (object->GetTag() == TagName::Wall) {
+		//--- 生成して直ぐかどうか
+		if (!m_isOnCollision) return;
 		GetOwner()->GetComponent<Transform>()->SetPosition(m_prevPos);
 		// 加速度を補正
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
@@ -466,6 +466,8 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 
 	// 壁と当たったときの処理
 	if (object->GetTag() == TagName::Wall) {
+		//--- 生成して直ぐかどうか
+		if (!m_isOnCollision) return;
 		GetOwner()->GetComponent<Transform>()->SetPosition(m_prevPos);
 		// 加速度を補正
 		GetOwner()->GetComponent<Rigidbody>()->SetAccele({ 0.0f, 0.0f, 0.0f });
@@ -474,7 +476,10 @@ void EnemyController::OnCollisionStay(ObjectBase* object)
 
 void EnemyController::OnCollisionExit(ObjectBase* object)
 {
-
+	// 壁と当たったときの処理
+	if (object->GetTag() == TagName::Wall) {
+		m_isOnCollision = true;
+	}
 }
 
 int EnemyController::GetStrBossHp()
