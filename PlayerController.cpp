@@ -14,6 +14,7 @@
 #include <math.h>
 #include "CameraPlayer.h"
 #include "Life.h"	//
+#include "LifeNumber.h"//
 #include "Zanki.h" //
 #include "SceneManager.h" // 
 #include "clicAtk.h"
@@ -306,24 +307,32 @@ void PlayerController::Update()
 	{
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(0);
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Play();
 	}
 	//HP_75%
 	if (m_Life == 3)
 	{
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Swapframe(1);
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Play();
 	}
 	//HP_50%
 	if (m_Life == 2)
 	{
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(2);
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Swapframe(2);
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Play();
 	}
 	//HP_25%
 	if (m_Life == 1)
 	{
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(3);
 		ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Swapframe(3);
+		ObjectManager::FindObjectWithName("UI.11")->GetComponent<LifeNumber>()->Play();
 	}
 	//HP_0%
 	if (m_Life == 0)
@@ -401,8 +410,16 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 	//-------------------------------------------------------------------------------
 	// 12/22
 	// 竹下　敵と当たった時の朱里
+	// 1/24  タグネームがめちゃんこ増えてるのでその分当たり判定を追加
 	//-------------------------------------------------------------------------------
-	if (object->GetTag() == TagName::Enemy || object->GetTag() == TagName::MiddleBoss)
+	if (object->GetTag() == TagName::Enemy || 
+		object->GetTag() == TagName::MiddleBoss||
+		object->GetTag() == TagName::GenerateEnemy||
+		object->GetTag() == TagName::GenerateStrEnemy||
+		object->GetTag() == TagName::FinalBoss||
+		object->GetTag() == TagName::FinalBigBoss||
+		object->GetTag() == TagName::StrFinalBoss||
+		object->GetTag() == TagName::ShockWave)
 	{
 		m_bLifeFlg = true;
 		if (m_bLifeFlg)
@@ -411,8 +428,20 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 			// ダメージ量を敵の種類によって分割
 			if (object->GetTag() == TagName::Enemy)
 				Reduce(1); // ライフが1減る
-			else if (object->GetTag() == TagName::MiddleBoss)
+			if (object->GetTag() == TagName::MiddleBoss)
 				Reduce(2); // ライフが2減る
+			if (object->GetTag() == TagName::GenerateEnemy)
+				Reduce(1); // ライフが1減る
+			if (object->GetTag() == TagName::GenerateStrEnemy)
+				Reduce(1); // ライフが1減る
+			if (object->GetTag() == TagName::FinalBoss)
+				Reduce(1); // ライフが1減
+			if (object->GetTag() == TagName::FinalBigBoss)
+				Reduce(1); // ライフが1減る
+			if (object->GetTag() == TagName::StrFinalBoss)
+				Reduce(1); // ライフが1減る
+			if (object->GetTag() == TagName::ShockWave)
+				Reduce(1); // ライフが1減る
 			if (m_FlgCount <= 0)
 			{
 				//初期化処理
