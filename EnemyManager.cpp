@@ -20,12 +20,12 @@ EnemyManager::EnemyManager()
 	, m_StrBossHP(0)
 {
 	//ÉäÉ|ÉbÉvÇ∑ÇÈèÍèä
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -28.0f,-5.4f, 3.1f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -23.0f,-5.4f, 5.0f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -14.5f,-5.4f, 2.2f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{   7.1f,-5.4f, 1.9f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{  14.0f,-5.4f, 2.6f });
-	m_RepopPosList.push_back(DirectX::XMFLOAT3{  20.5f,-5.4f, 3.2f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -28.0f,-5.4f, 3.0f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -23.0f,-5.4f, 3.0f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{ -14.5f,-5.4f, 3.0f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{   7.1f,-5.4f, 3.0f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{  14.0f,-5.4f, 3.0f });
+	m_RepopPosList.push_back(DirectX::XMFLOAT3{  20.5f,-5.4f, 3.0f });
 }
 
 void EnemyManager::Update()

@@ -59,9 +59,6 @@ private:
 	DirectX::XMFLOAT3 m_DeadPos;
 	//死んだ後に行く場所(右)
 	DirectX::XMFLOAT3 m_RDeadPos;
-
-	//--- 生成時に壁に埋もれないためのフラグ
-	bool m_isOnCollision;
 	
 public:
 	// コンストラクタ
@@ -86,7 +83,6 @@ public:
 		, m_StanCount(3.0f)
 		, m_RDeadPos(44.0f, -5.4, -9.0f)
 		, m_ChargeTime(120)
-		, m_isOnCollision(false)
 	{}
 	// デストラクタ
 	~EnemyController() {}
