@@ -497,9 +497,12 @@ void PlayerController::OnCollisionExit(ObjectBase* object)
 void PlayerController::AddLife(int add)
 {
 	// 体力が最大であれば処理しない
-	if (m_Life > MAX_LIFE) m_Life = MAX_LIFE;
+	if (m_Life == MAX_LIFE) return;
 
-	m_Life++;
+	m_Life += add;
+
+	//体力が上限を超えないようにるする
+	if (m_Life > MAX_LIFE) m_Life = MAX_LIFE;
 }
 
 //--------------------

@@ -4,13 +4,13 @@
 #include "AABBCollider.h"
 #include "ItemController.h"
 
-class Item : public Object3D
+class ItemSpecial : public Object3D
 {
 public:
 	// コンストラクタ
-	Item(std::string name, std::string tag) : Object3D(name, tag) {
-		// プレイヤーのモデルをロードする（仮でキューブのオブジェクト）
-		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/Item/heart/heart.fbx", 0.5f);
+	ItemSpecial(std::string name, std::string tag) : Object3D(name, tag) {
+		//アイテムのモデルをロードする（仮でキューブのオブジェクト）
+		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/Item/specialheart/ItemSpecial.fbx", 0.5f);
 		// コンポーネントを追加
 		AddComponent<AABBCollider>();
 		AddComponent<ItemController>();
@@ -19,5 +19,5 @@ public:
 	}
 
 	// デストラクタ
-	~Item() {}
+	~ItemSpecial() {}
 };

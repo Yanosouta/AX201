@@ -137,7 +137,7 @@ float4 main(PSIn psin) : SV_Target0
 float3 CalcLambertDiffuse(float3 lightDirection, float3 lightColor, float3 normal)
 {
 	//ピクセルの法線とライトの方向の内積を計算
-	float t = dot(normal, lightDirection);
+	float t = dot(normal, normalize(lightDirection));
 	t *= -1.0f; //反転
 
 	//内積の値を0以上にする
@@ -159,7 +159,7 @@ float3 CalcLambertDiffuse(float3 lightDirection, float3 lightColor, float3 norma
 float3 CalcPhongSpecular(float3 lightDirection, float3 lightColor, float3 worldPos, float3 normal)
 {
 	//反射ベクトルを求める
-	float3 refVec = reflect(lightDirection, normal);
+	float3 refVec = reflect(normalize(lightDirection), normal);
 
 	//光が当たったサーフェイスから視点の位置のベクトルを求める
 	float3 toEye = eyePos - worldPos;
@@ -172,7 +172,7 @@ float3 CalcPhongSpecular(float3 lightDirection, float3 lightColor, float3 worldP
 	t = max(0.0f, t);
 
 	//鏡面反射の強さを絞る ※引数の値を変えると強さが変わる
-	t = pow(t, 0.7f);
+	t = pow(t, 10.0f);
 
 	//鏡面反射光を求める
 	return lightColor * t;

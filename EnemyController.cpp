@@ -18,6 +18,7 @@
 #include"EnemyRepop.h"
 #include "AABBCollider.h"
 #include "Item.h"
+#include "ItemSpecial.h"
 
 void EnemyController::Start()
 {
@@ -406,18 +407,31 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->AddBreakEnemy();
 
 					//確率でアイテムの生成
-					if (rand() % 5 == 0)
+					if (rand() % 1 == 0)
 					{
 						std::shared_ptr<ObjectBase> pObj;
 						std::shared_ptr<Transform> pTransform;			// 位置情報
 
 						//アイテムの生成
-						pObj = ObjectManager::CreateObject<Item>("Item", TagName::Item);
-						//0か1でアイテムの種類を決める
-						pObj->GetComponent<ItemController>()->SetItemKind(rand() % 2);
-						pTransform = pObj->GetComponent<Transform>();
+						int kind = rand() % 2;
+
+						if (kind == 0)
+						{
+							//アイテムの生成
+							pObj = ObjectManager::CreateObject<Item>("Item", TagName::Item);
+							//0か1でアイテムの種類を決める
+							pObj->GetComponent<ItemController>()->SetItemKind(ItemController::E_LIFE_UP);
+						}
+						if (kind == 1)
+						{
+							//アイテムの生成
+							pObj = ObjectManager::CreateObject<ItemSpecial>("Item", TagName::Item);
+							//0か1でアイテムの種類を決める
+							pObj->GetComponent<ItemController>()->SetItemKind(ItemController::E_SPECIAL_UP);
+						}
 
 						//敵が死んだ位置に出す
+						pTransform = pObj->GetComponent<Transform>();
 						pTransform->SetPosition(GetOwner()->GetComponent<Transform>()->GetPosition());
 					}
 				}

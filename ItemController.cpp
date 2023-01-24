@@ -27,9 +27,16 @@ void ItemController::Start()
 void ItemController::Update()
 {
 	//アイテムの回転
+	m_rotY += 0.5f;
+	GetOwner()->GetComponent<Transform>()->SetAngle(DirectX::XMFLOAT3(0.0f, m_rotY, 0.0f));
 
 	//アイテムのy座標をsin波
+	m_pos = GetOwner()->GetComponent<Transform>()->GetPosition();
+	m_pos.y = sin(m_sinFram * 360 / 60 * 3.14f / 180) * 0.03f + m_pos.y;
+	GetOwner()->GetComponent<Transform>()->SetPosition(m_pos);
 
+	m_sinFram++;
+	m_collCount++;
 }
 
 
@@ -40,7 +47,7 @@ void ItemController::Update()
 void ItemController::OnCollisionEnter(ObjectBase* object)
 {
 	//矢との当たり判定
-	if (object->GetTag() == TagName::Arrow)
+	if (object->GetTag() == TagName::Arrow && m_collCount > 30)
 	{
 		std::shared_ptr<ObjectBase> pObj = ObjectManager::FindObjectWithTag(TagName::Player);
 
@@ -52,7 +59,7 @@ void ItemController::OnCollisionEnter(ObjectBase* object)
 			switch (m_eItemKind)
 			{
 				//体力回復
-			case ItemController::E_LIFE_UP: pObj->GetComponent<PlayerController>()->AddLife(1);
+			case ItemController::E_LIFE_UP: pObj->GetComponent<PlayerController>()->AddLife(MAX_LIFE);
 				break;
 
 				//スペシャルアップ
