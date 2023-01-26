@@ -10,10 +10,13 @@
 #include "SBotton.h"
 #include "ObjectManager.h"
 #include "FadeManager.h"
+#include "EButton.h"
+#include "WinUtil.h"
 
 void Game01Controller::Start()
 {
 	m_NextScene = false;
+	m_EndWnd = false;
 	m_nSelect = 0;
 }
 
@@ -24,6 +27,10 @@ void Game01Controller::Update()
 	{
 		//SceneManager::LoadScene(SceneName::SceneTitle);
 		FadeManager::CreateFadeOut(SceneName::SceneTitle);
+	}
+	if (m_EndWnd)
+	{
+		EndWindow();
 	}
 	if (IsKeyTrigger(VK_UP))
 	{
@@ -38,12 +45,16 @@ void Game01Controller::Update()
 	{
 		ObjectManager::FindObjectWithName("UI.3")->GetComponent<SBtton>()->Swapframe(1);
 		ObjectManager::FindObjectWithName("UI.3")->GetComponent<SBtton>()->Play();
+		ObjectManager::FindObjectWithName("UI.4")->GetComponent<SBtton>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.4")->GetComponent<SBtton>()->Play();
 	}
 	// 偶数なら未選択
 	if (m_nSelect % 2 == 0)
 	{
 		ObjectManager::FindObjectWithName("UI.3")->GetComponent<SBtton>()->Swapframe(0);
 		ObjectManager::FindObjectWithName("UI.3")->GetComponent<SBtton>()->Play();
+		ObjectManager::FindObjectWithName("UI.4")->GetComponent<SBtton>()->Swapframe(1);
+		ObjectManager::FindObjectWithName("UI.4")->GetComponent<SBtton>()->Play();
 	}
 	// エンターキーでUI切り替え
 	if (IsKeyTrigger(VK_RETURN))
@@ -53,6 +64,12 @@ void Game01Controller::Update()
 			m_NextScene = true;
 			ObjectManager::FindObjectWithName("UI.3")->GetComponent<SBtton>()->Swapframe(2);
 			ObjectManager::FindObjectWithName("UI.3")->GetComponent<SBtton>()->Play();
+		}
+		if (m_nSelect % 2 == 0)
+		{
+			m_EndWnd = true;
+			ObjectManager::FindObjectWithName("UI.4")->GetComponent<SBtton>()->Swapframe(2);
+			ObjectManager::FindObjectWithName("UI.4")->GetComponent<SBtton>()->Play();
 		}
 	}
 }

@@ -48,6 +48,16 @@ SceneGame01::SceneGame01()
 	pSpriteRenderer->SetSize(460, 92);
 	pTransform = pObj->GetComponent<Transform>();
 	pTransform->SetPosition({ 0.0f, -153.0f, 0.0f });
+
+	pObj = ObjectManager::CreateObject<UI>("UI.4");
+	pObj->SetLayerNum(4);
+	pObj->AddComponent<SBtton>();
+	pObj->AddComponent<SpriteAnimation>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/End1.png");
+	pSpriteRenderer->SetSize(460, 92);
+	pTransform = pObj->GetComponent<Transform>();
+	pTransform->SetPosition({ 0.0f, -260.0f, 0.0f });
 }
 
 SceneGame01::~SceneGame01()
