@@ -10,7 +10,6 @@
 #include "SBotton.h"
 #include "ObjectManager.h"
 #include "FadeManager.h"
-#include "EButton.h"
 #include "WinUtil.h"
 
 void Game01Controller::Start()
