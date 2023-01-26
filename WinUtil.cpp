@@ -142,3 +142,8 @@ void InitMouseWheel()
 {
 	g_MouseWheelfwKeys = 0.0f;
 }
+
+void EndWindow()
+{
+	DestroyWindow(g_hWnd);
+}

@@ -11,6 +11,7 @@ class Game01Controller : public ComponentBase
 private:
 	bool m_NextScene; // UI切り替え用フラグ
 	int m_nSelect;    // 選択用カウンタ
+	bool m_EndWnd;	  //ゲーム終了時のUI切り替えようフラグ
 public:
 	// コンストラクタ
 	Game01Controller() {};

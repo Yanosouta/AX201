@@ -23,4 +23,6 @@ DirectX::XMFLOAT2 GetCursorPos();
 float GetMouseWheel();
 void InitMouseWheel();
 
+void EndWindow();
+
 #endif //!___WINUTIL_H___
