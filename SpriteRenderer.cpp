@@ -13,6 +13,7 @@ std::list<std::pair<std::string, ID3D11ShaderResourceView*>> SpriteRenderer::m_T
 
 // コンストラクタ
 SpriteRenderer::SpriteRenderer()
+	: m_Color({1.0f, 1.0f, 1.0f, 1.0f})
 {
 	if (m_shaderRef == 0)
 	{
@@ -145,6 +146,7 @@ void SpriteRenderer::Draw()
 	m_SpriteInfo.m_Param[1].y = m_SpriteInfo.animeUV.uvTopLeftV;
 	m_SpriteInfo.m_Param[1].z = m_SpriteInfo.animeUV.uvWidth;
 	m_SpriteInfo.m_Param[1].w = m_SpriteInfo.animeUV.uvHeight;
+	m_SpriteInfo.m_Param[2] = m_Color;
 	m_pDefVS->Bind();		// VertexShader設定
 	m_pDefPS->Bind();		// PixelShader設定
 	m_pAlphaBlend->Bind();		// αブレンド用BlendStateを設定
@@ -214,5 +216,5 @@ void SpriteRenderer::SetUVScale(DirectX::XMFLOAT2 scale)
 }
 void SpriteRenderer::SetColor(DirectX::XMFLOAT4 color)
 {
-	m_SpriteInfo.m_Param[2] = color;
+	m_Color = color;
 }
