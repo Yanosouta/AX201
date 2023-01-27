@@ -26,6 +26,7 @@
 #include "Stage.h"
 #include "LightObj.h"
 #include "FadeManager.h"
+#include "ClearManager.h"
 
 SceneTitle::SceneTitle()
 {
@@ -39,7 +40,6 @@ SceneTitle::SceneTitle()
 	std::shared_ptr<CameraPlayer> pCameraPlayer;
 
 	ObjectManager::CreateObject<LightObj>("MainLight", TagName::Light);
-
 	//--- シーン切り替え時なのでフェードインを作成
 	FadeManager::CreateFadeIn();
 
@@ -144,6 +144,17 @@ SceneTitle::SceneTitle()
 	pSpriteRenderer->SetSize(50, 50);
 	pTransform = pObj->GetComponent<Transform>();
 	pTransform->SetPosition({ 130.0f, -310.0f, 0.0f });
+
+	pObj = ObjectManager::CreateObject<UI>("UI.12");
+	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.12")->GetComponent<SpriteRenderer>();
+	pTransform = ObjectManager::FindObjectWithName("UI.12")->GetComponent<Transform>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/clear.png");
+	pSpriteRenderer->SetSize(900, 260);
+	ObjectManager::FindObjectWithName("UI.12")->SetLayerNum(13);
+	pTransform->SetPosition({ 0.0f, 0.0f, 0.0f });
+	pObj->AddComponent<ClearManager>();
+		
+	
 	//------------------------------------------------------------------------------------
 
 
