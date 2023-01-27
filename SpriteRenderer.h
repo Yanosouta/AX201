@@ -74,6 +74,9 @@ private:
 	static std::list<std::pair<std::string, ID3D11ShaderResourceView*>> m_TextureList;
 private:
 	Info m_SpriteInfo;
+	
+	// 色情報
+	DirectX::XMFLOAT4 m_Color;
 };
 
 #endif //!___SPRITERENDERER_H___
