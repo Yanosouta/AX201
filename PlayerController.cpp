@@ -369,11 +369,11 @@ void PlayerController::Update()
 		}
 	}
 	//mc_nClearEnemyNumの数だけ倒すとクリア--------
-	if (m_nEnemyNum == mc_nClearEnemyNum)
-	{
-		//SceneManager::LoadScene(SceneName::SceneGame01);
-		FadeManager::CreateFadeOut(SceneName::SceneGame01);
-	}
+	//if (m_nEnemyNum == mc_nClearEnemyNum)
+	//{
+	//	//SceneManager::LoadScene(SceneName::SceneGame01);
+	//	FadeManager::CreateFadeOut(SceneName::SceneGame01);
+	//}
 }
 
 void PlayerController::OnCollisionEnter(ObjectBase* object)

@@ -83,9 +83,8 @@ public:
 
 	// 倒した数を増やす
 	void AddBreakEnemy() { m_nEnemyNum++; }
-
-	// クリア条件の敵を倒した数
-	constexpr static int mc_nClearEnemyNum = 11;
+	int GetBreahEnemy() { return m_nEnemyNum; }
+	
 
 };
 
