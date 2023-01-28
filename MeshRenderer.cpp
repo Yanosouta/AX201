@@ -16,15 +16,13 @@
 VertexShader* MeshRenderer::m_pDefVS = nullptr;
 PixelShader* MeshRenderer::m_pDefPS = nullptr;
 unsigned int MeshRenderer::m_shaderRef = 0;
-std::list<std::pair<std::string, MeshRenderer::Info*>> MeshRenderer::m_ModelList;
+std::list<std::pair<std::string, MeshRenderer::Info>> MeshRenderer::m_ModelList;
 
 //--- プロトタイプ宣言
 void MakeDefaultShader(VertexShader** vs, PixelShader** ps);
 
 MeshRenderer::MeshRenderer()
-	: m_modelScale(1.0f), m_isModelFlip(false)
-	, m_pMeshes(nullptr), m_meshNum(0)
-	, m_pMaterials(nullptr), m_materialNum(0)
+	: m_MeshInfo{ 1.0f, false, nullptr, 0, nullptr, 0 }
 	, m_playNo(ANIME_NONE), m_blendNo(ANIME_NONE)
 	, m_blendTime(0.0f), m_blendTotalTime(0.0f)
 	, m_parametric{ ANIME_NONE, ANIME_NONE }, m_parametricBlend(0.0f)
@@ -43,24 +41,24 @@ MeshRenderer::MeshRenderer()
 MeshRenderer::~MeshRenderer()
 {
 	delete m_pBones;
-	for (unsigned int i = 0; i < m_meshNum; ++i)
+	for (unsigned int i = 0; i < m_MeshInfo.m_meshNum; ++i)
 	{
-		if (m_pMeshes[i].pBones)
-			delete[] m_pMeshes[i].pBones;
-		delete[] m_pMeshes[i].pVertices;
-		delete[] m_pMeshes[i].pIndices;
-		delete m_pMeshes[i].pMesh;
+		if (m_MeshInfo.m_pMeshes[i].pBones)
+			delete[] m_MeshInfo.m_pMeshes[i].pBones;
+		delete[] m_MeshInfo.m_pMeshes[i].pVertices;
+		delete[] m_MeshInfo.m_pMeshes[i].pIndices;
+		delete m_MeshInfo.m_pMeshes[i].pMesh;
 	}
-	if (m_pMeshes) {
-		delete[] m_pMeshes;
+	if (m_MeshInfo.m_pMeshes) {
+		delete[] m_MeshInfo.m_pMeshes;
 	}
-	for (unsigned int i = 0; i < m_materialNum; ++i)
+	for (unsigned int i = 0; i < m_MeshInfo.m_materialNum; ++i)
 	{
-		if (m_pMaterials[i].pTexture)
-			m_pMaterials[i].pTexture->Release();
+		if (m_MeshInfo.m_pMaterials[i].pTexture)
+			m_MeshInfo.m_pMaterials[i].pTexture->Release();
 	}
-	if (m_pMaterials) {
-		delete[] m_pMaterials;
+	if (m_MeshInfo.m_pMaterials) {
+		delete[] m_MeshInfo.m_pMaterials;
 	}
 
 	--m_shaderRef;
@@ -88,7 +86,7 @@ MeshRenderer::AnimeNo MeshRenderer::AddAnimation(const char* file)
 	// assimpの設定
 	Assimp::Importer importer;
 	int flag = 0;
-	if (m_isModelFlip) flag |= aiProcess_MakeLeftHanded;
+	if (m_MeshInfo.m_isModelFlip) flag |= aiProcess_MakeLeftHanded;
 	// assimpで読み込み
 	const aiScene* pScene = importer.ReadFile(file, flag);
 	if (!pScene) {
@@ -116,8 +114,8 @@ MeshRenderer::AnimeNo MeshRenderer::AddAnimation(const char* file)
 		// チャンネル(ボーン)別にデータを設定
 		int channelIdx = channelIt - anime.channels.begin();
 		aiNodeAnim* pChannel = pAnime->mChannels[channelIdx];
-		Mapping::iterator mappingIt = m_boneMapping.find(pChannel->mNodeName.data);
-		if (mappingIt == m_boneMapping.end())
+		Mapping::iterator mappingIt = m_MeshInfo.m_boneMapping.find(pChannel->mNodeName.data);
+		if (mappingIt == m_MeshInfo.m_boneMapping.end())
 		{
 			channelIt->index = INDEX_NONE;
 			channelIt++;
@@ -131,7 +129,7 @@ MeshRenderer::AnimeNo MeshRenderer::AddAnimation(const char* file)
 		for (int i = 0; i < channelIt->pos.size(); ++i)
 		{
 			aiVector3D val = pChannel->mPositionKeys[i].mValue;
-			channelIt->pos[i].value = DirectX::XMFLOAT3(val.x * m_modelScale, val.y * m_modelScale, val.z * m_modelScale);
+			channelIt->pos[i].value = DirectX::XMFLOAT3(val.x * m_MeshInfo.m_modelScale, val.y * m_MeshInfo.m_modelScale, val.z * m_MeshInfo.m_modelScale);
 			channelIt->pos[i].time = pChannel->mPositionKeys[i].mTime / pAnime->mTicksPerSecond;
 		}
 		// 回転
@@ -298,31 +296,31 @@ void MeshRenderer::MakeNodes(const void* pScene)
 				mat.a1, mat.b1, mat.c1, mat.d1,
 				mat.a2, mat.b2, mat.c2, mat.d2,
 				mat.a3, mat.b3, mat.c3, mat.d3,
-				mat.a4 * m_modelScale, mat.b4 * m_modelScale, mat.c4 * m_modelScale, mat.d4)
+				mat.a4 * m_MeshInfo.m_modelScale, mat.b4 * m_MeshInfo.m_modelScale, mat.c4 * m_MeshInfo.m_modelScale, mat.d4)
 		);
 		node.mat = DirectX::XMLoadFloat4x4(&node.offset);
-		m_nodes.push_back(node);
+		m_MeshInfo.m_nodes.push_back(node);
 
 		// ノード名に基づく参照リスト作成
-		NodeIndex index = m_nodes.size() - 1;
-		m_boneMapping.insert(MappingKey(node.name, index));
+		NodeIndex index = m_MeshInfo.m_nodes.size() - 1;
+		m_MeshInfo.m_boneMapping.insert(MappingKey(node.name, index));
 
 		// 子要素に関しても変換
 		for (int i = 0; i < pNode->mNumChildren; ++i)
 		{
-			m_nodes[index].children[i] = AssimpNodeConvert(pNode->mChildren[i], index);
+			m_MeshInfo.m_nodes[index].children[i] = AssimpNodeConvert(pNode->mChildren[i], index);
 		}
 		return index;
 	};
 
 	// ノード作成
-	m_nodes.clear();
-	m_boneMapping.clear();
+	m_MeshInfo.m_nodes.clear();
+	m_MeshInfo.m_boneMapping.clear();
 	AssimpNodeConvert(reinterpret_cast<const aiScene*>(pScene)->mRootNode, -1);
 	// ノード数に基づいて、アニメーションデータ作成
 	for (int i = 0; i < MAX_ANIME_TRANSFORM; ++i)
 	{
-		m_animeTransform[i].resize(m_nodes.size());
+		m_animeTransform[i].resize(m_MeshInfo.m_nodes.size());
 		for (NodeTransforms::iterator it = m_animeTransform[i].begin(); it != m_animeTransform[i].end(); ++it)
 		{
 			it->translate = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -338,21 +336,21 @@ void MeshRenderer::MakeBoneWeight(const void* scene, int i)
 	// メッシュに対応するボーン番号
 	if (pScene->mMeshes[i]->HasBones())
 	{
-		m_pMeshes[i].boneNum = pScene->mMeshes[i]->mNumBones;
-		m_pMeshes[i].pBones = new Bone[m_pMeshes[i].boneNum];
-		for (unsigned int j = 0; j < m_pMeshes[i].boneNum; ++j)
+		m_MeshInfo.m_pMeshes[i].boneNum = pScene->mMeshes[i]->mNumBones;
+		m_MeshInfo.m_pMeshes[i].pBones = new Bone[m_MeshInfo.m_pMeshes[i].boneNum];
+		for (unsigned int j = 0; j < m_MeshInfo.m_pMeshes[i].boneNum; ++j)
 		{
 			std::string name = pScene->mMeshes[i]->mBones[j]->mName.data;
-			auto it = m_boneMapping.find(name);
-			if (it != m_boneMapping.end())
+			auto it = m_MeshInfo.m_boneMapping.find(name);
+			if (it != m_MeshInfo.m_boneMapping.end())
 			{
-				m_pMeshes[i].pBones[j].index = it->second;
+				m_MeshInfo.m_pMeshes[i].pBones[j].index = it->second;
 				aiMatrix4x4 mat = pScene->mMeshes[i]->mBones[j]->mOffsetMatrix;
-				m_pMeshes[i].pBones[j].invOffset = DirectX::XMFLOAT4X4(
+				m_MeshInfo.m_pMeshes[i].pBones[j].invOffset = DirectX::XMFLOAT4X4(
 					mat.a1, mat.b1, mat.c1, mat.d1,
 					mat.a2, mat.b2, mat.c2, mat.d2,
 					mat.a3, mat.b3, mat.c3, mat.d3,
-					mat.a4 * m_modelScale, mat.b4 * m_modelScale, mat.c4 * m_modelScale, mat.d4
+					mat.a4 * m_MeshInfo.m_modelScale, mat.b4 * m_MeshInfo.m_modelScale, mat.c4 * m_MeshInfo.m_modelScale, mat.d4
 				);
 
 				// ウェイト
@@ -362,10 +360,10 @@ void MeshRenderer::MakeBoneWeight(const void* scene, int i)
 					aiVertexWeight weight = pScene->mMeshes[i]->mBones[j]->mWeights[k];
 					for (int l = 0; l < 4; ++l)
 					{
-						if (m_pMeshes[i].pVertices[weight.mVertexId].weight[l] <= 0.0f)
+						if (m_MeshInfo.m_pMeshes[i].pVertices[weight.mVertexId].weight[l] <= 0.0f)
 						{
-							m_pMeshes[i].pVertices[weight.mVertexId].index[l] = j;
-							m_pMeshes[i].pVertices[weight.mVertexId].weight[l] = weight.mWeight;
+							m_MeshInfo.m_pMeshes[i].pVertices[weight.mVertexId].index[l] = j;
+							m_MeshInfo.m_pMeshes[i].pVertices[weight.mVertexId].weight[l] = weight.mWeight;
 							break;
 						}
 					}
@@ -373,23 +371,23 @@ void MeshRenderer::MakeBoneWeight(const void* scene, int i)
 			}
 			else
 			{
-				m_pMeshes[i].pBones[j].index = -1;
+				m_MeshInfo.m_pMeshes[i].pBones[j].index = -1;
 			}
 		}
 	}
 	else
 	{
-		std::map<std::string, int>::iterator it = m_boneMapping.find(pScene->mMeshes[i]->mName.data);
-		if (it != m_boneMapping.end())
+		std::map<std::string, int>::iterator it = m_MeshInfo.m_boneMapping.find(pScene->mMeshes[i]->mName.data);
+		if (it != m_MeshInfo.m_boneMapping.end())
 		{
 			// メッシュでない親ノードを探索
 			std::function<int(int)> FindNodeFunc = [&FindNodeFunc, this, pScene](int index)
 			{
-				std::string name = m_nodes[index].name;
+				std::string name = m_MeshInfo.m_nodes[index].name;
 				for (int i = 0; i < pScene->mNumMeshes; ++i)
 					if (name == pScene->mMeshes[i]->mName.data)
 					{
-						return FindNodeFunc(m_nodes[index].parent);
+						return FindNodeFunc(m_MeshInfo.m_nodes[index].parent);
 					}
 				return index;
 			};
@@ -398,25 +396,25 @@ void MeshRenderer::MakeBoneWeight(const void* scene, int i)
 				[&CalcNodeFunc, this](int index, DirectX::XMMATRIX mat)
 			{
 				if (index == -1) return mat;
-				mat = mat * DirectX::XMLoadFloat4x4(&m_nodes[index].offset);
-				return CalcNodeFunc(m_nodes[index].parent, mat);
+				mat = mat * DirectX::XMLoadFloat4x4(&m_MeshInfo.m_nodes[index].offset);
+				return CalcNodeFunc(m_MeshInfo.m_nodes[index].parent, mat);
 			};
 
-			m_pMeshes[i].boneNum = 1;
-			m_pMeshes[i].pBones = new Bone[1];
-			m_pMeshes[i].pBones->index = FindNodeFunc(m_nodes[it->second].parent);
-			DirectX::XMStoreFloat4x4(&m_pMeshes[i].pBones->invOffset, DirectX::XMMatrixInverse(nullptr,
-				CalcNodeFunc(m_pMeshes[i].pBones->index, DirectX::XMMatrixIdentity())
+			m_MeshInfo.m_pMeshes[i].boneNum = 1;
+			m_MeshInfo.m_pMeshes[i].pBones = new Bone[1];
+			m_MeshInfo.m_pMeshes[i].pBones->index = FindNodeFunc(m_MeshInfo.m_nodes[it->second].parent);
+			DirectX::XMStoreFloat4x4(&m_MeshInfo.m_pMeshes[i].pBones->invOffset, DirectX::XMMatrixInverse(nullptr,
+				CalcNodeFunc(m_MeshInfo.m_pMeshes[i].pBones->index, DirectX::XMMatrixIdentity())
 			));
-			for (unsigned int j = 0; j < m_pMeshes[i].vertexNum; ++j)
+			for (unsigned int j = 0; j < m_MeshInfo.m_pMeshes[i].vertexNum; ++j)
 			{
-				m_pMeshes[i].pVertices[j].weight[0] = 1.0f;
+				m_MeshInfo.m_pMeshes[i].pVertices[j].weight[0] = 1.0f;
 			}
 		}
 		else
 		{
-			m_pMeshes[i].boneNum = 0;
-			m_pMeshes[i].pBones = nullptr;
+			m_MeshInfo.m_pMeshes[i].boneNum = 0;
+			m_MeshInfo.m_pMeshes[i].pBones = nullptr;
 		}
 	}
 }
@@ -424,12 +422,12 @@ void MeshRenderer::UpdateBoneMatrix(int i)
 {
 	DirectX::XMFLOAT4X4 boneMat[MAX_BONE];
 	int j;
-	for (j = 0; j < m_pMeshes[i].boneNum && j < MAX_BONE; ++j)
+	for (j = 0; j < m_MeshInfo.m_pMeshes[i].boneNum && j < MAX_BONE; ++j)
 	{
 		DirectX::XMStoreFloat4x4(&boneMat[j],
 			DirectX::XMMatrixTranspose(
-				DirectX::XMLoadFloat4x4(&m_pMeshes[i].pBones[j].invOffset) *
-				m_nodes[m_pMeshes[i].pBones[j].index].mat
+				DirectX::XMLoadFloat4x4(&m_MeshInfo.m_pMeshes[i].pBones[j].invOffset) *
+				m_MeshInfo.m_nodes[m_MeshInfo.m_pMeshes[i].pBones[j].index].mat
 			));
 	}
 	for (; j < MAX_BONE; ++j)
@@ -497,7 +495,7 @@ void MeshRenderer::CalcBones(NodeIndex index, DirectX::XMMATRIX parent)
 	}
 
 	// ノードごとの姿勢行列を計算
-	Node& node = m_nodes[index];
+	Node& node = m_MeshInfo.m_nodes[index];
 	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(transform.translate.x, transform.translate.y, transform.translate.z);
 	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&transform.quaternion);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(Q);
@@ -665,11 +663,11 @@ void MeshRenderer::Draw()
 	m_pVS->Bind();
 	m_pPS->Bind();
 	m_pWVP->BindVS(0);
-	for (unsigned int i = 0; i < m_meshNum; ++i)
+	for (unsigned int i = 0; i < m_MeshInfo.m_meshNum; ++i)
 	{
 		UpdateBoneMatrix(i);
-		SetTexturePS(m_pMaterials[m_pMeshes[i].materialID].pTexture, 0);
-		m_pMeshes[i].pMesh->Draw();
+		SetTexturePS(m_MeshInfo.m_pMaterials[m_MeshInfo.m_pMeshes[i].materialID].pTexture, 0);
+		m_MeshInfo.m_pMeshes[i].pMesh->Draw();
 	}
 }
 
@@ -685,13 +683,13 @@ const MeshRenderer::Mesh* MeshRenderer::GetMesh(unsigned int index)
 {
 	if (index >= GetMeshNum())
 	{
-		return &m_pMeshes[index];
+		return &m_MeshInfo.m_pMeshes[index];
 	}
 	return nullptr;
 }
 uint32_t MeshRenderer::GetMeshNum()
 {
-	return m_meshNum;
+	return m_MeshInfo.m_meshNum;
 }
 
 void MakeDefaultShader(VertexShader** vs, PixelShader** ps)
@@ -708,6 +706,13 @@ void MakeDefaultShader(VertexShader** vs, PixelShader** ps)
 
 bool MeshRenderer::LoadModel(const char* file, float scale, bool flip)
 {
+	// 登録済みのモデルがあればロードせずに登録済みデータを使用する。
+	for (auto it = m_ModelList.begin(); it != m_ModelList.end(); ++it)
+		if (it->first == file) {
+			m_MeshInfo = it->second;
+			return true;
+		}
+
 	// assimpの読み込み時の設定
 	Assimp::Importer importer;
 	int flag = 0;
@@ -722,29 +727,29 @@ bool MeshRenderer::LoadModel(const char* file, float scale, bool flip)
 		return false;
 	}
 	// アニメーション用の設定
-	m_modelScale = scale;
-	m_isModelFlip = flip;
+	m_MeshInfo.m_modelScale = scale;
+	m_MeshInfo.m_isModelFlip = flip;
 	MakeNodes(pScene);
 	// 読み込んだデータを基にメッシュのデータを確保
-	m_meshNum = pScene->mNumMeshes;
-	m_pMeshes = new Mesh[m_meshNum];
+	m_MeshInfo.m_meshNum = pScene->mNumMeshes;
+	m_MeshInfo.m_pMeshes = new Mesh[m_MeshInfo.m_meshNum];
 
 	// メッシュごとに頂点データ、インデックスデータを読み取り
-	for (unsigned int i = 0; i < m_meshNum; ++i) {
+	for (unsigned int i = 0; i < m_MeshInfo.m_meshNum; ++i) {
 		// メッシュを基に頂点のデータを確保
 		aiVector3D zero(0.0f, 0.0f, 0.0f);
-		m_pMeshes[i].vertexNum = pScene->mMeshes[i]->mNumVertices;
-		m_pMeshes[i].pVertices = new MeshRenderer::Vertex[m_pMeshes[i].vertexNum];
+		m_MeshInfo.m_pMeshes[i].vertexNum = pScene->mMeshes[i]->mNumVertices;
+		m_MeshInfo.m_pMeshes[i].pVertices = new MeshRenderer::Vertex[m_MeshInfo.m_pMeshes[i].vertexNum];
 
 		// メッシュ内の頂点データを読み取り
-		for (unsigned int j = 0; j < m_pMeshes[i].vertexNum; ++j) {
+		for (unsigned int j = 0; j < m_MeshInfo.m_pMeshes[i].vertexNum; ++j) {
 			// 値の吸出し
 			aiVector3D pos = pScene->mMeshes[i]->mVertices[j];
 			aiVector3D normal = pScene->mMeshes[i]->mNormals[j];
 			aiVector3D uv = pScene->mMeshes[i]->HasTextureCoords(0) ?
 				pScene->mMeshes[i]->mTextureCoords[0][j] : zero;
 			// 値を設定
-			m_pMeshes[i].pVertices[j] = {
+			m_MeshInfo.m_pMeshes[i].pVertices[j] = {
 				DirectX::XMFLOAT3(pos.x * scale, pos.y * scale, pos.z * scale),
 				DirectX::XMFLOAT3(normal.x, normal.y, normal.z),
 				DirectX::XMFLOAT2(uv.x, uv.y),
@@ -758,31 +763,31 @@ bool MeshRenderer::LoadModel(const char* file, float scale, bool flip)
 
 		// メッシュを元にインデックスのデータを確保
 		// ※faceはポリゴンの数を表す（１ポリゴンで3インデックス
-		m_pMeshes[i].indexNum = pScene->mMeshes[i]->mNumFaces * 3;
-		m_pMeshes[i].pIndices = new unsigned int[m_pMeshes[i].indexNum];
+		m_MeshInfo.m_pMeshes[i].indexNum = pScene->mMeshes[i]->mNumFaces * 3;
+		m_MeshInfo.m_pMeshes[i].pIndices = new unsigned int[m_MeshInfo.m_pMeshes[i].indexNum];
 
 		// メッシュ内のインデックスデータを読み取り
 		for (unsigned int j = 0; j < pScene->mMeshes[i]->mNumFaces; ++j) {
 			aiFace face = pScene->mMeshes[i]->mFaces[j];
 			int idx = j * 3;
-			m_pMeshes[i].pIndices[idx + 0] = face.mIndices[0];
-			m_pMeshes[i].pIndices[idx + 1] = face.mIndices[1];
-			m_pMeshes[i].pIndices[idx + 2] = face.mIndices[2];
+			m_MeshInfo.m_pMeshes[i].pIndices[idx + 0] = face.mIndices[0];
+			m_MeshInfo.m_pMeshes[i].pIndices[idx + 1] = face.mIndices[1];
+			m_MeshInfo.m_pMeshes[i].pIndices[idx + 2] = face.mIndices[2];
 		}
 
 		// マテリアルの割り当て
-		m_pMeshes[i].materialID = pScene->mMeshes[i]->mMaterialIndex;
+		m_MeshInfo.m_pMeshes[i].materialID = pScene->mMeshes[i]->mMaterialIndex;
 
 		// メッシュを元に頂点バッファ作成
 		MeshBuffer::Description desc = {};
-		desc.pVtx = m_pMeshes[i].pVertices;
+		desc.pVtx = m_MeshInfo.m_pMeshes[i].pVertices;
 		desc.vtxSize = sizeof(Vertex);
-		desc.vtxCount = m_pMeshes[i].vertexNum;
-		desc.pIdx = m_pMeshes[i].pIndices;
+		desc.vtxCount = m_MeshInfo.m_pMeshes[i].vertexNum;
+		desc.pIdx = m_MeshInfo.m_pMeshes[i].pIndices;
 		desc.idxSize = sizeof(unsigned int);
-		desc.idxCount = m_pMeshes[i].indexNum;
+		desc.idxCount = m_MeshInfo.m_pMeshes[i].indexNum;
 		desc.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		m_pMeshes[i].pMesh = new MeshBuffer(desc);
+		m_MeshInfo.m_pMeshes[i].pMesh = new MeshBuffer(desc);
 	}
 
 	// テクスチャを読み込む場所を探索
@@ -790,22 +795,22 @@ bool MeshRenderer::LoadModel(const char* file, float scale, bool flip)
 	dir = dir.substr(0, dir.find_last_of('/') + 1);	// 読み込むファイルパスからファイル名を取り除く
 													// Assets/Model/xx.fbx → Assets/Model/
 	// 読み込んだデータを元にマテリアルのデータの確保
-	m_materialNum = pScene->mNumMaterials;
-	m_pMaterials = new Material[m_materialNum];
+	m_MeshInfo.m_materialNum = pScene->mNumMaterials;
+	m_MeshInfo.m_pMaterials = new Material[m_MeshInfo.m_materialNum];
 
 	// マテリアルごとにデータの読み取り
 	HRESULT hr;
-	for (unsigned int i = 0; i < m_materialNum; ++i) {
+	for (unsigned int i = 0; i < m_MeshInfo.m_materialNum; ++i) {
 		// テクスチャの読み取り
 		aiString path;
 		if (pScene->mMaterials[i]->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS) {
 			// モデルファイルに記録されていたファイルパスから読み込み
-			hr = LoadTextureFromFile(path.C_Str(), &m_pMaterials[i].pTexture);
+			hr = LoadTextureFromFile(path.C_Str(), &m_MeshInfo.m_pMaterials[i].pTexture);
 			if (FAILED(hr)) {
 				// モデルと同じフォルダ内でテクスチャファイルを読み込み
 				std::string file = dir;
 				file += path.C_Str();
-				hr = LoadTextureFromFile(file.c_str(), &m_pMaterials[i].pTexture);
+				hr = LoadTextureFromFile(file.c_str(), &m_MeshInfo.m_pMaterials[i].pTexture);
 			}
 			// パスを分解して探索
 			if (FAILED(hr)) {
@@ -817,13 +822,16 @@ bool MeshRenderer::LoadModel(const char* file, float scale, bool flip)
 				file = file.substr(file.find_last_of('\\') + 1);
 				file = dir + file;
 				hr = LoadTextureFromFile(file.c_str(),
-					&m_pMaterials[i].pTexture);
+					&m_MeshInfo.m_pMaterials[i].pTexture);
 			}
 			if (FAILED(hr)) { return false; }
 		}
 		else {
-			m_pMaterials[i].pTexture = nullptr;
+			m_MeshInfo.m_pMaterials[i].pTexture = nullptr;
 		}
 	}
+	// 新規モデルのため、
+	// ファイルネームと共にモデル情報を保存しておく。
+	m_ModelList.push_back(std::pair<std::string, Info>(file, m_MeshInfo));
 	return true;
 }

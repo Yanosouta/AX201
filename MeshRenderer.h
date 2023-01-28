@@ -126,10 +126,14 @@ public:
 	};
 
 	struct Info {
-		Mesh* m_pMeshes;
-		unsigned int m_meshNum;
-		Material* m_pMaterials;
-		unsigned int m_materialNum;
+		float			m_modelScale;
+		bool			m_isModelFlip;
+		Mesh*			m_pMeshes;
+		unsigned int	m_meshNum;
+		Material*		m_pMaterials;
+		unsigned int	m_materialNum;
+		Nodes			m_nodes;
+		Mapping			m_boneMapping;
 	};
 
 public:
@@ -180,16 +184,10 @@ private:
 	static PixelShader* m_pToonPS;
 	static unsigned int m_shaderRef;
 	// モデルリスト
-	static std::list<std::pair<std::string, Info*>> m_ModelList;
+	static std::list<std::pair<std::string, Info>> m_ModelList;
 private:
-	float			m_modelScale;
-	bool			m_isModelFlip;
-	Nodes			m_nodes;
-	Mapping			m_boneMapping;
-	Mesh*			m_pMeshes;
-	unsigned int	m_meshNum;
-	Material*		m_pMaterials;
-	unsigned int	m_materialNum;
+	Info m_MeshInfo;
+
 	VertexShader*	m_pVS;
 	PixelShader*	m_pPS;
 	ConstantBuffer*	m_pBones;
