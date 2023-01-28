@@ -13,11 +13,9 @@ Game3D::~Game3D()
 }
 void Game3D::Update()
 {
+
 	ObjectManager::FixedUpdate();
 	ObjectManager::Update();
-
-	if (IsKeyPress(VK_F1)) SceneManager::LoadScene(SceneName::SceneTitle);
-	if (IsKeyPress(VK_F2)) SceneManager::LoadScene(SceneName::SceneGame01);
 }
 
 void Game3D::LateUpdate()
