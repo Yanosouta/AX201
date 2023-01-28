@@ -12,11 +12,7 @@ public:
 	// コンストラクタ
 	Player(std::string name, std::string tag) : Object3D(name, tag) {
 		// プレイヤーのモデルをロードする（仮でキューブのオブジェクト）
-		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/obj.fbx", 0.05f);
-		MeshRenderer::AnimeNo no = GetComponent<MeshRenderer>()->AddAnimation("Assets/Model/yumiActionBoneyumiAction.fbx");
-		if (no == MeshRenderer::ANIME_NONE)
-			MessageBox(nullptr, "animeError", "Error", MB_OK);
-		GetComponent<MeshRenderer>()->Play(no, true);
+		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/DemoCube/DemoCube.fbx", 1.0f);
 		// コンポーネントを追加
 		AddComponent<PlayerController>();
 		AddComponent<Rigidbody>();
