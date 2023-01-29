@@ -149,7 +149,7 @@ SceneTitle::SceneTitle()
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.12")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.12")->GetComponent<Transform>();
 	pSpriteRenderer->LoadTexture("Assets/Texture/clear.png");
-	pSpriteRenderer->SetSize(900, 260);
+	pSpriteRenderer->SetSize(700, 490);
 	ObjectManager::FindObjectWithName("UI.12")->SetLayerNum(13);
 	pTransform->SetPosition({ 0.0f, 0.0f, 0.0f });
 	pObj->AddComponent<ClearManager>();
