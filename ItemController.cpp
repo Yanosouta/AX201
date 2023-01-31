@@ -63,7 +63,7 @@ void ItemController::OnCollisionEnter(ObjectBase* object)
 				break;
 
 				//スペシャルアップ
-			case ItemController::E_SPECIAL_UP: pObj->GetComponent<PlayerController>()->SetEnableSpecial();
+			case ItemController::E_SPECIAL_UP: pObj->GetComponent<PlayerController>()->SetEnableSpecial(true);
 				break;
 			
 			default:

@@ -15,7 +15,7 @@ private:
 	// 長押しによる溜め攻撃を使用可能になる時間
 	float m_ChargeTime;
 	float m_tic; // フレームカウント
-	std::shared_ptr<ObjectBase> m_haveArrow; // 現在プレイヤーが持っている矢のポインタ
+	std::shared_ptr<ObjectBase> m_haveArrow[3]; // 現在プレイヤーが持っている矢のポインタ
 	DirectX::XMFLOAT3 m_prevPos;	// ひとつ前の座標
 	bool m_isHaveArrow;	// 射撃中かどうか
 
@@ -39,6 +39,10 @@ private:
 
 	int m_nEnemyNum;	// 倒した敵の数
 
+	//矢の処理用の関数
+	void IsSpecialArrow();
+	void IsNormalArrow();
+
 public:
 	// コンストラクタ
 	PlayerController()
@@ -55,6 +59,7 @@ public:
 		,m_LivesIV(DirectX::XMFLOAT2(1.0f,1.0f))
 		, m_nEnemyNum(0)
 		, m_isHaveArrow(false)
+		,m_EnableSpecial(false)
 	{}
 	// デストラクタ
 	~PlayerController() {}
@@ -70,14 +75,14 @@ public:
 	void OnCollisionExit(ObjectBase* object);
 	
 	//--- ゲット関数
-	std::shared_ptr<ObjectBase> GetHaveArrow() { return m_haveArrow; }
+	std::shared_ptr<ObjectBase> GetHaveArrow() { return *m_haveArrow; }
 	bool GetIsHaveArrow() { return m_isHaveArrow; }
 
 	//ライフの回復
 	void AddLife(int add);
 
 	//セット関数　スペシャル仕様可能
-	void SetEnableSpecial() { m_EnableSpecial = true; }
+	void SetEnableSpecial(bool enable) { m_EnableSpecial = enable; }
 
 	// 体力を減らす
 	void Reduce(int num);
