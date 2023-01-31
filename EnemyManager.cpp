@@ -2,6 +2,7 @@
 #include"Enemy.h"
 #include"ObjectBase.h"
 #include"ObjectManager.h"
+#include"strEnemy.h"
 
 #include"Transform.h"
 #include<time.h>
@@ -64,7 +65,7 @@ void EnemyManager::Update()
 	{
 		std::shared_ptr<ObjectBase> pFinalBoss;
 		std::shared_ptr<Transform> pBossTrans;
-		pFinalBoss = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::FinalBoss);
+		pFinalBoss = ObjectManager::CreateObject<StrEnemy>("RepopEnemy", TagName::FinalBoss);
 		pBossTrans = pFinalBoss->GetComponent<Transform>();
 		pBossTrans->SetPosition({ -3.0f,-4.0f,20.0f });
 		pBossTrans->SetScale({ 2.0f,2.0f,2.0f });
@@ -126,7 +127,7 @@ void EnemyManager::StrEnemyRepop(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 Scale)
 	{
 		std::shared_ptr<ObjectBase> pEnemy;
 		std::shared_ptr<Transform> pTrans;
-		pEnemy = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::MiddleBoss);
+		pEnemy = ObjectManager::CreateObject<StrEnemy>("RepopEnemy", TagName::MiddleBoss);
 		pTrans = pEnemy->GetComponent<Transform>();
 		pTrans->SetPosition(pos);
 		pTrans->SetScale({ Scale.x,Scale.y,Scale.z });
@@ -161,7 +162,7 @@ void EnemyManager::StrEnemyGenerate(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 Sca
 	{
 		std::shared_ptr<ObjectBase> pEnemy;
 		std::shared_ptr<Transform> pTrans;
-		pEnemy = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::GenerateStrEnemy);
+		pEnemy = ObjectManager::CreateObject<StrEnemy>("RepopEnemy", TagName::GenerateStrEnemy);
 		pTrans = pEnemy->GetComponent<Transform>();
 		pTrans->SetPosition(m_RepopPosList[rand() % m_RepopPosList.size()]);
 		pTrans->SetScale(Scale);
@@ -189,7 +190,7 @@ void EnemyManager::BStrEnemyGenerate(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 Sc
 		{
 			std::shared_ptr<ObjectBase> pEnemy;
 			std::shared_ptr<Transform> pTrans;
-			pEnemy = ObjectManager::CreateObject<Enemy>("RepopEnemy", TagName::GenerateStrEnemy);
+			pEnemy = ObjectManager::CreateObject<StrEnemy>("RepopEnemy", TagName::GenerateStrEnemy);
 			pTrans = pEnemy->GetComponent<Transform>();
 			pTrans->SetPosition(m_RepopPosList[rand() % m_RepopPosList.size()]);
 			pTrans->SetScale(Scale);

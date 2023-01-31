@@ -12,6 +12,7 @@ ClearManager::ClearManager()
 	,m_color(1.0f,1.0f,1.0f,0.0f)
 	,m_time(0.0f)
 	,m_TotalTime(90.0f)
+	,m_clear(false)
 {
 	ObjectManager::FindObjectWithName("UI.12")->GetComponent<SpriteRenderer>()->SetColor(m_color);
 }
@@ -23,11 +24,16 @@ void ClearManager::Update()
 	if (m_BreakEnemy == mc_nClearEnemyNum)
 	{
 		m_time++;
+		m_clear = true;
 		m_color.w = 0.0f + (m_time / m_TotalTime);
 		ObjectManager::FindObjectWithName("UI.12")->GetComponent<SpriteRenderer>()->SetColor(m_color);
 	}
-	if (IsKeyTrigger(VK_RETURN))
+	if (m_clear)
 	{
-		FadeManager::CreateFadeOut(SceneName::SceneGame01);
+		if (IsKeyTrigger(VK_RETURN))
+		{
+			FadeManager::CreateFadeOut(SceneName::SceneGame01);
+			m_clear = false;
+		}
 	}
 }

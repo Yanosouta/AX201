@@ -3,7 +3,8 @@
 #include "Timer.h"
 
 //--- 定数定義
-const char* APP_TITLE = "Osakazyuuzi";
+//const char* APP_TITLE = "Osakazyuuzi";
+const char* APP_TITLE = "レスキューピット";
 const Frame DEFAULT_FPS = 60;
 
 /*

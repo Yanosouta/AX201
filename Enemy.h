@@ -12,7 +12,7 @@ public:
 	// コンストラクタ
 	Enemy(std::string name, std::string tag) : Object3D(name, tag) {
 		// プレイヤーのモデルをロードする（仮でキューブのオブジェクト）
-		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/DemoCube/DemoCube.fbx", 1.0f);
+		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/enemy1.fbx", 0.2f);
 		// コンポーネントを追加
 		AddComponent<EnemyController>();
 		AddComponent<Rigidbody>();
