@@ -8,6 +8,7 @@
 #include "Game01.h"
 #include "SBotton.h"
 #include "FadeManager.h"
+#include "TitleUI.h"
 
 SceneGame01::SceneGame01()
 {
@@ -26,11 +27,13 @@ SceneGame01::SceneGame01()
 	// 1/14 竹下
 	//      タイトル用の画像に差し替え
 	//------------------------------------
+
+
 	// UI.1 タイトル画面
 	ObjectManager::CreateObject<Game01>("UI.2");
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.2")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.2")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/Bg.png");
+	pSpriteRenderer->LoadTexture("Assets/Texture/BG2.png");
 	pSpriteRenderer->SetSize(1280, 720);
 	ObjectManager::FindObjectWithName("UI.2")->SetLayerNum(2);
 	pTransform->SetPosition({ 0.0f, 0.0f, 0.0f });
@@ -44,7 +47,7 @@ SceneGame01::SceneGame01()
 	pObj->AddComponent<SBtton>(); 
 	pObj->AddComponent<SpriteAnimation>();
 	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/Start.png");
+	pSpriteRenderer->LoadTexture("Assets/Texture/StartBup.png");
 	pSpriteRenderer->SetSize(460, 92);
 	pTransform = pObj->GetComponent<Transform>();
 	pTransform->SetPosition({ 0.0f, -153.0f, 0.0f });
@@ -58,6 +61,16 @@ SceneGame01::SceneGame01()
 	pSpriteRenderer->SetSize(460, 92);
 	pTransform = pObj->GetComponent<Transform>();
 	pTransform->SetPosition({ 0.0f, -260.0f, 0.0f });
+
+	pObj = ObjectManager::CreateObject<UI>("UI.6");
+	pObj->SetLayerNum(5);
+	pObj->AddComponent<TitleUI>();
+	pObj->AddComponent<SpriteAnimation>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/Title.png");
+	pSpriteRenderer->SetSize(900, 300);
+	pTransform = pObj->GetComponent<Transform>();
+	pTransform->SetPosition({ 0.0f, 150.0f, 0.0f });
 }
 
 SceneGame01::~SceneGame01()
