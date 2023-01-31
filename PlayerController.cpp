@@ -21,6 +21,7 @@
 #include "AtkGauge.h"
 #include "FadeManager.h"
 #include "XInput.h"
+#include "SpesialGauge.h"
 
 void PlayerController::Start()
 {
@@ -571,7 +572,21 @@ void PlayerController::IsSpecialArrow()
 		{
 			m_haveArrow[i] = nullptr;
 		}
+
+		//スペシャル回数のカウントダウン
+		m_Specialcnt--;
+		if (m_Specialcnt == 4)		ObjectManager::FindObjectWithName("UI.13")->GetComponent<SpesialGauge>()->Swapframe(4);
+		if (m_Specialcnt == 3)		ObjectManager::FindObjectWithName("UI.13")->GetComponent<SpesialGauge>()->Swapframe(3);
+		if (m_Specialcnt == 2)		ObjectManager::FindObjectWithName("UI.13")->GetComponent<SpesialGauge>()->Swapframe(2);
+		if (m_Specialcnt == 1)		ObjectManager::FindObjectWithName("UI.13")->GetComponent<SpesialGauge>()->Swapframe(1);
+		if (m_Specialcnt == 0)
+		{//スペシャルの終了とゲージのリセット
+			ObjectManager::FindObjectWithName("UI.13")->GetComponent <SpesialGauge>()->Swapframe(0);
+			SetEnableSpecial(false);
+		}
 	}
+
+
 }
 
 
@@ -738,5 +753,15 @@ void PlayerController::IsNormalArrow()
 				//UIのuv座標の切り替え
 		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(0);
 		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
+	}
+}
+
+void PlayerController::SetEnableSpecial(bool enable)
+{
+	m_EnableSpecial = enable;
+	if (enable)
+	{
+		m_Specialcnt = 4;
+		ObjectManager::FindObjectWithName("UI.13")->GetComponent<SpesialGauge>()->Swapframe(4);
 	}
 }

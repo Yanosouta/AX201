@@ -422,7 +422,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->AddBreakEnemy();
 
 					//確率でアイテムの生成
-					if (rand() % 20 == 0)
+					if (rand() % 10 == 0)
 					{
 						std::shared_ptr<ObjectBase> pObj;
 						std::shared_ptr<Transform> pTransform;			// 位置情報
@@ -446,7 +446,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 						}
 
 						//敵が死んだ位置に出す
-						pTransform = pObj->GetComponent<Transform>();
+   						pTransform = pObj->GetComponent<Transform>();
 						pTransform->SetPosition(GetOwner()->GetComponent<Transform>()->GetPosition());
 					}
 				}
