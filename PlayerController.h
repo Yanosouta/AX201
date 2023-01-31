@@ -17,6 +17,7 @@ private:
 	float m_tic; // フレームカウント
 	std::shared_ptr<ObjectBase> m_haveArrow; // 現在プレイヤーが持っている矢のポインタ
 	DirectX::XMFLOAT3 m_prevPos;	// ひとつ前の座標
+	bool m_isHaveArrow;	// 射撃中かどうか
 
 	// 12/23 竹下　プレイヤーのライフ
 	int m_Life;
@@ -53,6 +54,7 @@ public:
 		, m_LivesHalf(false)
 		,m_LivesIV(DirectX::XMFLOAT2(1.0f,1.0f))
 		, m_nEnemyNum(0)
+		, m_isHaveArrow(false)
 	{}
 	// デストラクタ
 	~PlayerController() {}
@@ -69,6 +71,7 @@ public:
 	
 	//--- ゲット関数
 	std::shared_ptr<ObjectBase> GetHaveArrow() { return m_haveArrow; }
+	bool GetIsHaveArrow() { return m_isHaveArrow; }
 
 	//ライフの回復
 	void AddLife(int add);

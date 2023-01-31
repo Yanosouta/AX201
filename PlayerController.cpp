@@ -124,6 +124,8 @@ void PlayerController::Update()
 	if (IsKeyTrigger(VK_SPACE)
 		|| XInput::GetJoyTrigger(0, BUTTON_TYPE::R)) {
 		m_tic = 0.0f;	// 押し始めたら、0.0fに初期化
+		// 矢を持っている判定にする
+		m_isHaveArrow = true;
 
 		// 変更用ポインタ
 		std::shared_ptr<Transform> trans;
@@ -236,6 +238,8 @@ void PlayerController::Update()
 	}
 	if (IsKeyRelease(VK_SPACE)
 		|| XInput::GetJoyRelease(0, BUTTON_TYPE::R)) {
+		// 射撃したので、矢を持っていない判定にする
+		m_isHaveArrow = false;
 		//ゲージのリセット
 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
 		// 変更用ポインタ
@@ -453,6 +457,7 @@ void PlayerController::OnCollisionEnter(ObjectBase* object)
 				m_FlgCount = 5.0f;
 			}
 		}	
+		ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->ScreenShake();
 	}
 }
 

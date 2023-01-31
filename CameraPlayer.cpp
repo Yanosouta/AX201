@@ -13,4 +13,14 @@ void CameraPlayer::Update()
 	sinf(m_radY) * m_radius + m_LookPoint.y,
 	cosf(m_radY) * cosf(m_radXZ) * m_radius + m_LookPoint.z
 		});
+
+	/* ‰æ–Ê—h‚ê”»’è */
+	if (m_bScreenShake)
+	{
+		m_tick++;
+		m_radius = (mc_radius - sinf(m_tick * 100 / mc_screenShakeTime));
+		m_radY = (m_StopRadY - sinf(m_tick*100 / mc_screenShakeTime)) * -0.02f + 3;
+		m_radXZ = (m_StopRadXZ - sinf(m_tick * 100 / mc_screenShakeTime)) * -0.02f + 6.27;
+		if (mc_screenShakeTime < m_tick) m_bScreenShake = false;
+	}
 }
