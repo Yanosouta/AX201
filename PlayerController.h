@@ -32,10 +32,11 @@ private:
 	bool  m_bKnockBackFlg; //ノックバック中にフラグを立てる
 	float m_KnockBackCount;	//フラグを立てている時にカウント
 
-	//UI強調表示用
+	//UI用
 	bool m_LivesHighlighting;		//強調表示中フラグ
 	DirectX::XMFLOAT2 m_LivesIV;	//UIの初期値
 	bool m_LivesHalf;				//強調表示の折り返し
+	int m_Specialcnt;
 
 	int m_nEnemyNum;	// 倒した敵の数
 
@@ -60,6 +61,7 @@ public:
 		, m_nEnemyNum(0)
 		, m_isHaveArrow(false)
 		,m_EnableSpecial(false)
+		,m_Specialcnt(0)
 	{}
 	// デストラクタ
 	~PlayerController() {}
@@ -82,7 +84,7 @@ public:
 	void AddLife(int add);
 
 	//セット関数　スペシャル仕様可能
-	void SetEnableSpecial(bool enable) { m_EnableSpecial = enable; }
+	void SetEnableSpecial(bool enable);
 
 	// 体力を減らす
 	void Reduce(int num);

@@ -14,6 +14,7 @@
 #include "LifeNumber.h" // 1/24 竹下 追加
 #include "clicAtk.h"
 #include "AtkGauge.h"
+#include "SpesialGauge.h"
 
 
 #include "Transform.h"
@@ -70,10 +71,20 @@ SceneTitle::SceneTitle()
 	pTransform->SetPosition({ 0.0f, -280.0f, 0.0f });
 
 	// 画面左端 必殺技アイコン
+	pObj = ObjectManager::CreateObject<UI>("UI.13");
+	pObj->SetLayerNum(4);
+	pObj->AddComponent<SpesialGauge>(); 
+	pObj->AddComponent<SpriteAnimation>();
+	pSpriteRenderer = pObj->GetComponent<SpriteRenderer>();
+	pSpriteRenderer->LoadTexture("Assets/Texture/special.png");
+	pSpriteRenderer->SetSize(120, 120);
+	pTransform = pObj->GetComponent<Transform>();
+	pTransform->SetPosition({ -530.0f, -180.0f, 0.0f });
+
 	ObjectManager::CreateObject<UI>("UI.6");
 	pSpriteRenderer = ObjectManager::FindObjectWithName("UI.6")->GetComponent<SpriteRenderer>();
 	pTransform = ObjectManager::FindObjectWithName("UI.6")->GetComponent<Transform>();
-	pSpriteRenderer->LoadTexture("Assets/Texture/SP.png");
+	pSpriteRenderer->LoadTexture("Assets/Texture/SpecialFrame.png");
 	pSpriteRenderer->SetSize(120, 120);
 	ObjectManager::FindObjectWithName("UI.6")->SetLayerNum(5);
 	pTransform->SetPosition({ -530.0f, -180.0f, 0.0f });
