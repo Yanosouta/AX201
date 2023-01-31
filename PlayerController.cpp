@@ -120,168 +120,15 @@ void PlayerController::Update()
 		GetOwner()->GetComponent<Transform>()->SetAngle({ 0.0f, radY, 0.0f });
 	}
 
-	//--- 発射
-	if (IsKeyTrigger(VK_SPACE)
-		|| XInput::GetJoyTrigger(0, BUTTON_TYPE::R)) {
-		m_tic = 0.0f;	// 押し始めたら、0.0fに初期化
-		// 矢を持っている判定にする
-		m_isHaveArrow = true;
+	
+	//------------矢の処理--------------
+	//通常の矢の処理
+	IsNormalArrow();
 
-		// 変更用ポインタ
-		std::shared_ptr<Transform> trans;
-		std::shared_ptr<Rigidbody> rb;
-
-		//--- オブジェクト作成
-		//   型　：Arrow
-		//  名前 ：Arrow
-		// タグ名：Arrow
-		m_haveArrow = ObjectManager::CreateObject<Arrow>("Arrow", TagName::Arrow);
-		// 今持っているArrowのTransformを取得
-		trans = m_haveArrow->GetComponent<Transform>();
-		// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
-		// 要約：右前
-		trans->SetPosition({
-			GetOwner()->GetComponent<Transform>()->GetPosition().x + 
-				GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().x,
-			GetOwner()->GetComponent<Transform>()->GetPosition().y + 
-				GetOwner()->GetComponent<Transform>()->GetVectorRight().y +
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().y,
-			GetOwner()->GetComponent<Transform>()->GetPosition().z + 
-				GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().z
-			});
-		// 角度を自分のオブジェクトの角度に設定
-		trans->SetAngle({
-			GetOwner()->GetComponent<Transform>()->GetAngle().x,
-			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
-			GetOwner()->GetComponent<Transform>()->GetAngle().z
-			});
-
-	}
-	if (IsKeyPress(VK_SPACE)
-		|| XInput::GetJoyButton(0, BUTTON_TYPE::R)) {
-		//UIのuv座標の切り替え
-		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(1);
-		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
-
-		m_tic++;	// 押している間、カウントする
-		// 変更用ポインタ
-		std::shared_ptr<Transform> trans;
-		std::shared_ptr<Rigidbody> rb;
-		// 今持っているArrowのTransformを取得
-		trans = m_haveArrow->GetComponent<Transform>();
-		// 今持っているArrowのRigidbodyを取得
-		rb = m_haveArrow->GetComponent<Rigidbody>();
-		// チャージ時間の割合を求める
-		float ChargePer = m_tic > m_ChargeTime ? m_ChargeTime/m_ChargeTime : m_tic/m_ChargeTime;
-
-		//
-		int SwapGauge = ChargePer / (1.0f / 16.0f);
-		if (SwapGauge == 0) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
-		if (SwapGauge == 1) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(1);
-		if (SwapGauge == 2) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(2);
-		if (SwapGauge == 3) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(3);
-		if (SwapGauge == 4) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(4);
-		if (SwapGauge == 5) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(5);
-		if (SwapGauge == 6) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(6);
-		if (SwapGauge == 7) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(7);
-		if (SwapGauge == 8) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(8);
-		if (SwapGauge == 9) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(9);
-  		if (SwapGauge == 10)		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(10);
-		if (SwapGauge == 11) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(11);
-		if (SwapGauge == 12) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(12);
-		if (SwapGauge == 13) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(13);
-		if (SwapGauge == 14) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(14);
-		if (SwapGauge == 15) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(15);
-		if (SwapGauge == 16) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(16);
-
-		// 割合を逆にする
-		ChargePer = 1 - ChargePer;
-		// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
-		trans->SetPosition({
-			GetOwner()->GetComponent<Transform>()->GetPosition().x +
-				GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * ChargePer,
-			GetOwner()->GetComponent<Transform>()->GetPosition().y +
-				GetOwner()->GetComponent<Transform>()->GetVectorRight().y +
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * ChargePer,
-			GetOwner()->GetComponent<Transform>()->GetPosition().z +
-				GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * ChargePer
-			});
-		// 角度を自分のオブジェクトの角度に設定
-		trans->SetAngle({
-			GetOwner()->GetComponent<Transform>()->GetAngle().x,
-			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
-			GetOwner()->GetComponent<Transform>()->GetAngle().z
-			});
-		// チャージタイム以上に長押ししていた場合
-		if (m_tic > m_ChargeTime) {
-			// サイズを設定
-			trans->SetScale({ 0.6f, 0.6f, 0.6f });
-			rb->SetDrag(1.0f);
-			rb->SetMass(0.01f);
-
-			m_haveArrow->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::SUPER);
-		}
-		// 通常の場合
-		else {
-			// サイズを設定
-			trans->SetScale({ 0.3f, 0.3f, 0.3f });
-			rb->SetDrag(1.0f);
-			m_haveArrow->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::NORMAL);
-		}
-
-		// 溜め中なので加速度を0.0fに設定
-		rb->SetAccele({ 0.0f, 0.0f, 0.0f});
-	}
-	if (IsKeyRelease(VK_SPACE)
-		|| XInput::GetJoyRelease(0, BUTTON_TYPE::R)) {
-		// 射撃したので、矢を持っていない判定にする
-		m_isHaveArrow = false;
-		//ゲージのリセット
-		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
-		// 変更用ポインタ
-		std::shared_ptr<Rigidbody> rb;
-		// 今持っているArrowのRigidbodyを取得
-		rb = m_haveArrow->GetComponent<Rigidbody>();
-		// チャージタイム以上に長押ししていた場合
-		if (m_tic > m_ChargeTime) {
-			// 加速度をオブジェクトの正面方向に設定
-			rb->SetAccele({
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.6f,
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.6f,
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.6f
-				});
-			// 自分に撃った反動を加える
-			m_bKnockBackFlg = true;
-			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * -m_KnockBackPower,
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * -m_KnockBackPower,
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * -m_KnockBackPower
-				});
-		}
-		// 通常の場合
-		else {
-			// 加速度をオブジェクトの正面方向に設定
-			rb->SetAccele({
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.3f,
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.3f,
-				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.3f
-				});
-		}
-		// 矢を離したためポインタをnullptrにする
-		m_haveArrow = nullptr;
-
-
-		//仮配置<UI切り替え>ーーーーーーーーーーーーー
-				//UIのuv座標の切り替え
-		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(0);
-		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
-		//ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Swapframe(1);	
-		//ObjectManager::FindObjectWithName("UI.5")->GetComponent<Life>()->Play();
-	}
+	//スペシャル用の矢の処理
+	if (m_EnableSpecial) IsSpecialArrow();
+	
+	//----------------------------------
 	
 	//--- 座標補正
 	// 落下判定
@@ -553,4 +400,343 @@ void PlayerController::LivesHighlight()
 	}
 
 
+}
+
+
+
+//======================
+//スペシャル用の矢
+//======================
+void PlayerController::IsSpecialArrow()
+{
+	// 矢の発射　単発うち
+	if (IsKeyTrigger(VK_SPACE)
+		|| XInput::GetJoyTrigger(0, BUTTON_TYPE::R)) {
+		m_tic = 0.0f;	// 押し始めたら、0.0fに初期化
+
+		// 変更用ポインタ
+		std::shared_ptr<Transform> trans[2];
+
+		//--- オブジェクト作成
+		//   型　：Arrow
+		//  名前 ：Arrow
+		// タグ名：Arrow
+		for (int i = 1; i < 3; i++)
+		{
+			m_haveArrow[i] = ObjectManager::CreateObject<Arrow>("Arrow", TagName::Arrow);
+			// 今持っているArrowのTransformを取得
+			trans[i - 1] = m_haveArrow[i]->GetComponent<Transform>();
+			// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
+			// 要約：右前
+			trans[i - 1]->SetPosition({
+				GetOwner()->GetComponent<Transform>()->GetPosition().x +
+					GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().x,
+				GetOwner()->GetComponent<Transform>()->GetPosition().y +
+					GetOwner()->GetComponent<Transform>()->GetVectorRight().y +
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().y,
+				GetOwner()->GetComponent<Transform>()->GetPosition().z +
+					GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().z
+				});
+			// 角度を自分のオブジェクトの角度に設定
+			trans[i - 1]->SetAngle({
+				GetOwner()->GetComponent<Transform>()->GetAngle().x,
+				GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
+				GetOwner()->GetComponent<Transform>()->GetAngle().z
+				});
+		}
+	}
+
+	//スペースを押している間
+	if (IsKeyPress(VK_SPACE)
+		|| XInput::GetJoyButton(0, BUTTON_TYPE::R)) {
+
+		m_tic++;	// 押している間、カウントする
+		// 変更用ポインタ
+		std::shared_ptr<Transform> trans[2];
+		std::shared_ptr<Rigidbody> rb[2];
+		for (int i = 1; i < 3; i++)
+		{
+			// 今持っているArrowのTransformを取得
+			trans[i - 1] = m_haveArrow[i]->GetComponent<Transform>();
+			// 今持っているArrowのRigidbodyを取得
+			rb[i - 1] = m_haveArrow[i]->GetComponent<Rigidbody>();
+			// チャージ時間の割合を求める
+			float ChargePer = m_tic > m_ChargeTime ? m_ChargeTime / m_ChargeTime : m_tic / m_ChargeTime;
+
+			// 割合を逆にする
+			ChargePer = 1 - ChargePer;
+			// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
+			trans[i - 1]->SetPosition({
+				GetOwner()->GetComponent<Transform>()->GetPosition().x +
+					GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().x * ChargePer,
+				GetOwner()->GetComponent<Transform>()->GetPosition().y +
+					GetOwner()->GetComponent<Transform>()->GetVectorRight().y +
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().y * ChargePer,
+				GetOwner()->GetComponent<Transform>()->GetPosition().z +
+					GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
+					GetOwner()->GetComponent<Transform>()->GetVectorForword().z * ChargePer
+				});
+			// 角度を自分のオブジェクトの角度に設定
+			trans[i - 1]->SetAngle({
+				GetOwner()->GetComponent<Transform>()->GetAngle().x,
+				GetOwner()->GetComponent<Transform>()->GetAngle().y + 60.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
+				GetOwner()->GetComponent<Transform>()->GetAngle().z
+				});
+			// チャージタイム以上に長押ししていた場合
+			if (m_tic > m_ChargeTime) {
+				// サイズを設定
+				trans[i - 1]->SetScale({ 0.6f, 0.6f, 0.6f });
+				rb[i - 1]->SetDrag(1.0f);
+				rb[i - 1]->SetMass(0.01f);
+
+				m_haveArrow[i]->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::SUPER);
+			}
+			// 通常の場合
+			else {
+				// サイズを設定
+				trans[i - 1]->SetScale({ 0.3f, 0.3f, 0.3f });
+				rb[i - 1]->SetDrag(1.0f);
+				m_haveArrow[i]->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::NORMAL);
+			}
+
+			// 溜め中なので加速度を0.0fに設定
+			rb[i - 1]->SetAccele({ 0.0f, 0.0f, 0.0f });
+		}
+	}
+
+	//スペースを放したとき
+	if (IsKeyRelease(VK_SPACE)
+		|| XInput::GetJoyRelease(0, BUTTON_TYPE::R)) {
+		//ゲージのリセット
+		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
+		// 変更用ポインタ
+		std::shared_ptr<Rigidbody> rb[2];
+
+		// 今持っているArrowのRigidbodyを取得
+		rb[0] = m_haveArrow[1]->GetComponent<Rigidbody>();
+		rb[1] = m_haveArrow[2]->GetComponent<Rigidbody>();
+		// チャージタイム以上に長押ししていた場合
+		if (m_tic > m_ChargeTime) {
+			// 加速度をオブジェクトの正面方向に設定
+			rb[0]->SetAccele({
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().x * 0.857f) * 0.6f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().y * 0.857f) * 0.6f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().z * 0.857f) * 0.6f
+				});
+			rb[1]->SetAccele({
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().x * -0.857f) * 0.6f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().y * -0.857f) * 0.6f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().z * -0.857f) * 0.6f
+				});
+
+			// 自分に撃った反動を加える
+			m_bKnockBackFlg = true;
+			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * -m_KnockBackPower
+				});
+		}
+		// 通常の場合
+		else {
+			// 加速度をオブジェクトの正面方向に設定
+			rb[0]->SetAccele({
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().x * 0.857f) * 0.3f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().y * 0.857f) * 0.3f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().z * 0.857f) * 0.3f
+				});
+			rb[1]->SetAccele({
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().x * -0.857f) * 0.3f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().y * -0.857f) * 0.3f,
+				(GetOwner()->GetComponent<Transform>()->GetVectorForword().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().z * -0.857f) * 0.3f
+				});
+		}
+		// 矢を離したためポインタをnullptrにする
+		for (int i = 1; i < 3; i++)
+		{
+			m_haveArrow[i] = nullptr;
+		}
+	}
+}
+
+
+
+//===============
+//ノーマルの矢
+//===============
+void PlayerController::IsNormalArrow()
+{
+	// 矢の発射　単発うち
+	if (IsKeyTrigger(VK_SPACE)
+		|| XInput::GetJoyTrigger(0, BUTTON_TYPE::R)) {
+		m_tic = 0.0f;	// 押し始めたら、0.0fに初期化
+
+		// 変更用ポインタ
+		std::shared_ptr<Transform> trans;
+		std::shared_ptr<Rigidbody> rb;
+
+		//--- オブジェクト作成
+		//   型　：Arrow
+		//  名前 ：Arrow
+		// タグ名：Arrow
+		m_haveArrow[0] = ObjectManager::CreateObject<Arrow>("Arrow", TagName::Arrow);
+		// 今持っているArrowのTransformを取得
+		trans = m_haveArrow[0]->GetComponent<Transform>();
+		// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
+		// 要約：右前
+		trans->SetPosition({
+			GetOwner()->GetComponent<Transform>()->GetPosition().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x,
+			GetOwner()->GetComponent<Transform>()->GetPosition().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y,
+			GetOwner()->GetComponent<Transform>()->GetPosition().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z
+			});
+		// 角度を自分のオブジェクトの角度に設定
+		trans->SetAngle({
+			GetOwner()->GetComponent<Transform>()->GetAngle().x,
+			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
+			GetOwner()->GetComponent<Transform>()->GetAngle().z
+			});
+	}
+
+	//スペースを押している間　チャージ中
+	if (IsKeyPress(VK_SPACE)
+		|| XInput::GetJoyButton(0, BUTTON_TYPE::R)) {
+		//UIのuv座標の切り替え
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(1);
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
+
+		m_tic++;	// 押している間、カウントする
+		// 変更用ポインタ
+		std::shared_ptr<Transform> trans;
+		std::shared_ptr<Rigidbody> rb;
+		// 今持っているArrowのTransformを取得
+		trans = m_haveArrow[0]->GetComponent<Transform>();
+		// 今持っているArrowのRigidbodyを取得
+		rb = m_haveArrow[0]->GetComponent<Rigidbody>();
+		// チャージ時間の割合を求める
+		float ChargePer = m_tic > m_ChargeTime ? m_ChargeTime / m_ChargeTime : m_tic / m_ChargeTime;
+
+		//
+		int SwapGauge = ChargePer / (1.0f / 16.0f);
+		if (SwapGauge == 0) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
+		if (SwapGauge == 1) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(1);
+		if (SwapGauge == 2) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(2);
+		if (SwapGauge == 3) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(3);
+		if (SwapGauge == 4) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(4);
+		if (SwapGauge == 5) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(5);
+		if (SwapGauge == 6) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(6);
+		if (SwapGauge == 7) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(7);
+		if (SwapGauge == 8) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(8);
+		if (SwapGauge == 9) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(9);
+		if (SwapGauge == 10)		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(10);
+		if (SwapGauge == 11) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(11);
+		if (SwapGauge == 12) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(12);
+		if (SwapGauge == 13) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(13);
+		if (SwapGauge == 14) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(14);
+		if (SwapGauge == 15) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(15);
+		if (SwapGauge == 16) 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(16);
+
+		// 割合を逆にする
+		ChargePer = 1 - ChargePer;
+		// 座標を自分のオブジェクト＋自分オブジェクトの法線（長さ１）横の位置に設定
+		trans->SetPosition({
+			GetOwner()->GetComponent<Transform>()->GetPosition().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().x +
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * ChargePer,
+			GetOwner()->GetComponent<Transform>()->GetPosition().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().y +
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * ChargePer,
+			GetOwner()->GetComponent<Transform>()->GetPosition().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorRight().z +
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * ChargePer
+			});
+		// 角度を自分のオブジェクトの角度に設定
+		trans->SetAngle({
+			GetOwner()->GetComponent<Transform>()->GetAngle().x,
+			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
+			GetOwner()->GetComponent<Transform>()->GetAngle().z
+			});
+		// チャージタイム以上に長押ししていた場合
+		if (m_tic > m_ChargeTime) {
+			// サイズを設定
+			trans->SetScale({ 0.6f, 0.6f, 0.6f });
+			rb->SetDrag(1.0f);
+			rb->SetMass(0.01f);
+
+			m_haveArrow[0]->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::SUPER);
+		}
+		// 通常の場合
+		else {
+			// サイズを設定
+			trans->SetScale({ 0.3f, 0.3f, 0.3f });
+			rb->SetDrag(1.0f);
+			m_haveArrow[0]->GetComponent<ArrowController>()->SetArrowType(ArrowController::ARROW_TYPE::NORMAL);
+		}
+
+		// 溜め中なので加速度を0.0fに設定
+		rb->SetAccele({ 0.0f, 0.0f, 0.0f });
+	}
+
+	//スペースを放したとき　チャージした矢の発射
+	if (IsKeyRelease(VK_SPACE)
+		|| XInput::GetJoyRelease(0, BUTTON_TYPE::R)) {
+		//ゲージのリセット
+		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
+		// 変更用ポインタ
+		std::shared_ptr<Rigidbody> rb;
+		// 今持っているArrowのRigidbodyを取得
+		rb = m_haveArrow[0]->GetComponent<Rigidbody>();
+		// チャージタイム以上に長押ししていた場合
+		if (m_tic > m_ChargeTime) {
+			// 加速度をオブジェクトの正面方向に設定
+			rb->SetAccele({
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.6f,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.6f,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.6f
+				});
+			// 自分に撃った反動を加える
+			m_bKnockBackFlg = true;
+			GetOwner()->GetComponent<Rigidbody>()->SetAccele({
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * -m_KnockBackPower,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * -m_KnockBackPower
+				});
+		}
+		// 通常の場合
+		else {
+			// 加速度をオブジェクトの正面方向に設定
+			rb->SetAccele({
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().x * 0.3f,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().y * 0.3f,
+				GetOwner()->GetComponent<Transform>()->GetVectorForword().z * 0.3f
+				});
+		}
+		// 矢を離したためポインタをnullptrにする
+		m_haveArrow[0] = nullptr;
+
+		//仮配置<UI切り替え>ーーーーーーーーーーーーー
+				//UIのuv座標の切り替え
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(0);
+		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
+	}
 }
