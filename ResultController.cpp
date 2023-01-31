@@ -4,6 +4,7 @@
 #include "ResultButton.h"
 #include "ObjectManager.h"
 #include "FadeManager.h"
+#include "XInput.h"
 
 void ResultController::Start()
 {
@@ -20,7 +21,7 @@ void ResultController::Update()
 	}
 	
 	// エンターキーでUI切り替え
-	if (IsKeyTrigger(VK_RETURN))
+	if (IsKeyTrigger(VK_RETURN) || XInput::GetJoyButton(0, B))
 	{
 		m_NextScene = true;
 		ObjectManager::FindObjectWithName("UI.2")->GetComponent<ResultButton>()->Swapframe(1);

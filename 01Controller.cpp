@@ -12,6 +12,7 @@
 #include "FadeManager.h"
 #include "WinUtil.h"
 #include "TitleUI.h"
+#include "XInput.h"
 
 void Game01Controller::Start()
 {
@@ -28,7 +29,7 @@ void Game01Controller::Update()
 	if (!m_TitleMoveOnece)	TitleMove();
 
 	//エンターを押すとゲームシーンに移動
-	if (m_NextScene)	
+	if (m_NextScene)
 	{
 		//SceneManager::LoadScene(SceneName::SceneTitle);
 		FadeManager::CreateFadeOut(SceneName::SceneTitle);
@@ -37,11 +38,11 @@ void Game01Controller::Update()
 	{
 		EndWindow();
 	}
-	if (IsKeyTrigger(VK_UP))
+	if (IsKeyTrigger(VK_UP) || XInput::GetJoyPOVTrigger(0, CURSOR_BUTTON_TYPE::POV_UP))
 	{
 		m_nSelect++;
 	}
-	else if (IsKeyTrigger(VK_DOWN))
+	else if (IsKeyTrigger(VK_DOWN) || XInput::GetJoyPOVTrigger(0, CURSOR_BUTTON_TYPE::POV_DOWN))
 	{
 		m_nSelect++;
 	}
@@ -62,7 +63,7 @@ void Game01Controller::Update()
 		ObjectManager::FindObjectWithName("UI.4")->GetComponent<SBtton>()->Play();
 	}
 	// エンターキーでUI切り替え
-	if (IsKeyTrigger(VK_RETURN))
+	if (IsKeyTrigger(VK_RETURN) || XInput::GetJoyButton(0, B))
 	{
 		if (m_nSelect % 2 == 1)
 		{

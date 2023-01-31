@@ -72,10 +72,10 @@ void PlayerController::Update()
 
 	DirectX::XMVECTOR vMove = DirectX::XMVectorZero();
 	// 斜め移動も可
-	if (IsKeyPress('W')/* || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_UP)   */) vMove = DirectX::XMVectorAdd(vMove, vFront);
-	if (IsKeyPress('S')/* || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_DOWN) */) vMove = DirectX::XMVectorAdd(vMove, DirectX::XMVectorScale(vFront, -1.0f));
-	if (IsKeyPress('A')/* || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_LEFT) */) vMove = DirectX::XMVectorAdd(vMove, DirectX::XMVectorScale(vSide, -1.0f));
-	if (IsKeyPress('D')/* || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_RIGHT)*/) vMove = DirectX::XMVectorAdd(vMove, vSide);
+	if (IsKeyPress('W') || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_UP)   ) vMove = DirectX::XMVectorAdd(vMove, vFront);
+	if (IsKeyPress('S') || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_DOWN) ) vMove = DirectX::XMVectorAdd(vMove, DirectX::XMVectorScale(vFront, -1.0f));
+	if (IsKeyPress('A') || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_LEFT) ) vMove = DirectX::XMVectorAdd(vMove, DirectX::XMVectorScale(vSide, -1.0f));
+	if (IsKeyPress('D') || XInput::GetJoyPOVButton(0, CURSOR_BUTTON_TYPE::POV_RIGHT)) vMove = DirectX::XMVectorAdd(vMove, vSide);
 	// 斜め移動のときに移動量が多くなってしまうため、正規化する
 	vMove = DirectX::XMVector3Normalize(vMove);
 	vMove = DirectX::XMVectorScale(vMove, 0.3f);
@@ -122,7 +122,7 @@ void PlayerController::Update()
 
 	//--- 発射
 	if (IsKeyTrigger(VK_SPACE)
-		/*|| XInput::GetJoyTrigger(0, BUTTON_TYPE::R)*/) {
+		|| XInput::GetJoyTrigger(0, BUTTON_TYPE::R)) {
 		m_tic = 0.0f;	// 押し始めたら、0.0fに初期化
 
 		// 変更用ポインタ
@@ -158,7 +158,7 @@ void PlayerController::Update()
 
 	}
 	if (IsKeyPress(VK_SPACE)
-		/*|| XInput::GetJoyButton(0, BUTTON_TYPE::R)*/) {
+		|| XInput::GetJoyButton(0, BUTTON_TYPE::R)) {
 		//UIのuv座標の切り替え
 		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Swapframe(1);
 		ObjectManager::FindObjectWithName("UI.8")->GetComponent<clicAtk>()->Play();
@@ -235,7 +235,7 @@ void PlayerController::Update()
 		rb->SetAccele({ 0.0f, 0.0f, 0.0f});
 	}
 	if (IsKeyRelease(VK_SPACE)
-		/*|| XInput::GetJoyRelease(0, BUTTON_TYPE::R)*/) {
+		|| XInput::GetJoyRelease(0, BUTTON_TYPE::R)) {
 		//ゲージのリセット
 		ObjectManager::FindObjectWithName("UI.7")->GetComponent<AtkGauge>()->Swapframe(0);
 		// 変更用ポインタ

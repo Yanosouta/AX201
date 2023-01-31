@@ -104,6 +104,7 @@ public:
 	static JOYINFOEX* GetJoyState(DWORD dwJoy)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return nullptr;
+		if (dwJoy >= m_dwJoyCount) return nullptr;
 		return &m_joyState[dwJoy];
 	}
 
@@ -111,6 +112,7 @@ public:
 	static LONG GetJoyX(DWORD dwJoy)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return 0L;
+		if (dwJoy >= m_dwJoyCount) return 0L;
 		return (LONG)m_joyState[dwJoy].dwXpos - 0x08000;
 	}
 
@@ -118,6 +120,7 @@ public:
 	static LONG GetJoyY(DWORD dwJoy)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return 0L;
+		if (dwJoy >= m_dwJoyCount) return 0L;
 		return (LONG)m_joyState[dwJoy].dwYpos - 0x08000;
 	}
 
@@ -125,6 +128,7 @@ public:
 	static LONG GetJoyZ(DWORD dwJoy)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return 0L;
+		if (dwJoy >= m_dwJoyCount) return 0L;
 		return (LONG)m_joyState[dwJoy].dwZpos - 0x08000;
 	}
 
@@ -132,6 +136,7 @@ public:
 	static bool GetJoyPOVButton(DWORD dwJoy, DWORD nCursorType)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return false;
+		if (dwJoy >= m_dwJoyCount) return false;
 
 		// 斜め方向も入力可
 		if (JOYPOVUP == nCursorType) {
@@ -154,10 +159,18 @@ public:
 		return (m_joyState[dwJoy].dwPOV == nCursorType) ? true : false;
 	}
 
+	static bool GetJoyPOVTrigger(DWORD dwJoy, DWORD nCursorType)
+	{
+		if (dwJoy >= mc_NUM_JOY_MAX) return false;
+		if (dwJoy >= m_dwJoyCount) return false;
+		return (m_joyState[dwJoy].dwPOV != nCursorType && m_dwJoyPOVTrigger[dwJoy] & (1 << nCursorType)) ? true : false;
+	}
+
 	// ゲームパッド　ボタン情報取得
 	static bool GetJoyButton(DWORD dwJoy, DWORD dwBtn)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return false;
+		if (dwJoy >= m_dwJoyCount) return false;
 		return (m_joyState[dwJoy].dwButtons & (1 << dwBtn)) ? true : false;
 	}
 
@@ -165,6 +178,7 @@ public:
 	static bool GetJoyTrigger(DWORD dwJoy, DWORD dwBtn)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return false;
+		if (dwJoy >= m_dwJoyCount) return false;
 		return (m_dwJoyButtonTrigger[dwJoy] & (1 << dwBtn)) ? true : false;
 	}
 
@@ -172,12 +186,13 @@ public:
 	static bool GetJoyRelease(DWORD dwJoy, DWORD dwBtn)
 	{
 		if (dwJoy >= mc_NUM_JOY_MAX) return false;
+		if (dwJoy >= m_dwJoyCount) return false;
 		return (m_dwJoyButtonRelease[dwJoy] & (1 << dwBtn)) ? true : false;
 	}
 
 	//--- 定数
 	// コントローラーの許容数
-	constexpr static int mc_NUM_JOY_MAX = 2;
+	constexpr static int mc_NUM_JOY_MAX = 1;
 private:
 	// コントローラーの接続数
 	static unsigned int m_dwJoyCount;
