@@ -12,7 +12,7 @@ public:
 	// コンストラクタ
 	Arrow(std::string name, std::string tag) : Object3D(name, tag) {
 		// 矢のモデルをロードする
-		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/DemoCube/DemoCube.fbx", 1.0f);
+		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/arrow.fbx", 0.5f);
 		// コンポーネントを追加
 		AddComponent<Rigidbody>();
 		AddComponent<ArrowController>();

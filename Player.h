@@ -12,7 +12,7 @@ public:
 	// コンストラクタ
 	Player(std::string name, std::string tag) : Object3D(name, tag) {
 		// プレイヤーのモデルをロードする（仮でキューブのオブジェクト）
-		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/DemoCube/DemoCube.fbx", 1.0f);
+		GetComponent<MeshRenderer>()->LoadModel("Assets/Model/engel_Tpause.fbx", 0.2f);
 		// コンポーネントを追加
 		AddComponent<PlayerController>();
 		AddComponent<Rigidbody>();

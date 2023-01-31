@@ -26,5 +26,6 @@ private:
 	// Œo‰ßŽžŠÔ
 	float m_time;
 	float m_TotalTime;
+	bool m_clear;
 };
 #endif // __CLEARMANAGER_H__

@@ -688,7 +688,7 @@ void PlayerController::IsNormalArrow()
 		// 角度を自分のオブジェクトの角度に設定
 		trans->SetAngle({
 			GetOwner()->GetComponent<Transform>()->GetAngle().x,
-			GetOwner()->GetComponent<Transform>()->GetAngle().y + 0.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
+			GetOwner()->GetComponent<Transform>()->GetAngle().y - 90.0f,// 矢のモデルと矢を射出するモデルの正面が違う場合、ここで数値調整する。
 			GetOwner()->GetComponent<Transform>()->GetAngle().z
 			});
 		// チャージタイム以上に長押ししていた場合
