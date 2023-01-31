@@ -19,6 +19,8 @@
 #include "AABBCollider.h"
 #include "Item.h"
 #include "ItemSpecial.h"
+#include "Timer.h"
+#include "CameraPlayer.h"
 
 void EnemyController::Start()
 {
@@ -319,6 +321,9 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				//==========================
 				if (this->GetOwner()->GetTag() == TagName::Enemy || this->GetOwner()->GetTag() == TagName::GenerateEnemy)
 				{
+					//--- ヒットエフェクト（FPSをゆっくりにする）
+					Timer::ChangeFps(3, 10);
+					ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->ScreenShake();
 					//EnemyのHPを減らす
 					m_Hp--;
 					m_KnockbackPower = 0.7f;
@@ -336,6 +341,9 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					m_FlgCount = 0.0f;
 					if (ArrowController::ARROW_TYPE::SUPER == object->GetComponent<ArrowController>()->GetArrowType())
 					{
+						//--- ヒットエフェクト（FPSをゆっくりにする）
+						Timer::ChangeFps(3, 10);
+						ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->ScreenShake();
 						m_StrHp--;
 					}
 
@@ -345,6 +353,9 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				//=======================
 				if (this->GetOwner()->GetTag() == TagName::FinalBoss)
 				{
+					//--- ヒットエフェクト（FPSをゆっくりにする）
+					Timer::ChangeFps(3, 10);
+					ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->ScreenShake();
 					//ノックバックとスタンをしない
 					m_KnockbackPower = 0.0f;
 					m_FlgCount = 0.0f;
@@ -374,6 +385,9 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					//スタンしている時にダメージが入る
 					if (m_StanCount == 0 && m_FlgCount < 300.0f)
 					{
+						//--- ヒットエフェクト（FPSをゆっくりにする）
+						Timer::ChangeFps(3, 10);
+						ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->ScreenShake();
 						m_StrBossHP--;
 						m_StanCount = 3.0f;
 					}
@@ -383,6 +397,9 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 				//=======================
 				if (this->GetOwner()->GetTag() == TagName::FinalBigBoss)
 				{
+					//--- ヒットエフェクト（FPSをゆっくりにする）
+					Timer::ChangeFps(3, 10);
+					ObjectManager::FindObjectWithTag(TagName::MainCamera)->GetComponent<CameraPlayer>()->ScreenShake();
 					//ノックバックとスタンをしない
 					m_KnockbackPower = 0.0f;
 					m_FlgCount = 0.0f;
@@ -405,7 +422,7 @@ void EnemyController::OnCollisionEnter(ObjectBase* object)
 					ObjectManager::FindObjectWithTag(TagName::Player)->GetComponent<PlayerController>()->AddBreakEnemy();
 
 					//確率でアイテムの生成
-					if (rand() % 1 == 0)
+					if (rand() % 20 == 0)
 					{
 						std::shared_ptr<ObjectBase> pObj;
 						std::shared_ptr<Transform> pTransform;			// 位置情報
